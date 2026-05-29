@@ -323,6 +323,8 @@ Verification:
 - Hardened live DeepSeek smoke evidence so it records Git commit metadata, and updated release completion auditing to reject live API smoke evidence that is missing or stale for release-critical changes.
 - Reran `scripts/verify_release_readiness.sh`; script self-tests, token leak scan, macOS tests, iOS build, and unsigned Release compiles still pass after the release audit hardening.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` and `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; iOS candidate and live API smoke evidence now point at commit `370a31ab6316`, while macOS signing remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Hardened manual smoke recording so manual rows cannot be written until current DeepSeek live protocol smoke evidence exists and remains fresh for release-critical files.
+- Reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, macOS tests, iOS build, and unsigned Release compiles still pass after manual smoke recording hardening.
 
 Next:
 

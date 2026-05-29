@@ -12,11 +12,15 @@ STALE_CANDIDATE_EVIDENCE="$TMPDIR/stale-candidate-evidence.md"
 ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ancestor-docs-only-candidate-evidence.md"
 ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE="$TMPDIR/ancestor-product-change-candidate-evidence.md"
 IOS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ios-only-candidate-evidence.md"
+MISSING_LIVE_SMOKE_EVIDENCE="$TMPDIR/missing-live-smoke-evidence.md"
+STALE_LIVE_SMOKE_EVIDENCE="$TMPDIR/stale-live-smoke-evidence.md"
 
 cat >"$EVIDENCE" <<EVIDENCE_MD
 ## Non-Manual Release Gate
 
-Existing gate evidence.
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live JSON Output smoke passed. Git commit \`$CURRENT_COMMIT\`. |
 
 ## Release Candidate Build Evidence
 
@@ -125,12 +129,51 @@ if grep -qF '## Manual Smoke Evidence' "$MISSING_CANDIDATE_EVIDENCE"; then
   exit 1
 fi
 
+cat >"$MISSING_LIVE_SMOKE_EVIDENCE" <<MISSING_LIVE_SMOKE_MD
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | readiness passed |
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | PASS | signed macOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Git commit | $CURRENT_COMMIT |
+MISSING_LIVE_SMOKE_MD
+
+set +e
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$MISSING_LIVE_SMOKE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Should require live API smoke first" >"$TMPDIR/missing-live-smoke.out" 2>"$TMPDIR/missing-live-smoke.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires current DeepSeek live protocol smoke metadata.' "$TMPDIR/missing-live-smoke.err"
+if grep -qF '## Manual Smoke Evidence' "$MISSING_LIVE_SMOKE_EVIDENCE"; then
+  echo "record_release_smoke_result should not write manual rows without live API smoke metadata" >&2
+  exit 1
+fi
+
 cp "$EVIDENCE" "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
 
 WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
 WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
+WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
   "$ROOT/scripts/record_release_smoke_result.sh" \
   --evidence "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
@@ -149,6 +192,8 @@ set +e
 WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
 WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\nscripts/run_release_candidate_gate.sh' \
+WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
   "$ROOT/scripts/record_release_smoke_result.sh" \
   --evidence "$ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
@@ -162,6 +207,42 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Manual smoke evidence requires fresh release candidate metadata; release-critical files changed since candidate build: scripts/run_release_candidate_gate.sh. Rerun scripts/run_release_candidate_gate.sh.' "$TMPDIR/ancestor-product-change.err"
+
+cat >"$STALE_LIVE_SMOKE_EVIDENCE" <<STALE_LIVE_SMOKE_MD
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live JSON Output smoke passed. Git commit \`aaaaaaaaaaaa\`. |
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | PASS | signed macOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Git commit | bbbbbbbbbbbb |
+STALE_LIVE_SMOKE_MD
+
+set +e
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\nscripts/run_live_deepseek_translation_smoke.sh' \
+  "$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$STALE_LIVE_SMOKE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro / macOS 26.5" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Should reject live API drift across script changes" >"$TMPDIR/stale-live-smoke.out" 2>"$TMPDIR/stale-live-smoke.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires fresh DeepSeek live protocol smoke metadata; release-critical files changed since live API smoke: scripts/run_live_deepseek_translation_smoke.sh. Rerun scripts/run_live_deepseek_translation_smoke.sh.' "$TMPDIR/stale-live-smoke.err"
 
 cp "$EVIDENCE" "$STALE_CANDIDATE_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_CANDIDATE_EVIDENCE"
@@ -182,6 +263,12 @@ test "$status" -eq 1
 grep -qF "Manual smoke evidence requires current release candidate metadata: evidence 000000000000 is not an ancestor of current $CURRENT_COMMIT." "$TMPDIR/stale-candidate.err"
 
 cat >"$IOS_ONLY_CANDIDATE_EVIDENCE" <<IOS_ONLY_MD
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live JSON Output smoke passed. Git commit \`$CURRENT_COMMIT\`. |
+
 ## Release Candidate Build Evidence
 
 | Area | Platform | Device / OS | Build | Result | Notes |

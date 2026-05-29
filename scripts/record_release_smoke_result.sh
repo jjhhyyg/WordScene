@@ -134,6 +134,22 @@ candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+live_smoke_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "DeepSeek live protocol smoke" &&
+    trim($3) == "API" &&
+    trim($6) == "PASS" {
+      print trim($7)
+      exit
+    }
+  ' "$EVIDENCE_FILE" |
+    sed -n 's/.*Git commit `\([^`][^`]*\)`.*/\1/p'
+}
+
 candidate_matches_current_head() {
   local evidence_commit="$1"
 
@@ -156,6 +172,28 @@ changed_files_since_candidate() {
 
   if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE+x}" ]]; then
     printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
+}
+
+live_smoke_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_LIVE_SMOKE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_LIVE_SMOKE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_live_smoke() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE"
     return
   fi
 
@@ -203,6 +241,49 @@ assert_current_candidate_commit() {
     echo "Manual smoke evidence requires fresh release candidate metadata; release-critical files changed since candidate build: $joined. Rerun scripts/run_release_candidate_gate.sh." >&2
     exit 1
   fi
+}
+
+assert_current_live_smoke_commit() {
+  local evidence_commit="$1"
+  local disallowed=()
+  local file
+  local joined
+
+  if candidate_matches_current_head "$evidence_commit"; then
+    return
+  fi
+
+  if ! live_smoke_is_ancestor_of_head "$evidence_commit"; then
+    echo "Manual smoke evidence requires current DeepSeek live protocol smoke metadata: evidence $evidence_commit is not an ancestor of current $CURRENT_COMMIT." >&2
+    exit 1
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_live_smoke "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    echo "Manual smoke evidence requires fresh DeepSeek live protocol smoke metadata; release-critical files changed since live API smoke: $joined. Rerun scripts/run_live_deepseek_translation_smoke.sh." >&2
+    exit 1
+  fi
+}
+
+assert_current_live_smoke_metadata() {
+  local evidence_commit
+
+  evidence_commit="$(live_smoke_git_commit)"
+  if [[ -z "$evidence_commit" ]]; then
+    echo "Manual smoke evidence requires current DeepSeek live protocol smoke metadata. Run scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md first." >&2
+    exit 1
+  fi
+
+  assert_current_live_smoke_commit "$evidence_commit"
 }
 
 assert_current_candidate_metadata() {
@@ -317,6 +398,7 @@ ERROR
 fi
 
 assert_current_candidate_metadata
+assert_current_live_smoke_metadata
 assert_required_candidate_builds
 
 ensure_section
