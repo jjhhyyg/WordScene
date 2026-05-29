@@ -2,6 +2,14 @@ import XCTest
 @testable import WordScene
 
 final class AppDataControllerTests: XCTestCase {
+    private enum StoreBootstrapError: LocalizedError {
+        case unavailable
+
+        var errorDescription: String? {
+            "Core Data store unavailable"
+        }
+    }
+
     func testRepositoriesShareInjectedCoreDataStore() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(coreDataStore: coreDataStore)
@@ -23,5 +31,23 @@ final class AppDataControllerTests: XCTestCase {
 
         XCTAssertEqual(try coreDataStore.loadActiveItems(), [memoryItem])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [historyRecord])
+    }
+
+    func testReportsPrimaryPersistenceWhenCoreDataLoads() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let controller = AppDataController(coreDataStoreFactory: { coreDataStore })
+
+        XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable)
+    }
+
+    func testReportsFallbackPersistenceWhenCoreDataBootstrapFails() {
+        let controller = AppDataController(coreDataStoreFactory: {
+            throw StoreBootstrapError.unavailable
+        })
+
+        XCTAssertEqual(
+            controller.persistenceStatus,
+            .legacyFallback(reason: "Core Data store unavailable")
+        )
     }
 }

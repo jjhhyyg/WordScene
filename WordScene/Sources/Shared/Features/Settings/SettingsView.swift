@@ -58,12 +58,14 @@ struct SettingsView: View {
                 if usesTwoColumnSettings {
                     LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
                         deepSeekCard
+                        persistenceStatusCard
                         privacyCard
                         importExportCard
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
                         deepSeekCard
+                        persistenceStatusCard
                         privacyCard
                         importExportCard
                     }
@@ -104,6 +106,10 @@ struct SettingsView: View {
                 Text("默认关闭，不包含 Token、原文、译文或导出文件。敏感内容仅保存在本机设置和系统凭据存储中。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
+
+            Section("数据存储") {
+                persistenceStatusView
             }
 
             Section("导入导出") {
@@ -250,6 +256,25 @@ struct SettingsView: View {
         }
     }
 
+    private var persistenceStatusCard: some View {
+        SettingsCard(title: "数据存储", systemImage: "internaldrive") {
+            persistenceStatusView
+        }
+    }
+
+    private var persistenceStatusView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(dataController.persistenceStatus.title, systemImage: dataController.persistenceStatus.systemImage)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(persistenceStatusTint)
+
+            Text(dataController.persistenceStatus.message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var importExportCard: some View {
         SettingsCard(title: "导入导出", systemImage: "arrow.up.arrow.down") {
             VStack(alignment: .leading, spacing: 14) {
@@ -343,6 +368,10 @@ struct SettingsView: View {
         #else
         return Color(.systemGroupedBackground)
         #endif
+    }
+
+    private var persistenceStatusTint: Color {
+        dataController.persistenceStatus.isDegraded ? .orange : .secondary
     }
 
     private var trimmedToken: String {

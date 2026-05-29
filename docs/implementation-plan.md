@@ -160,10 +160,13 @@ Verification:
 - Added `AppDataController` as the shared app data entry point so Translate, Library, Search, and Settings use one owned Core Data stack.
 - Injected the shared data controller through SwiftUI environment for the main window and macOS Settings scene.
 - Added tests proving memory and recent-history repositories share the injected Core Data store.
+- Added explicit app persistence status for Core Data bootstrap success/failure.
+- Surfaced the persistence status in Settings so legacy fallback mode is visible instead of silent.
+- Added tests proving Core Data bootstrap failures are reported through `AppDataController`.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Add an explicit Core Data load/error state so persistence failures surface in UI instead of silently falling back.
+- Replace repository-level `try?` Core Data read/write fallbacks with explicit `Result` or throwing paths.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.
