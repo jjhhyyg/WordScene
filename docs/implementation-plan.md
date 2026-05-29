@@ -44,6 +44,7 @@ Baseline already completed:
 - Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
+- Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 
 Known gaps:
 
@@ -246,6 +247,8 @@ Verification:
 - Added an explicit iPad supported-orientation declaration for Release candidate builds.
 - Added `scripts/build_release_candidates.sh` to make macOS and iOS Release candidate build attempts reproducible, including platform-specific reruns.
 - Verified the iOS signed Release build can be produced locally through the release candidate script, with iPad all-orientation metadata present in the built app; macOS signing remains blocked by missing Xcode account/profile state on this machine.
+- Added `scripts/collect_release_candidate_evidence.sh` plus a shell regression test so candidate build metadata can be recorded from the built app bundle.
+- Recorded initial release candidate evidence for the iOS signed build and the current macOS signing blocker in `docs/release-smoke-evidence.md`.
 
 Next:
 

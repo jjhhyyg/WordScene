@@ -146,7 +146,8 @@ Expected result:
 
 ## Evidence Template
 
-Use this table for each release candidate.
+Use this table for each release candidate. Build metadata and blocker evidence
+for the current candidate is recorded in `docs/release-smoke-evidence.md`.
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
