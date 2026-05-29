@@ -6,16 +6,15 @@
 | Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` records the macOS signing blocker, continues to build iOS, refreshes current candidate evidence, and exits non-zero until all requested platforms produce signed candidates. |
 | DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-29T18:13:40Z using the ignored local token file, verified JSON Output with the real DeepSeek API, and returned `你好世界` without printing the token. |
 
-
 ## Release Candidate Build Blocker
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Candidate build | macOS | local build host | 1 | BLOCKED | /Users/erikssonhou/Documents/WordScene/WordScene.xcodeproj: error: No Accounts: Add a new account in Accounts settings. (in target 'WordSceneMac' from project 'WordScene') /Users/erikssonhou/Documents/WordScene/WordScene.xcodeproj: error: No profiles for 'com.erikssonhou.leximemory' were found: Xcode couldn't find any Mac App Development provisioning profiles matching 'com.erikssonhou.leximemory'. (in target 'WordSceneMac' from project 'WordScene') ** BUILD FAILED ** The following build commands failed: Building project WordScene with scheme WordSceneMac and configuration Release (1 failure)  See /tmp/WordSceneReleaseCandidates/logs/macos-release-candidate.log |
+| Candidate build | macOS | local build host | 1 | BLOCKED | Signing diagnosis / macOS / BLOCKED / Xcode has no active Apple Developer account session; Mac App Development provisioning profile is missing for com.erikssonhou.leximemory / Next: Open Xcode Settings > Accounts and add or re-authenticate the Apple ID for team JU68L3U235; After account authentication, rerun scripts/build_release_candidates.sh --allow-provisioning-updates --platform macos /  See /tmp/WordSceneReleaseCandidates/logs/macos-release-candidate.log |
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-29T18:10:04Z
+Generated: 2026-05-29T18:19:25Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |

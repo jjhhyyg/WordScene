@@ -46,12 +46,15 @@ run bash -n \
   scripts/test_collect_release_candidate_evidence.sh \
   scripts/run_live_deepseek_translation_smoke.sh \
   scripts/test_run_live_deepseek_translation_smoke.sh \
+  scripts/diagnose_release_signing.sh \
+  scripts/test_diagnose_release_signing.sh \
   scripts/run_release_candidate_gate.sh \
   scripts/test_run_release_candidate_gate.sh \
   scripts/test_verify_release_readiness.sh \
   scripts/verify_release_readiness.sh
 
 run scripts/test_collect_release_candidate_evidence.sh
+run scripts/test_diagnose_release_signing.sh
 run "$RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT"
 run "$RUN_CANDIDATE_GATE_TEST_SCRIPT"
 if [[ "${WORDSCENE_SKIP_READINESS_SELF_TEST:-0}" != "1" ]]; then

@@ -50,6 +50,7 @@ Baseline already completed:
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
+- Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
 - Real DeepSeek translation protocol can be smoke-tested without a signed app through `scripts/run_live_deepseek_translation_smoke.sh`.
 
 Known gaps:
@@ -267,6 +268,9 @@ Verification:
 - Reran `scripts/verify_release_readiness.sh`; script syntax checks, shell regression tests, token leak scan, XcodeGen marker scan, the macOS 72-test suite, and the iOS generic build passed.
 - Added `docs/release-signing-runbook.md` so the current macOS signing blocker is treated as an Xcode account/profile recovery task instead of a project configuration change.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh`; the ignored local token still works against the real DeepSeek JSON Output path without printing the token.
+- Added `scripts/diagnose_release_signing.sh` and wired it into the release candidate gate so macOS signing failures are recorded as actionable account/profile diagnostics instead of raw log excerpts.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence refreshed, and macOS is still blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
+- Reran `scripts/verify_release_readiness.sh`; the signing diagnosis tests are now part of the non-manual gate and the macOS 72-test suite plus iOS generic build still pass.
 
 Next:
 

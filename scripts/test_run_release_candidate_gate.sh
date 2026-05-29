@@ -48,7 +48,7 @@ case "$platform" in
     mkdir -p "$DERIVED_DATA_BASE/iOS/Build/Products/Release-iphoneos/Word Scene.app"
     ;;
   macos)
-    echo "No profiles for com.erikssonhou.leximemory" >&2
+    echo "No profiles for 'com.erikssonhou.leximemory' were found: Xcode couldn't find any Mac App Development provisioning profiles matching 'com.erikssonhou.leximemory'." >&2
     exit 65
     ;;
   *)
@@ -114,4 +114,5 @@ fi
 grep -qF 'PRESERVED READINESS EVIDENCE' "$EVIDENCE"
 grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$EVIDENCE"
 grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED |' "$EVIDENCE"
-grep -qF 'No profiles for com.erikssonhou.leximemory' "$EVIDENCE"
+grep -qF 'Signing diagnosis / macOS / BLOCKED' "$EVIDENCE"
+grep -qF 'Mac App Development provisioning profile is missing for com.erikssonhou.leximemory' "$EVIDENCE"

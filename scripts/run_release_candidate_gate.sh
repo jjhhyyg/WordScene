@@ -9,6 +9,7 @@ export DERIVED_DATA_BASE="${DERIVED_DATA_BASE:-/tmp/WordSceneReleaseCandidates}"
 
 BUILD_CANDIDATES_SCRIPT="${WORDSCENE_BUILD_CANDIDATES_SCRIPT:-$ROOT/scripts/build_release_candidates.sh}"
 COLLECT_EVIDENCE_SCRIPT="${WORDSCENE_COLLECT_EVIDENCE_SCRIPT:-$ROOT/scripts/collect_release_candidate_evidence.sh}"
+DIAGNOSE_SIGNING_SCRIPT="${WORDSCENE_DIAGNOSE_SIGNING_SCRIPT:-$ROOT/scripts/diagnose_release_signing.sh}"
 
 usage() {
   echo "Usage: $0 [--allow-provisioning-updates] [--platform all|macos|ios] [--evidence <markdown>]" >&2
@@ -114,7 +115,14 @@ append_blocker() {
   local notes
 
   label="$(platform_label "$platform")"
-  notes="$(tail -n 8 "$log_file" | tr '\n' ' ' | sed 's/|/\//g; s/[[:space:]][[:space:]]*/ /g')"
+  if [[ -x "$DIAGNOSE_SIGNING_SCRIPT" ]]; then
+    notes="$("$DIAGNOSE_SIGNING_SCRIPT" --platform "$platform" --log "$log_file" | tr '\n' ' ' | sed 's/|/\//g; s/[[:space:]][[:space:]]*/ /g')"
+  else
+    notes=""
+  fi
+  if [[ -z "$notes" ]]; then
+    notes="$(tail -n 8 "$log_file" | tr '\n' ' ' | sed 's/|/\//g; s/[[:space:]][[:space:]]*/ /g')"
+  fi
   if [[ -z "$notes" ]]; then
     notes="Release candidate build failed; see $log_file"
   else

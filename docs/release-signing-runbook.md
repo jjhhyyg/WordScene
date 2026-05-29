@@ -52,6 +52,18 @@ If that command still fails, do not edit source code first. Read the last
 signing error and confirm whether Xcode is missing the account, the certificate,
 the provisioning profile, or access to the CloudKit container.
 
+You can classify the latest release-candidate signing log without rerunning the
+build:
+
+```bash
+scripts/diagnose_release_signing.sh \
+  --platform macos \
+  --log /tmp/WordSceneReleaseCandidates/logs/macos-release-candidate.log
+```
+
+The release candidate gate runs the same diagnosis automatically when a platform
+build fails and records the result in `docs/release-smoke-evidence.md`.
+
 ## Regenerate Candidate Evidence
 
 After macOS signing succeeds, run the full non-manual gate:
@@ -79,4 +91,3 @@ Only after both signed candidates exist:
    CloudKit sync results in `docs/release-smoke-evidence.md`.
 3. Keep the DeepSeek token local to each device. It must not enter CloudKit,
    exports, logs, screenshots, or commits.
-
