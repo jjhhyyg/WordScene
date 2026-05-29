@@ -65,7 +65,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         )
 
         let result = try await provider.translate(
-            TranslationProviderRequest(text: "Hello", source: .en, target: .zh),
+            TranslationProviderRequest(text: "He said \"hello\"", source: .en, target: .zh),
             credential: TranslationProviderCredential(apiToken: "test-token")
         )
 
@@ -89,11 +89,14 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertEqual(messages.first?["role"], "system")
         XCTAssertEqual(messages.first?["content"], "System prompt")
         XCTAssertEqual(messages.last?["role"], "user")
-        XCTAssertTrue(messages.last?["content"]?.contains("Source language: English") == true)
-        XCTAssertTrue(messages.last?["content"]?.contains("Target language: Chinese") == true)
-        XCTAssertTrue(messages.last?["content"]?.contains("Hello") == true)
-        XCTAssertTrue(messages.last?["content"]?.contains("json") == true)
-        XCTAssertTrue(messages.last?["content"]?.contains("translated_text") == true)
+        let userPrompt = try XCTUnwrap(messages.last?["content"])
+        XCTAssertTrue(userPrompt.contains("json"))
+        XCTAssertTrue(userPrompt.contains("translated_text"))
+        XCTAssertTrue(userPrompt.contains("Translate only the text field"))
+        XCTAssertTrue(userPrompt.contains(#""source_language":"English""#))
+        XCTAssertTrue(userPrompt.contains(#""target_language":"Chinese""#))
+        XCTAssertTrue(userPrompt.contains(#""text":"He said \"hello\"""#))
+        XCTAssertFalse(userPrompt.contains("Text:\nHe said"))
     }
 
     func testProviderDecodesTranslatedTextFromJSONAssistantContent() async throws {

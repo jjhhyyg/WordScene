@@ -178,12 +178,30 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
 
     private func userPrompt(text: String, source: LanguageSelection, target: LanguageSelection) -> String {
         """
-        Source language: \(source.translationPromptName)
-        Target language: \(target.translationPromptName)
+        Translate only the text field in the input json object below.
         Return json matching {"translated_text":"..."}.
-        Text:
-        \(text)
+        Input json:
+        \(userPromptInputJSON(text: text, source: source, target: target))
         """
+    }
+
+    private func userPromptInputJSON(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection
+    ) -> String {
+        let payload = UserPromptInput(
+            sourceLanguage: source.translationPromptName,
+            targetLanguage: target.translationPromptName,
+            text: text
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        guard let data = try? encoder.encode(payload),
+              let json = String(data: data, encoding: .utf8) else {
+            return "{}"
+        }
+        return json
     }
 
     private func validateFinishReason(_ finishReason: String?) throws {
@@ -294,6 +312,18 @@ private struct TranslationJSONOutput: Decodable {
 
     enum CodingKeys: String, CodingKey {
         case translatedText = "translated_text"
+    }
+}
+
+private struct UserPromptInput: Encodable {
+    let sourceLanguage: String
+    let targetLanguage: String
+    let text: String
+
+    enum CodingKeys: String, CodingKey {
+        case sourceLanguage = "source_language"
+        case targetLanguage = "target_language"
+        case text
     }
 }
 
