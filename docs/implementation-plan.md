@@ -65,6 +65,7 @@ Baseline already completed:
 - Manual smoke recording requires PASS release candidate build evidence for the platform being tested.
 - Manual smoke readiness can be listed through `scripts/manual_smoke_readiness.sh`, with optional command templates, so eligible rows are explicit before recording evidence.
 - Manual smoke readiness can append a summary of READY/WAITING counts and grouped WAITING reasons for release triage.
+- Release next actions can be listed through `scripts/release_next_actions.sh` so signing recovery, READY manual smoke rows, and completion gating are visible without manually interpreting multiple scripts.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
@@ -380,6 +381,7 @@ Verification:
 - Added `scripts/manual_smoke_readiness.sh --summary` so release triage can see READY/WAITING totals and grouped WAITING reasons without parsing every row by eye.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `a645c9fb419d`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `01b09a2495ac`.
+- Added `scripts/release_next_actions.sh` plus regression coverage so the next release action list can be generated from current evidence instead of being inferred manually from readiness and completion failures.
 
 Next:
 

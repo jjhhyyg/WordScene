@@ -40,6 +40,9 @@ and pass/fail notes for each run.
   recording, so stale evidence prints WAITING instead of record commands. It is
   read-only and does not record PASS evidence. Add `--summary` to append READY
   and WAITING counts plus grouped WAITING reasons for release triage.
+- Run `scripts/release_next_actions.sh` when deciding what to do next. It wraps
+  the same readiness rules into an ordered action list, including the macOS
+  signing recovery step, READY manual rows, and the final completion gate.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

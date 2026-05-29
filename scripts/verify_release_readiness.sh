@@ -9,6 +9,7 @@ PRIVACY_MANIFEST_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT:-scripts/
 PRIVACY_SURFACE_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT:-scripts/test_privacy_surface.sh}"
 REQUIRED_REASON_API_SCAN_SCRIPT="${WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT:-scripts/test_required_reason_api_scan.sh}"
 MANUAL_SMOKE_READINESS_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_READINESS_SCRIPT:-scripts/test_manual_smoke_readiness.sh}"
+RELEASE_NEXT_ACTIONS_TEST_SCRIPT="${WORDSCENE_TEST_RELEASE_NEXT_ACTIONS_SCRIPT:-scripts/test_release_next_actions.sh}"
 
 run() {
   printf '\n==> %s\n' "$*"
@@ -57,6 +58,8 @@ run bash -n \
   scripts/test_record_release_smoke_result.sh \
   scripts/manual_smoke_readiness.sh \
   scripts/test_manual_smoke_readiness.sh \
+  scripts/release_next_actions.sh \
+  scripts/test_release_next_actions.sh \
   scripts/check_release_completion.sh \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
@@ -71,6 +74,7 @@ run scripts/test_collect_release_candidate_evidence.sh
 run scripts/test_diagnose_release_signing.sh
 run scripts/test_record_release_smoke_result.sh
 run "$MANUAL_SMOKE_READINESS_TEST_SCRIPT"
+run "$RELEASE_NEXT_ACTIONS_TEST_SCRIPT"
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
 run "$PRIVACY_SURFACE_TEST_SCRIPT"
