@@ -14,6 +14,11 @@ struct SettingsView: View {
     @State private var exportFileName = "memory-book-export.json"
     @State private var isExportingMemory = false
     @State private var isImportingMemory = false
+    @State private var recoveryStatus: SettingsLocalRecoveryStatus = .idle
+    @State private var recoveryBackupDocument = MemoryExportFileDocument()
+    @State private var recoveryBackupFileName = "wordscene-local-backup.json"
+    @State private var isExportingRecoveryBackup = false
+    @State private var isConfirmingLegacyReset = false
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -21,6 +26,9 @@ struct SettingsView: View {
     private let balanceClient = DeepSeekBalanceClient()
     private var importExportController: SettingsImportExportController {
         dataController.settingsImportExport
+    }
+    private var recoveryController: LocalPersistenceRecoveryController {
+        dataController.localDocumentRecovery
     }
 
     var body: some View {
@@ -39,12 +47,32 @@ struct SettingsView: View {
         ) { result in
             handleExportCompletion(result)
         }
+        .fileExporter(
+            isPresented: $isExportingRecoveryBackup,
+            document: recoveryBackupDocument,
+            contentType: .json,
+            defaultFilename: recoveryBackupFileName
+        ) { result in
+            handleRecoveryBackupCompletion(result)
+        }
         .fileImporter(
             isPresented: $isImportingMemory,
             allowedContentTypes: [.json],
             allowsMultipleSelection: false
         ) { result in
             handleImportSelection(result)
+        }
+        .confirmationDialog(
+            "重置旧缓存？",
+            isPresented: $isConfirmingLegacyReset,
+            titleVisibility: .visible
+        ) {
+            Button("重置旧缓存", role: .destructive) {
+                resetLegacyDocuments()
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。")
         }
     }
 
@@ -110,6 +138,12 @@ struct SettingsView: View {
 
             Section("数据存储") {
                 persistenceStatusView
+                recoveryStatusView
+
+                HStack {
+                    Spacer()
+                    localRecoveryButtons
+                }
             }
 
             Section("导入导出") {
@@ -198,6 +232,13 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var recoveryStatusView: some View {
+        Label(recoveryStatus.message, systemImage: recoveryStatus.systemImage)
+            .font(.footnote)
+            .foregroundStyle(recoveryStatus.tint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var deepSeekTokenButtons: some View {
         HStack(spacing: 10) {
             Button {
@@ -258,7 +299,14 @@ struct SettingsView: View {
 
     private var persistenceStatusCard: some View {
         SettingsCard(title: "数据存储", systemImage: "internaldrive") {
-            persistenceStatusView
+            VStack(alignment: .leading, spacing: 14) {
+                persistenceStatusView
+
+                Divider()
+
+                recoveryStatusView
+                localRecoveryButtons
+            }
         }
     }
 
@@ -302,6 +350,27 @@ struct SettingsView: View {
                 .controlSize(.large)
             }
         }
+    }
+
+    private var localRecoveryButtons: some View {
+        HStack(spacing: 10) {
+            Button {
+                prepareLocalBackup()
+            } label: {
+                Label("导出原始备份", systemImage: "externaldrive.badge.timemachine")
+            }
+            .buttonStyle(.bordered)
+            .disabled(recoveryStatus.isWorking)
+
+            Button(role: .destructive) {
+                isConfirmingLegacyReset = true
+            } label: {
+                Label("重置旧缓存", systemImage: "trash")
+            }
+            .buttonStyle(.bordered)
+            .disabled(recoveryStatus.isWorking)
+        }
+        .controlSize(.large)
     }
 
     private func settingValueRow(_ title: String, value: String) -> some View {
@@ -444,6 +513,37 @@ struct SettingsView: View {
         case .failure(let error):
             importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
         }
+    }
+
+    @MainActor
+    private func prepareLocalBackup() {
+        recoveryStatus = .working("正在准备旧缓存原始备份...")
+
+        do {
+            let backup = try recoveryController.prepareBackup()
+            recoveryBackupDocument = MemoryExportFileDocument(data: backup.data)
+            recoveryBackupFileName = backup.fileName
+            recoveryStatus = .working("准备导出 \(backup.documentCount) 个旧缓存文档。")
+            isExportingRecoveryBackup = true
+        } catch {
+            recoveryStatus = .failed(importExportErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func handleRecoveryBackupCompletion(_ result: Result<URL, Error>) {
+        switch result {
+        case .success:
+            recoveryStatus = .success("旧缓存原始备份已生成。")
+        case .failure(let error):
+            recoveryStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func resetLegacyDocuments() {
+        let resetCount = recoveryController.resetLocalDocuments()
+        recoveryStatus = .success("已重置 \(resetCount) 个旧缓存文档。")
     }
 
     @MainActor
@@ -603,6 +703,55 @@ private enum SettingsImportExportStatus: Equatable {
         switch self {
         case .idle:
             return "lock.doc"
+        case .working:
+            return "arrow.triangle.2.circlepath"
+        case .success:
+            return "checkmark.seal.fill"
+        case .failed:
+            return "exclamationmark.triangle.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .idle:
+            return .secondary
+        case .working:
+            return .accentColor
+        case .success:
+            return .green
+        case .failed:
+            return .red
+        }
+    }
+
+    var isWorking: Bool {
+        if case .working = self {
+            return true
+        }
+        return false
+    }
+}
+
+private enum SettingsLocalRecoveryStatus: Equatable {
+    case idle
+    case working(String)
+    case success(String)
+    case failed(String)
+
+    var message: String {
+        switch self {
+        case .idle:
+            return "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。"
+        case .working(let message), .success(let message), .failed(let message):
+            return message
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .idle:
+            return "wrench.and.screwdriver"
         case .working:
             return "arrow.triangle.2.circlepath"
         case .success:

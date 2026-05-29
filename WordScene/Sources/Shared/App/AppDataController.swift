@@ -6,6 +6,7 @@ struct AppDataController {
     let memoryLibrary: MemoryLibraryRepository
     let translationHistory: TranslationHistoryRepository
     let settingsImportExport: SettingsImportExportController
+    let localDocumentRecovery: LocalPersistenceRecoveryController
     let persistenceStatus: AppPersistenceStatus
 
     init(
@@ -31,6 +32,7 @@ struct AppDataController {
             legacyStore: legacyHistoryStore
         )
         settingsImportExport = SettingsImportExportController(memoryStore: memoryLibrary)
+        localDocumentRecovery = LocalPersistenceRecoveryController()
     }
 
     init(

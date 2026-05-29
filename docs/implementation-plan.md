@@ -169,10 +169,12 @@ Verification:
 - Wired Translate and Search recent-history access to the explicit error path, with non-blocking warnings when translation succeeds but history persistence fails.
 - Added explicit `UserDefaults` document decode errors for local memory and recent-history stores.
 - Added tests proving corrupt local documents throw through `loadOrThrow()` and are preserved for recovery instead of being cleared or treated as empty.
+- Added a Settings recovery affordance for early local documents: export raw `UserDefaults` payloads as a backup, then reset only the known legacy memory/history keys after confirmation.
+- Added recovery controller tests proving raw corrupt documents are exportable and reset does not touch unrelated preferences.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Add an in-app recovery affordance for corrupt local documents, such as export raw backup then reset local cache.
+- Manually smoke test the local document recovery flow on macOS and iOS.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.
