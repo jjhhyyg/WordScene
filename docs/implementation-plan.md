@@ -371,6 +371,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `6303c97a9b24`.
 - Extended `scripts/manual_smoke_readiness.sh --commands` to print ready-row `record_release_smoke_result.sh` command templates without printing commands for blocked rows.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b8760d156497`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `a80d52add923`.
 
 Next:
 
