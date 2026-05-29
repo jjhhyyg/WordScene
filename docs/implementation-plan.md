@@ -410,6 +410,10 @@ Verification:
 - Reran `scripts/verify_release_readiness.sh`; script self-tests, token leak scan, 88 macOS tests, 89 iOS unit tests, 2 iOS UI tests, iOS generic build, and unsigned macOS/iOS Release builds passed.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `f381a0eaf4ae`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `5af837195bd9` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Split `scripts/check_release_completion.sh` freshness errors so stale DeepSeek live-smoke evidence reports `scripts/run_live_deepseek_translation_smoke.sh` as the rerun action instead of using candidate-build wording.
+- Reran `scripts/verify_release_readiness.sh`; script self-tests, token leak scan, 88 macOS tests, 89 iOS unit tests, 2 iOS UI tests, iOS generic build, and unsigned macOS/iOS Release builds passed after the completion-audit wording split.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `9c9168a94051`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `69f5ef62aafe` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
