@@ -396,6 +396,7 @@ Verification:
 - Added iOS simulator unit tests to `scripts/verify_release_readiness.sh`, fixed the iOS test bundle's Core Data import, and made simulator hosts default to local-only storage instead of bootstrapping CloudKit without signed iCloud entitlements.
 - Reran iOS simulator tests on iPhone 17 Pro Max / iOS 26.5, targeted macOS Core Data tests, `scripts/test_verify_release_readiness.sh`, and `scripts/verify_release_readiness.sh`; the non-manual gate now covers 88 iOS simulator tests.
 - Added iOS `remote-notification` background mode for CloudKit push notifications and a readiness check that verifies both `project.yml` and the generated Xcode project keep that setting.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness now records iOS simulator tests and CloudKit background-mode validation, iOS candidate evidence points at commit `de1894ef8e57`, and macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
