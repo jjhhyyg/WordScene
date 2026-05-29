@@ -227,7 +227,7 @@ run_readiness() {
     return "$status"
   fi
 
-  notes="scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles."
+  notes="scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, CloudKit background-mode validation, XcodeGen version-marker scan, macOS tests, iOS simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles."
   prepare_evidence_file
   append_non_manual_gate_row "Readiness script" "macOS + iOS generic" "PASS" "$notes"
 }
