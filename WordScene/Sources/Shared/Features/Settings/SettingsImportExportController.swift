@@ -3,13 +3,16 @@ import Foundation
 struct SettingsImportExportController {
     private let memoryStore: any MemoryLibraryDataStore
     private let importExportService: MemoryImportExportService
+    private let changeRecorder: () -> Void
 
     init(
         memoryStore: any MemoryLibraryDataStore = MemoryLibraryRepository(),
-        importExportService: MemoryImportExportService = MemoryImportExportService()
+        importExportService: MemoryImportExportService = MemoryImportExportService(),
+        changeRecorder: @escaping () -> Void = {}
     ) {
         self.memoryStore = memoryStore
         self.importExportService = importExportService
+        self.changeRecorder = changeRecorder
     }
 
     func prepareExport() throws -> SettingsMemoryExport {
@@ -32,6 +35,7 @@ struct SettingsImportExportController {
             conflictStrategy: conflictStrategy
         )
         try memoryStore.saveOrThrow(result.items)
+        changeRecorder()
 
         return SettingsMemoryImportSummary(
             importedCount: result.importedCount,

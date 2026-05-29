@@ -40,6 +40,7 @@ Baseline already completed:
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
 - Library, Search, and Translate refresh local view state after persistent store remote-change notifications.
+- Settings import records local data changes so already loaded Library/Search/Translate views can refresh after an import.
 - Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
@@ -141,6 +142,7 @@ Deliverables:
 - Observe `NSPersistentCloudKitContainer` sync events so recent sync success and errors are visible.
 - Persist the latest CloudKit sync event locally so relaunch does not reset diagnostics to an unhelpful waiting state.
 - Refresh translation, library, and search screens after persistent store remote-change notifications so synced items can appear without relaunch.
+- Refresh already loaded local views after Settings imports memory data.
 - Surface offline, constrained, and available network states in Settings without blocking local library/search usage.
 
 Verification:
@@ -150,6 +152,7 @@ Verification:
 - Runtime sync-mode selection tests for signed CloudKit and unsigned local-only processes.
 - Sync event status tests for waiting, success, and failure states.
 - Sync event persistence tests across monitor recreation and local-only mode.
+- Settings import data-change tests at controller and app-data-controller integration layers.
 - Network status tests for offline local-availability messaging.
 - Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
@@ -237,6 +240,8 @@ Verification:
 - Added tests proving offline network status messaging preserves local library/search/delete availability.
 - Added a manual Library entry flow so source/translation pairs can be saved locally without calling DeepSeek.
 - Added tests proving manual memory entries trim text, replace duplicates, and reject blank source or translation fields.
+- Added a local data-change notification after successful Settings import so loaded Library, Search, and Translate views can refresh without relaunch.
+- Added tests proving Settings import records a local data change through both the import controller and `AppDataController`.
 
 Next:
 

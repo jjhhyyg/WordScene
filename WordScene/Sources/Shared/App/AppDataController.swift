@@ -58,7 +58,12 @@ struct AppDataController {
             coreDataStore: coreDataStore,
             legacyStore: legacyHistoryStore
         )
-        settingsImportExport = SettingsImportExportController(memoryStore: memoryLibrary)
+        settingsImportExport = SettingsImportExportController(
+            memoryStore: memoryLibrary,
+            changeRecorder: { [dataChangeMonitor] in
+                dataChangeMonitor.recordLocalChange()
+            }
+        )
         localDocumentRecovery = LocalPersistenceRecoveryController()
     }
 
@@ -492,6 +497,10 @@ final class AppDataChangeMonitor: ObservableObject, @unchecked Sendable {
     }
 
     func recordExternalChange() {
+        recordLocalChange()
+    }
+
+    func recordLocalChange() {
         revision &+= 1
     }
 }

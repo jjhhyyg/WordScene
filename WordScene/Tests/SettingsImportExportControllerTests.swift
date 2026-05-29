@@ -64,4 +64,28 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertEqual(store.load().first { $0.sourceText == "hello" }?.note, "new")
         XCTAssertTrue(store.load().contains { $0.sourceText == "cat" })
     }
+
+    func testImportMemoryRecordsLocalDataChangeAfterSuccessfulSave() throws {
+        let suiteName = "SettingsImportExportControllerTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = MemoryLibraryStore(defaults: defaults)
+        let service = MemoryImportExportService()
+        var changeCount = 0
+        let controller = SettingsImportExportController(
+            memoryStore: store,
+            importExportService: service,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let item = MemoryItem(sourceText: "offline", translatedText: "离线", sourceLanguage: .en, targetLanguage: .zh)
+        let data = try service.exportData(items: [item])
+
+        _ = try controller.importMemory(from: data)
+
+        XCTAssertEqual(changeCount, 1)
+    }
 }

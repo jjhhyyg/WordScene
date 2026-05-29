@@ -69,13 +69,14 @@ Run once on macOS and once on iOS or iPadOS.
 6. Import the exported file.
 7. Verify duplicate handling reports imported, replaced, and skipped counts
    accurately.
-8. Verify Library and Search reflect the imported state.
+8. Verify Library and Search reflect the imported state without relaunching.
 
 Expected result:
 
 - Export produces `memory-book-export-YYYYMMDD.json`.
 - Import rejects modified files with checksum errors.
 - Import does not wipe unrelated local state.
+- Already loaded Library and Search views refresh after import.
 - API token is not present in exported metadata.
 
 ## Local Recovery
