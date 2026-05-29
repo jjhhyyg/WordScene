@@ -21,6 +21,15 @@ protocol TranslationProvider: Sendable {
     ) async throws -> TranslationLLMResult
 }
 
+protocol TranslationClienting: Sendable {
+    func translate(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection,
+        apiToken: String
+    ) async throws -> String
+}
+
 struct DeepSeekTranslationClient: Sendable {
     private let provider: any TranslationProvider
 
@@ -48,6 +57,8 @@ struct DeepSeekTranslationClient: Sendable {
         ).translatedText
     }
 }
+
+extension DeepSeekTranslationClient: TranslationClienting {}
 
 struct DeepSeekProvider: TranslationProvider {
     private let chatProvider: OpenAICompatibleChatProvider

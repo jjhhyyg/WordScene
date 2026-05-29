@@ -65,6 +65,7 @@ Baseline already completed:
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
 - Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
+- Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
 
 Known gaps:
 
@@ -314,6 +315,9 @@ Verification:
 - Added regression coverage for candidate evidence that points to an ancestor commit with only `docs/release-smoke-evidence.md` and `docs/implementation-plan.md` changed afterward.
 - Added regression coverage proving product/source and release script changes after a candidate build still force a fresh candidate gate run before completion or manual smoke evidence can be accepted.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness passed, iOS signed Release candidate evidence was refreshed for commit `9c4ecc9ec1d6`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
+- Extracted the Translate screen's business action into `TranslationWorkflow` so the token-read -> provider-call -> `TranslationRecord` -> recent-history persistence path is directly testable outside SwiftUI layout code.
+- Added `TranslationWorkflowTests` covering successful translation history persistence, missing-token failure before provider invocation, and successful translation with a non-blocking history-save warning.
+- Reran `scripts/verify_release_readiness.sh`; non-manual gates still pass after the workflow extraction.
 
 Next:
 

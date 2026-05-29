@@ -763,48 +763,42 @@ struct TranslationView: View {
 
     @MainActor
     private func translateInput() async {
-        let trimmedInput = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedInput.isEmpty else {
-            return
-        }
-
         do {
-            guard let token = try credentialStore.read(account: DeepSeekCredential.tokenAccount), !token.isEmpty else {
-                translationState = .failed("请先在设置中保存 DeepSeek API Token。")
+            if inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 return
             }
 
             translationState = .translating
             lastTranslatedRecord = nil
-            let translatedText = try await translationClient.translate(
-                text: trimmedInput,
+            let workflow = TranslationWorkflow(
+                credentialStore: credentialStore,
+                translationClient: translationClient,
+                historyStore: historyStore
+            )
+            let result = try await workflow.translate(
+                text: inputText,
                 source: sourceLanguage,
                 target: targetLanguage,
-                apiToken: token
+                currentHistory: history
             )
 
-            let record = TranslationRecord(
-                sourceText: trimmedInput,
-                translatedText: translatedText,
-                sourceLanguage: sourceLanguage,
-                targetLanguage: targetLanguage
-            )
-            let updatedHistory = historyStore.adding(record, to: history)
-            lastTranslatedRecord = record
-            translationState = .translated(translatedText)
-            do {
-                try historyStore.saveOrThrow(updatedHistory)
-                history = updatedHistory
-                persistenceWarningMessage = nil
-            } catch {
-                persistenceWarningMessage = "译文已生成，但翻译历史保存失败：\(error.localizedDescription)"
-            }
+            lastTranslatedRecord = result.record
+            translationState = .translated(result.translatedText)
+            history = result.updatedHistory
+            persistenceWarningMessage = result.persistenceWarningMessage
         } catch {
             translationState = .failed(translationErrorMessage(for: error))
         }
     }
 
     private func translationErrorMessage(for error: Error) -> String {
+        if let workflowError = error as? TranslationWorkflowError {
+            switch workflowError {
+            case .missingToken:
+                return "请先在设置中保存 DeepSeek API Token。"
+            }
+        }
+
         if let translationError = error as? DeepSeekTranslationError {
             switch translationError {
             case .emptyInput:

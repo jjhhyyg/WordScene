@@ -64,6 +64,7 @@
 		91566169B9D98817B5F67F57 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0810899951479D6FBD559709 /* SearchView.swift */; };
 		919982FFBFBCDFAB048AB6CB /* MemorySearchIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */; };
 		92D0C51F92C3D103A797888E /* LanguageSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ED2EB20F79032F10EF2C34 /* LanguageSelection.swift */; };
+		93586842A3D1F2890284039B /* TranslationWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */; };
 		94A3C66F428D89952D709864 /* MemoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685B7AD82D463A45F145A2B4 /* MemoryItem.swift */; };
 		96456CE04F829F9F661C839E /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */; };
 		99789BE74D4F9380AE1099C6 /* PinyinTransliteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */; };
@@ -71,6 +72,7 @@
 		A1FF6F8390ABACCCFC42D618 /* MemoryLibraryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */; };
 		A3763EB90C333BAE13DD6151 /* MemoryImportExportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */; };
 		A4A5D25B054C3C52CF254C35 /* TranslationHistoryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */; };
+		A52792C146BF20E923447A64 /* TranslationWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */; };
 		A9460D82F6024D2375A935A2 /* DeepSeekBalanceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F3D453013B5CDB55D10CE9 /* DeepSeekBalanceClient.swift */; };
 		AC19431356023625286C7D0B /* TranslationRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */; };
 		AC65FFFB9A83544D8D9E2DA8 /* TranslationHistoryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */; };
@@ -93,6 +95,8 @@
 		E5B7353A38053A7132DC2B4E /* SettingsImportExportController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */; };
 		E5E0E767AB87050F9F6D44CF /* KeychainCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */; };
 		E8387D3BEC5985278E5A4367 /* AppDataControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E1AB2FCE2706C58FFA814B /* AppDataControllerTests.swift */; };
+		EBB18BFE15879357DE3B3855 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
+		EBB64F51EEB42F7B3A935EA3 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
 		EF9C91796A1D3361577B3BD1 /* MemorySearchIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */; };
 		F294FCD453CF07E7643B19C8 /* PinyinTransliteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */; };
 		F7A5C8B44172D6B4E104ED37 /* MemoryLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */; };
@@ -148,6 +152,7 @@
 		721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		7E1C69A659E9CCA80A97DDED /* WordScene.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WordScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySearchIndexTests.swift; sourceTree = "<group>"; };
+		8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationWorkflowTests.swift; sourceTree = "<group>"; };
 		8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryRepositoryTests.swift; sourceTree = "<group>"; };
 		90DB37BC6A6D92D6B7DEF9BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		930A284E1EE951193AB252A3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -168,6 +173,7 @@
 		F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneApp.swift; sourceTree = "<group>"; };
 		F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationRecord.swift; sourceTree = "<group>"; };
 		F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImportExportController.swift; sourceTree = "<group>"; };
+		F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationWorkflow.swift; sourceTree = "<group>"; };
 		FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -197,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				372CB65BBB01171BE108F83E /* TranslationView.swift */,
+				F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */,
 			);
 			path = Translate;
 			sourceTree = "<group>";
@@ -308,6 +315,7 @@
 				A326C54DE9B73BA7405FCB32 /* SettingsImportExportControllerTests.swift */,
 				8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */,
 				0AE85772F6048138E153C124 /* TranslationHistoryStoreTests.swift */,
+				8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */,
 			);
 			name = Tests;
 			path = WordScene/Tests;
@@ -501,6 +509,7 @@
 				006BCD5E5A69C195FA9490C4 /* SettingsImportExportControllerTests.swift in Sources */,
 				A4A5D25B054C3C52CF254C35 /* TranslationHistoryRepositoryTests.swift in Sources */,
 				266ACE20C07FC4780D9E87C6 /* TranslationHistoryStoreTests.swift in Sources */,
+				EBB64F51EEB42F7B3A935EA3 /* TranslationWorkflowTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -522,6 +531,7 @@
 				6240C1716D03756546DA1020 /* SettingsImportExportControllerTests.swift in Sources */,
 				AC65FFFB9A83544D8D9E2DA8 /* TranslationHistoryRepositoryTests.swift in Sources */,
 				40D429323A1B11DBAE9BFE66 /* TranslationHistoryStoreTests.swift in Sources */,
+				EBB18BFE15879357DE3B3855 /* TranslationWorkflowTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -557,6 +567,7 @@
 				4F46BEAA4AB8DC57D8EB9575 /* TranslationLanguageDirection.swift in Sources */,
 				B496C9CBBEAC38EA4F3E8E33 /* TranslationRecord.swift in Sources */,
 				261538CC6268D556FF32E9AA /* TranslationView.swift in Sources */,
+				A52792C146BF20E923447A64 /* TranslationWorkflow.swift in Sources */,
 				3417254A726A1308C0B0DD66 /* WordSceneApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -593,6 +604,7 @@
 				D8FEA8870625A4556E0A93CF /* TranslationLanguageDirection.swift in Sources */,
 				AC19431356023625286C7D0B /* TranslationRecord.swift in Sources */,
 				B96FA72ACC684B146879D2A3 /* TranslationView.swift in Sources */,
+				93586842A3D1F2890284039B /* TranslationWorkflow.swift in Sources */,
 				4EF9E0FF93BCAA01045EE0F8 /* WordSceneApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
