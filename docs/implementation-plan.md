@@ -313,6 +313,7 @@ Verification:
 - Fixed the release evidence freshness rule so committing evidence/progress documentation after a clean candidate build does not invalidate that candidate by itself.
 - Added regression coverage for candidate evidence that points to an ancestor commit with only `docs/release-smoke-evidence.md` and `docs/implementation-plan.md` changed afterward.
 - Added regression coverage proving product/source and release script changes after a candidate build still force a fresh candidate gate run before completion or manual smoke evidence can be accepted.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness passed, iOS signed Release candidate evidence was refreshed for commit `9c4ecc9ec1d6`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
 
 Next:
 

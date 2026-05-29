@@ -14,7 +14,7 @@
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-29T19:58:54Z
+Generated: 2026-05-29T20:06:44Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Generated: 2026-05-29T19:58:54Z
 | Bundle ID | com.erikssonhou.leximemory |
 | Version | 1.0.0 |
 | Build | 1 |
-| Git commit | b5e5741f9aa7 |
+| Git commit | 9c4ecc9ec1d6 |
 | iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |
 | CloudKit containers | iCloud.com.erikssonhou.leximemory |
 | iCloud services | CloudKit |
