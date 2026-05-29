@@ -50,7 +50,7 @@ struct AppDataController {
                 do {
                     coreDataStore = try makeLocalCoreDataStore()
                     persistenceStatus = .coreDataAvailable(syncMode: .localOnly)
-                    syncStatus = .localOnly
+                    syncStatus = .localOnlyFallback(reason: Self.failureReason(for: error))
                     syncEventMonitor = CloudKitSyncEventMonitor(
                         syncStatus: syncStatus,
                         eventStore: syncEventStore
@@ -168,6 +168,7 @@ enum AppPersistenceStatus: Equatable {
 enum AppSyncStatus: Equatable {
     case cloudKitConfigured(containerIdentifier: String)
     case localOnly
+    case localOnlyFallback(reason: String)
     case unavailable(reason: String)
 
     init(syncMode: CoreDataSyncMode) {
@@ -183,7 +184,7 @@ enum AppSyncStatus: Equatable {
         switch self {
         case .cloudKitConfigured:
             return "iCloud 同步已配置"
-        case .localOnly:
+        case .localOnly, .localOnlyFallback:
             return "仅本机存储"
         case .unavailable:
             return "同步不可用"
@@ -196,6 +197,8 @@ enum AppSyncStatus: Equatable {
             return "已配置通过 \(containerIdentifier) 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。"
         case .localOnly:
             return "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。"
+        case .localOnlyFallback(let reason):
+            return "iCloud 同步存储初始化失败，已切换为仅本机存储。数据仍可本机使用，但不会通过 iCloud 同步：\(reason)"
         case .unavailable(let reason):
             return "主存储初始化失败，当前无法使用 iCloud 同步：\(reason)"
         }
@@ -205,7 +208,7 @@ enum AppSyncStatus: Equatable {
         switch self {
         case .cloudKitConfigured:
             return "icloud"
-        case .localOnly:
+        case .localOnly, .localOnlyFallback:
             return "internaldrive"
         case .unavailable:
             return "icloud.slash"
@@ -216,7 +219,7 @@ enum AppSyncStatus: Equatable {
         switch self {
         case .cloudKitConfigured:
             return .secondary
-        case .localOnly:
+        case .localOnly, .localOnlyFallback:
             return .orange
         case .unavailable:
             return .red
@@ -316,7 +319,7 @@ enum AppSyncEventStatus: Equatable {
         switch syncStatus {
         case .cloudKitConfigured:
             self = .waitingForCloudEvents
-        case .localOnly:
+        case .localOnly, .localOnlyFallback:
             self = .unavailable("当前为仅本机存储，不会收到 iCloud 同步事件。")
         case .unavailable(let reason):
             self = .unavailable("同步不可用：\(reason)")

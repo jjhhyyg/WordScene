@@ -136,7 +136,9 @@ final class AppDataControllerTests: XCTestCase {
 
         XCTAssertEqual(bootstrapAttempts, 2)
         XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable(syncMode: .localOnly))
-        XCTAssertEqual(controller.syncStatus, .localOnly)
+        XCTAssertEqual(controller.syncStatus, .localOnlyFallback(reason: "Core Data store unavailable"))
+        XCTAssertTrue(controller.syncStatus.message.contains("Core Data store unavailable"))
+        XCTAssertFalse(controller.syncStatus.message.contains("没有可用的 CloudKit entitlement"))
         XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [item])
     }
 
