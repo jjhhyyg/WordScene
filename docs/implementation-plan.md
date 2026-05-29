@@ -352,6 +352,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `55cdbed0f128`.
 - Split the Settings sync status for entitlement-driven local-only mode from CloudKit-bootstrap-failure local fallback, so users see the actual degradation reason when iCloud store initialization fails.
 - Reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 82 macOS tests, iOS build, and unsigned Release compiles still pass after the sync-status split.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `c47757fd5232`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
