@@ -59,6 +59,14 @@ if grep -qF -- '--platform "macOS"' "$TMPDIR/commands.out"; then
   exit 1
 fi
 
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --summary >"$TMPDIR/summary.out"
+
+grep -qF 'Summary' "$TMPDIR/summary.out"
+grep -qF 'Ready rows: 5' "$TMPDIR/summary.out"
+grep -qF 'Waiting rows: 5' "$TMPDIR/summary.out"
+grep -qF 'Waiting reasons:' "$TMPDIR/summary.out"
+grep -qF -- '- missing PASS candidate build: macOS (5 rows)' "$TMPDIR/summary.out"
+
 WORDSCENE_CURRENT_COMMIT="abcdef123456" \
 WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE="scripts/run_release_candidate_gate.sh" \

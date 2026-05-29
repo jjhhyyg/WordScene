@@ -4,10 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 SHOW_COMMANDS=0
+SHOW_SUMMARY=0
 CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>] [--commands]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--commands] [--summary]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --commands)
       SHOW_COMMANDS=1
+      shift
+      ;;
+    --summary)
+      SHOW_SUMMARY=1
       shift
       ;;
     *)
@@ -313,6 +318,10 @@ else
   echo "Candidate build: missing"
 fi
 
+ready_count=0
+waiting_count=0
+waiting_reasons=""
+
 while IFS='|' read -r area platform required_platforms; do
   reason=""
   missing_platforms="$(missing_platforms_for "$required_platforms")"
@@ -328,11 +337,32 @@ while IFS='|' read -r area platform required_platforms; do
   fi
 
   if [[ -z "$reason" ]]; then
+    ready_count=$((ready_count + 1))
     echo "READY $area / $platform"
     if [[ "$SHOW_COMMANDS" -eq 1 ]]; then
       print_record_command "$area" "$platform"
     fi
   else
+    waiting_count=$((waiting_count + 1))
+    waiting_reasons="${waiting_reasons}${reason}"$'\n'
     echo "WAITING $area / $platform - $reason"
   fi
 done < <(manual_rows)
+
+if [[ "$SHOW_SUMMARY" -eq 1 ]]; then
+  echo "Summary"
+  echo "Ready rows: $ready_count"
+  echo "Waiting rows: $waiting_count"
+  if [[ "$waiting_count" -gt 0 ]]; then
+    echo "Waiting reasons:"
+    printf '%s' "$waiting_reasons" |
+      sed '/^$/d' |
+      sort |
+      uniq -c |
+      awk '{
+        count = $1
+        sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "")
+        printf "- %s (%s rows)\n", $0, count
+      }'
+  fi
+fi

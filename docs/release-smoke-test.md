@@ -38,7 +38,8 @@ and pass/fail notes for each run.
   print `scripts/record_release_smoke_result.sh` templates for READY rows. It
   applies the same candidate/live-smoke freshness checks as manual evidence
   recording, so stale evidence prints WAITING instead of record commands. It is
-  read-only and does not record PASS evidence.
+  read-only and does not record PASS evidence. Add `--summary` to append READY
+  and WAITING counts plus grouped WAITING reasons for release triage.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek
