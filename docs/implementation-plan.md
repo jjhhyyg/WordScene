@@ -45,6 +45,7 @@ Baseline already completed:
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
+- Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`.
 
 Known gaps:
 
@@ -249,9 +250,11 @@ Verification:
 - Verified the iOS signed Release build can be produced locally through the release candidate script, with iPad all-orientation metadata present in the built app; macOS signing remains blocked by missing Xcode account/profile state on this machine.
 - Added `scripts/collect_release_candidate_evidence.sh` plus a shell regression test so candidate build metadata can be recorded from the built app bundle.
 - Recorded initial release candidate evidence for the iOS signed build and the current macOS signing blocker in `docs/release-smoke-evidence.md`.
+- Added `scripts/verify_release_readiness.sh` with a shell regression test so non-manual release gates can be rerun consistently before smoke testing.
 
 Next:
 
 - Restore a valid Xcode Apple Developer account session and Mac App Development provisioning profile, then rerun `scripts/build_release_candidates.sh --allow-provisioning-updates --platform macos`.
+- Rerun `scripts/verify_release_readiness.sh` after any release-gate change and before manual smoke testing.
 - Execute `docs/release-smoke-test.md` on a signed release candidate and record evidence.
 - Keep local-only mode fully usable while sync is being prepared.

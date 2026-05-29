@@ -12,6 +12,10 @@ and pass/fail notes for each run.
   is signed in to the Apple Developer account. If provisioning has already been
   prepared locally, the flag can be omitted. Use `--platform ios` or
   `--platform macos` only when recording a platform-specific build blocker.
+- Run `scripts/verify_release_readiness.sh` before manual smoke testing. It
+  covers script syntax, release evidence script tests, `git diff --check`, token
+  leak scanning, XcodeGen version-marker scanning, macOS tests, and iOS generic
+  build.
 - Use the same Apple ID on all devices used for iCloud sync testing.
 - Confirm iCloud Drive and CloudKit are enabled for the Apple ID.
 - Keep the DeepSeek API token local to each device; do not expect it to sync.
