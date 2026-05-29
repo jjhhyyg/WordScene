@@ -95,7 +95,17 @@ prepare_evidence_file() {
   preserved_rest="$(mktemp)"
 
   if [[ -f "$EVIDENCE_FILE" ]]; then
-    awk '
+    awk -F'|' -v platform="$PLATFORM" '
+      function trim(value) {
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+        return value
+      }
+      function normalized_platform(value) {
+        value = trim(value)
+        gsub(/iOS/, "ios", value)
+        gsub(/macOS/, "macos", value)
+        return value
+      }
       /^## Non-Manual Release Gate$/ {
         in_section = 1
         next
@@ -107,25 +117,80 @@ prepare_evidence_file() {
       /^\| / &&
       $0 !~ /^\| Area \|/ &&
       $0 !~ /^\| ---/ &&
-      $0 !~ /^\| Readiness script \|/ &&
-      $0 !~ /^\| Candidate gate \|/ {
+      trim($2) != "Readiness script" {
+        if (trim($2) == "Candidate gate") {
+          if (platform == "all" || normalized_platform($3) == platform) {
+            next
+          }
+        }
         print
       }
     ' "$EVIDENCE_FILE" >"$preserved_rows"
 
-    awk '
+    awk -F'|' -v platform="$PLATFORM" -v requested_csv="$(requested_platforms_csv)" '
+      function trim(value) {
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+        return value
+      }
+      function normalized_platform(value) {
+        value = trim(value)
+        gsub(/iOS/, "ios", value)
+        gsub(/macOS/, "macos", value)
+        return value
+      }
+      function is_requested(value) {
+        return requested[normalized_platform(value)] == 1
+      }
+      function starts_build_section(value) {
+        return value == "## Release Candidate Build Evidence" ||
+          value == "## Release Candidate Build Blocker" ||
+          value == "## Current Build Blockers"
+      }
+      function flush_build_section() {
+        if (in_build_section == 1 && platform != "all" && build_section_has_requested != 1) {
+          printf "%s", build_section
+        }
+        in_build_section = 0
+        build_section = ""
+        build_section_has_requested = 0
+      }
+      BEGIN {
+        split(requested_csv, requested_values, ",")
+        for (requested_index in requested_values) {
+          requested[requested_values[requested_index]] = 1
+        }
+      }
       /^## Non-Manual Release Gate$/ ||
       /^## Release Candidate Build Evidence$/ ||
       /^## Release Candidate Build Blocker$/ ||
       /^## Current Build Blockers$/ {
+        flush_build_section()
+      }
+      /^## Non-Manual Release Gate$/ {
         skip = 1
         next
       }
+      starts_build_section($0) {
+        in_build_section = 1
+        build_section = $0 ORS
+        next
+      }
       /^## / {
+        flush_build_section()
         skip = 0
+      }
+      in_build_section == 1 {
+        build_section = build_section $0 ORS
+        if ($0 ~ /^\| / && trim($2) == "Candidate build" && is_requested($3)) {
+          build_section_has_requested = 1
+        }
+        next
       }
       skip != 1 {
         print
+      }
+      END {
+        flush_build_section()
       }
     ' "$EVIDENCE_FILE" >"$preserved_rest"
   fi
@@ -244,6 +309,14 @@ gate_platform_label() {
     all) printf 'macOS + iOS' ;;
     ios) printf 'iOS' ;;
     macos) printf 'macOS' ;;
+  esac
+}
+
+requested_platforms_csv() {
+  case "$PLATFORM" in
+    all) printf 'ios,macos' ;;
+    ios) printf 'ios' ;;
+    macos) printf 'macos' ;;
   esac
 }
 

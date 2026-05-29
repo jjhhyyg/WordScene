@@ -186,3 +186,62 @@ grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$EVIDENCE"
 grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED |' "$EVIDENCE"
 grep -qF 'Signing diagnosis / macOS / BLOCKED' "$EVIDENCE"
 grep -qF 'Mac App Development provisioning profile is missing for com.erikssonhou.leximemory' "$EVIDENCE"
+
+IOS_ONLY_EVIDENCE="$TMPDIR/ios-only-evidence.md"
+IOS_ONLY_LOG="$TMPDIR/ios-only-commands.log"
+
+cat >"$IOS_ONLY_EVIDENCE" <<'IOS_ONLY_STALE_EVIDENCE'
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | STALE READINESS EVIDENCE |
+| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | STALE MACOS BLOCKER |
+| Candidate gate | iOS | local build host | 1 | PASS | STALE IOS GATE |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | PRESERVED LIVE EVIDENCE |
+
+## Release Candidate Build Blocker
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | BLOCKED | PRESERVED MACOS BLOCKER |
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | iOS | local build host | 1 | PASS | STALE IOS EVIDENCE |
+IOS_ONLY_STALE_EVIDENCE
+
+DERIVED_DATA_BASE="$TMPDIR/IOSOnlyDerivedData" \
+  WORDSCENE_FAKE_COMMAND_LOG="$IOS_ONLY_LOG" \
+  WORDSCENE_SKIP_DIRTY_RELEASE_GATE_CHECK=1 \
+  WORDSCENE_BUILD_CANDIDATES_SCRIPT="$BUILD_SCRIPT" \
+  WORDSCENE_COLLECT_EVIDENCE_SCRIPT="$COLLECT_SCRIPT" \
+  WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT="$READINESS_SCRIPT" \
+  "$ROOT/scripts/run_release_candidate_gate.sh" --platform ios --evidence "$IOS_ONLY_EVIDENCE" \
+  >/tmp/wordscene-ios-only-gate-test.out 2>/tmp/wordscene-ios-only-gate-test.err
+
+grep -qF 'readiness' "$IOS_ONLY_LOG"
+grep -qF 'build ios' "$IOS_ONLY_LOG"
+grep -qF 'collect ios' "$IOS_ONLY_LOG"
+if grep -qF 'build macos' "$IOS_ONLY_LOG"; then
+  echo "ios-only release candidate gate should not build macOS" >&2
+  exit 1
+fi
+if grep -qF 'STALE READINESS EVIDENCE' "$IOS_ONLY_EVIDENCE"; then
+  echo "ios-only release candidate gate should replace stale readiness evidence" >&2
+  exit 1
+fi
+if grep -qF 'STALE IOS GATE' "$IOS_ONLY_EVIDENCE"; then
+  echo "ios-only release candidate gate should replace stale iOS gate evidence" >&2
+  exit 1
+fi
+if grep -qF 'STALE IOS EVIDENCE' "$IOS_ONLY_EVIDENCE"; then
+  echo "ios-only release candidate gate should replace stale iOS candidate evidence" >&2
+  exit 1
+fi
+grep -qF '| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | STALE MACOS BLOCKER |' "$IOS_ONLY_EVIDENCE"
+grep -qF '| Candidate gate | iOS | local build host | 1 | PASS |' "$IOS_ONLY_EVIDENCE"
+grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED | PRESERVED MACOS BLOCKER |' "$IOS_ONLY_EVIDENCE"
+grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$IOS_ONLY_EVIDENCE"
