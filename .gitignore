@@ -8,3 +8,4 @@ build/
 *.moved-aside
 *.pyc
 __pycache__/
+.local/

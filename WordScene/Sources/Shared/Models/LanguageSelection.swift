@@ -1,6 +1,6 @@
 import Foundation
 
-enum LanguageSelection: String, CaseIterable, Identifiable {
+enum LanguageSelection: String, CaseIterable, Identifiable, Codable {
     case auto
     case zh
     case en
@@ -14,6 +14,15 @@ enum LanguageSelection: String, CaseIterable, Identifiable {
         case .zh: "中文"
         case .en: "英文"
         case .es: "西班牙语"
+        }
+    }
+
+    var translationPromptName: String {
+        switch self {
+        case .auto: "auto-detect"
+        case .zh: "Chinese"
+        case .en: "English"
+        case .es: "Spanish"
         }
     }
 

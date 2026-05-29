@@ -10,8 +10,14 @@ struct TranslationView: View {
     @State private var sourceLanguage: LanguageSelection = .auto
     @State private var targetLanguage: LanguageSelection = .zh
     @State private var inputText = ""
+    @State private var translationState: TranslationState = .idle
+    @State private var history: [TranslationRecord] = []
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private let credentialStore = KeychainCredentialStore()
+    private let translationClient = DeepSeekTranslationClient()
+    private let historyStore = TranslationHistoryStore()
 
     var body: some View {
         contentContainer
@@ -23,6 +29,9 @@ struct TranslationView: View {
         }
         #endif
         .navigationTitle("翻译")
+        .task {
+            loadHistory()
+        }
     }
 
     @ViewBuilder
@@ -359,15 +368,12 @@ struct TranslationView: View {
                 HStack(alignment: .firstTextBaseline) {
                     inlineLanguagePicker("目标语言", selection: $targetLanguage, options: LanguageSelection.targetOptions(excluding: sourceLanguage))
                     Spacer()
-                    Label("等待翻译", systemImage: "clock")
+                    Label(translationState.statusText, systemImage: translationState.statusSystemImage)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(translationState.statusTint)
                 }
 
-                Text("翻译结果会显示在这里")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity, minHeight: dynamicTypeSize.isAccessibilitySize ? 72 : 92, alignment: .topLeading)
+                translationResultContent(minHeight: dynamicTypeSize.isAccessibilitySize ? 72 : 92)
             }
             .padding(.top, 10)
         }
@@ -419,20 +425,23 @@ struct TranslationView: View {
 
         return HStack(spacing: 12) {
             Button {
-                // DeepSeek translation will be wired in the next milestone.
+                Task {
+                    await translateInput()
+                }
             } label: {
-                Label("翻译", systemImage: "arrow.right.circle.fill")
+                Label(translationState.isTranslating ? "翻译中" : "翻译", systemImage: translationState.isTranslating ? "arrow.triangle.2.circlepath" : "arrow.right.circle.fill")
                     .lineLimit(1)
                     .minimumScaleFactor(0.86)
                     .frame(width: style.primaryWidth)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(!hasInput)
+            .disabled(!hasInput || translationState.isTranslating)
             .accessibilityLabel("开始翻译")
 
             Button {
                 inputText = ""
+                translationState = .idle
             } label: {
                 Label("清空", systemImage: "xmark.circle")
                     .lineLimit(1)
@@ -453,19 +462,12 @@ struct TranslationView: View {
                 Text("结果")
                     .font(.headline)
                 Spacer()
-                Label("等待翻译", systemImage: "clock")
+                Label(translationState.statusText, systemImage: translationState.statusSystemImage)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(translationState.statusTint)
             }
 
-            ContentUnavailableView(
-                "还没有翻译结果",
-                systemImage: "text.bubble",
-                description: Text("配置 DeepSeek Token 后，输入内容即可开始翻译。")
-            )
-            .frame(minHeight: resultPanelMinHeight)
-            .frame(maxWidth: .infinity)
-            .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            translationResultContent(minHeight: resultPanelMinHeight)
         }
         .panelStyle()
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -482,7 +484,7 @@ struct TranslationView: View {
                     .foregroundStyle(.secondary)
             }
 
-            contextEmptyState(minHeight: usesContextSidebar ? 360 : 160)
+            translationHistoryContent(minHeight: usesContextSidebar ? 360 : 160)
         }
         .panelStyle()
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -499,19 +501,89 @@ struct TranslationView: View {
                     .foregroundStyle(.secondary)
             }
 
-            contextEmptyState(minHeight: minHeight)
+            translationHistoryContent(minHeight: minHeight)
         }
         .panelStyle()
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
-    private func contextEmptyState(minHeight: CGFloat) -> some View {
-        ContentUnavailableView(
-            "暂无翻译历史",
-            systemImage: "clock.arrow.circlepath",
-            description: Text("翻译后会在这里显示最近记录、相关词和收藏状态。")
-        )
+    @ViewBuilder
+    private func translationResultContent(minHeight: CGFloat) -> some View {
+        Group {
+            switch translationState {
+            case .idle:
+                ContentUnavailableView(
+                    "还没有翻译结果",
+                    systemImage: "text.bubble",
+                    description: Text("配置 DeepSeek Token 后，输入内容即可开始翻译。")
+                )
+            case .translating:
+                ProgressView("正在翻译...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .translated(let text):
+                ScrollView {
+                    Text(text)
+                        .font(.title3.weight(.semibold))
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .padding(14)
+                }
+            case .failed(let message):
+                ContentUnavailableView(
+                    "翻译失败",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text(message)
+                )
+            }
+        }
         .frame(minHeight: minHeight)
+        .frame(maxWidth: .infinity)
+        .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func translationHistoryContent(minHeight: CGFloat) -> some View {
+        Group {
+            if history.isEmpty {
+                ContentUnavailableView(
+                    "暂无翻译历史",
+                    systemImage: "clock.arrow.circlepath",
+                    description: Text("翻译后会在这里显示最近记录、相关词和收藏状态。")
+                )
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(history.prefix(6)) { record in
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 6) {
+                                Text(record.sourceLanguage.title)
+                                Image(systemName: "arrow.right")
+                                    .font(.caption2)
+                                Text(record.targetLanguage.title)
+                                Spacer()
+                                Text(record.createdAt, style: .time)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                            Text(record.sourceText)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(2)
+
+                            Text(record.translatedText)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(3)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(10)
+            }
+        }
+        .frame(minHeight: minHeight, alignment: .topLeading)
         .frame(maxWidth: .infinity)
         .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
@@ -569,6 +641,123 @@ struct TranslationView: View {
 
     private var currentLanguageDirection: TranslationLanguageDirection {
         TranslationLanguageDirection(source: sourceLanguage, target: targetLanguage)
+    }
+
+    @MainActor
+    private func loadHistory() {
+        history = historyStore.load()
+    }
+
+    @MainActor
+    private func translateInput() async {
+        let trimmedInput = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedInput.isEmpty else {
+            return
+        }
+
+        do {
+            guard let token = try credentialStore.read(account: DeepSeekCredential.tokenAccount), !token.isEmpty else {
+                translationState = .failed("请先在设置中保存 DeepSeek API Token。")
+                return
+            }
+
+            translationState = .translating
+            let translatedText = try await translationClient.translate(
+                text: trimmedInput,
+                source: sourceLanguage,
+                target: targetLanguage,
+                apiToken: token
+            )
+
+            let record = TranslationRecord(
+                sourceText: trimmedInput,
+                translatedText: translatedText,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage
+            )
+            let updatedHistory = historyStore.adding(record, to: history)
+            history = updatedHistory
+            historyStore.save(updatedHistory)
+            translationState = .translated(translatedText)
+        } catch {
+            translationState = .failed(translationErrorMessage(for: error))
+        }
+    }
+
+    private func translationErrorMessage(for error: Error) -> String {
+        if let translationError = error as? DeepSeekTranslationError {
+            switch translationError {
+            case .emptyInput:
+                return "请输入需要翻译的文本。"
+            case .emptyOutput:
+                return "DeepSeek 没有返回可用译文。"
+            case .invalidResponse:
+                return "DeepSeek 返回无效响应。"
+            case .unauthorized:
+                return "DeepSeek Token 无效或已过期。"
+            case .httpStatus(let status):
+                return "DeepSeek 请求失败：HTTP \(status)。"
+            }
+        }
+
+        if let keychainError = error as? KeychainCredentialError {
+            switch keychainError {
+            case .unhandledStatus(let status):
+                return "读取系统凭据失败：\(status)。"
+            }
+        }
+
+        return "翻译请求失败，请检查网络后重试。"
+    }
+}
+
+private enum TranslationState: Equatable {
+    case idle
+    case translating
+    case translated(String)
+    case failed(String)
+
+    var isTranslating: Bool {
+        self == .translating
+    }
+
+    var statusText: String {
+        switch self {
+        case .idle:
+            return "等待翻译"
+        case .translating:
+            return "翻译中"
+        case .translated:
+            return "已翻译"
+        case .failed:
+            return "需要处理"
+        }
+    }
+
+    var statusSystemImage: String {
+        switch self {
+        case .idle:
+            return "clock"
+        case .translating:
+            return "arrow.triangle.2.circlepath"
+        case .translated:
+            return "checkmark.circle"
+        case .failed:
+            return "exclamationmark.triangle"
+        }
+    }
+
+    var statusTint: Color {
+        switch self {
+        case .idle:
+            return .secondary
+        case .translating:
+            return .accentColor
+        case .translated:
+            return .green
+        case .failed:
+            return .red
+        }
     }
 }
 

@@ -7,7 +7,11 @@ import AppKit
 struct SettingsView: View {
     @AppStorage("allowsAnonymousCrashReports") private var allowsAnonymousCrashReports = false
     @State private var apiToken = ""
+    @State private var tokenStatus: SettingsTokenStatus = .idle
     @Environment(\.adaptiveLayout) private var adaptiveLayout
+
+    private let credentialStore = KeychainCredentialStore()
+    private let balanceClient = DeepSeekBalanceClient()
 
     var body: some View {
         #if os(macOS)
@@ -45,6 +49,9 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(settingsBackground.ignoresSafeArea())
         .navigationTitle("设置")
+        .onAppear {
+            loadSavedToken()
+        }
     }
 
     #if os(macOS)
@@ -59,17 +66,8 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
                     .accessibilityLabel("DeepSeek API Token")
 
-                HStack {
-                    Spacer()
-                    Button {
-                        // Balance endpoint validation will be connected in the next milestone.
-                    } label: {
-                        Label("测试连接", systemImage: "checkmark.seal")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(apiToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .accessibilityLabel("测试 DeepSeek Token")
-                }
+                tokenStatusView
+                deepSeekTokenButtons
             }
 
             Section("隐私") {
@@ -107,6 +105,9 @@ struct SettingsView: View {
         .frame(minWidth: 620, minHeight: 500)
         .background(settingsBackground)
         .navigationTitle("设置")
+        .onAppear {
+            loadSavedToken()
+        }
     }
     #endif
 
@@ -141,18 +142,54 @@ struct SettingsView: View {
                         .accessibilityLabel("DeepSeek API Token")
                 }
 
-                Button {
-                    // Balance endpoint validation will be connected in the next milestone.
-                } label: {
-                    Label("测试连接", systemImage: "checkmark.seal")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(apiToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityLabel("测试 DeepSeek Token")
+                tokenStatusView
+                deepSeekTokenButtons
             }
         }
+    }
+
+    private var tokenStatusView: some View {
+        Label(tokenStatus.message, systemImage: tokenStatus.systemImage)
+            .font(.footnote)
+            .foregroundStyle(tokenStatus.tint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var deepSeekTokenButtons: some View {
+        HStack(spacing: 10) {
+            Button {
+                saveToken()
+            } label: {
+                Label("保存", systemImage: "key")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
+            .accessibilityLabel("保存 DeepSeek Token")
+
+            Button {
+                Task {
+                    await testToken()
+                }
+            } label: {
+                Label("测试连接", systemImage: "checkmark.seal")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
+            .accessibilityLabel("测试 DeepSeek Token")
+
+            Button(role: .destructive) {
+                deleteToken()
+            } label: {
+                Image(systemName: "trash")
+                    .frame(width: 34)
+            }
+            .buttonStyle(.bordered)
+            .disabled(tokenStatus.isWorking)
+            .accessibilityLabel("删除 DeepSeek Token")
+        }
+        .controlSize(.large)
     }
 
     private var privacyCard: some View {
@@ -266,6 +303,130 @@ struct SettingsView: View {
         #else
         return Color(.systemGroupedBackground)
         #endif
+    }
+
+    private var trimmedToken: String {
+        apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    @MainActor
+    private func loadSavedToken() {
+        do {
+            apiToken = try credentialStore.read(account: DeepSeekCredential.tokenAccount) ?? ""
+            tokenStatus = apiToken.isEmpty ? .idle : .saved
+        } catch {
+            tokenStatus = .failed(settingsErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func saveToken() {
+        do {
+            try credentialStore.save(trimmedToken, account: DeepSeekCredential.tokenAccount)
+            tokenStatus = .saved
+        } catch {
+            tokenStatus = .failed(settingsErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func deleteToken() {
+        do {
+            try credentialStore.delete(account: DeepSeekCredential.tokenAccount)
+            apiToken = ""
+            tokenStatus = .idle
+        } catch {
+            tokenStatus = .failed(settingsErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func testToken() async {
+        tokenStatus = .testing
+        do {
+            _ = try await balanceClient.fetchBalance(apiToken: trimmedToken)
+            try credentialStore.save(trimmedToken, account: DeepSeekCredential.tokenAccount)
+            tokenStatus = .valid
+        } catch {
+            tokenStatus = .failed(settingsErrorMessage(for: error))
+        }
+    }
+
+    private func settingsErrorMessage(for error: Error) -> String {
+        if let balanceError = error as? DeepSeekBalanceError {
+            switch balanceError {
+            case .invalidResponse:
+                return "DeepSeek 返回无效响应。"
+            case .unauthorized:
+                return "Token 无效或已过期。"
+            case .httpStatus(let status):
+                return "DeepSeek 请求失败：HTTP \(status)。"
+            }
+        }
+
+        if let keychainError = error as? KeychainCredentialError {
+            switch keychainError {
+            case .unhandledStatus(let status):
+                return "系统凭据存储失败：\(status)。"
+            }
+        }
+
+        return "操作失败，请稍后重试。"
+    }
+}
+
+private enum SettingsTokenStatus: Equatable {
+    case idle
+    case saved
+    case testing
+    case valid
+    case failed(String)
+
+    var message: String {
+        switch self {
+        case .idle:
+            return "Token 只会保存在本机系统凭据存储中。"
+        case .saved:
+            return "Token 已保存在本机。"
+        case .testing:
+            return "正在测试 DeepSeek 连接..."
+        case .valid:
+            return "连接成功，Token 已保存。"
+        case .failed(let message):
+            return message
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .idle:
+            return "lock"
+        case .saved:
+            return "key.fill"
+        case .testing:
+            return "arrow.triangle.2.circlepath"
+        case .valid:
+            return "checkmark.seal.fill"
+        case .failed:
+            return "exclamationmark.triangle.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .idle, .saved:
+            return .secondary
+        case .testing:
+            return .accentColor
+        case .valid:
+            return .green
+        case .failed:
+            return .red
+        }
+    }
+
+    var isWorking: Bool {
+        self == .testing
     }
 }
 
