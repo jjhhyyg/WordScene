@@ -20,6 +20,7 @@ Generated: 2026-05-29T17:24:53Z
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | `scripts/verify_release_readiness.sh` passed script syntax checks, shell regression tests, `git diff --check`, token leak scan, XcodeGen version-marker scan, macOS 66-test suite, and iOS generic build. |
+| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | `scripts/run_release_candidate_gate.sh --platform all` records the macOS signing blocker, continues to build iOS, and exits non-zero until all requested platforms produce signed candidates. |
 
 ## Current Build Blockers
 

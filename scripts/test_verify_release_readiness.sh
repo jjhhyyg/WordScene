@@ -45,14 +45,22 @@ printf 'xcodebuild %s\n' "$*" >>"$WORDSCENE_FAKE_COMMAND_LOG"
 exit 0
 FAKE_XCODEBUILD
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild"
+cat >"$BIN/scripts-test-run-release-candidate-gate" <<'FAKE_GATE_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_run_release_candidate_gate\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_GATE_TEST
+
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
   WORDSCENE_SKIP_READINESS_SELF_TEST=1 \
+  WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT="$BIN/scripts-test-run-release-candidate-gate" \
   "$ROOT/scripts/verify_release_readiness.sh"
 
 grep -qF 'git diff --check' "$LOG"
+grep -qF 'test_run_release_candidate_gate' "$LOG"
 token_pattern='sk-[A-Za-z0-9]|e2a'
 token_pattern+='988'
 grep -qF "rg -n $token_pattern WordScene docs project.yml .gitignore scripts" "$LOG"
