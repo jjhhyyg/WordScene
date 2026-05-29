@@ -335,6 +335,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `d935f20a72c5`.
 - Added an `AppDataController` regression proving Settings local recovery reset clears legacy `UserDefaults` documents without removing the current Core Data-backed Library or translation History.
 - Reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 78 macOS tests, iOS build, and unsigned Release compiles still pass after the local recovery coverage.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `f82dcb8df41a`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 

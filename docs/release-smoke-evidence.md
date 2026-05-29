@@ -2,9 +2,9 @@
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-29T20:45:50Z using the ignored local token file. Git commit `d935f20a72c5`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |
 | Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform. |
-| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-29T20:45:50Z using the ignored local token file. Git commit `d935f20a72c5`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 
 ## Release Candidate Build Blocker
 
@@ -14,7 +14,7 @@
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-29T20:45:24Z
+Generated: 2026-05-29T20:53:07Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Generated: 2026-05-29T20:45:24Z
 | Bundle ID | com.erikssonhou.leximemory |
 | Version | 1.0.0 |
 | Build | 1 |
-| Git commit | bf63303c73d0 |
+| Git commit | f82dcb8df41a |
 | iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |
 | CloudKit containers | iCloud.com.erikssonhou.leximemory |
 | iCloud services | CloudKit |
