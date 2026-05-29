@@ -391,6 +391,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `33c35ea173de`.
 - Clarified Settings import status messaging so keep-existing imports that only skip duplicates say no new content was imported; reran targeted Settings import/export controller tests and `scripts/verify_release_readiness.sh`.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1b32ffc6cfa9`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `74fb40dde8aa`.
 
 Next:
 
