@@ -2,6 +2,30 @@ import XCTest
 @testable import WordScene
 
 final class TranslationHistoryRepositoryTests: XCTestCase {
+    private enum RepositoryTestError: Error, Equatable {
+        case loadFailed
+        case writeFailed
+    }
+
+    private struct FailingHistoryCoreDataStore: CoreDataTranslationHistoryDataStore {
+        var historyRecords: [TranslationRecord] = []
+        var loadError: Error?
+        var writeError: Error?
+
+        func loadHistoryRecords() throws -> [TranslationRecord] {
+            if let loadError {
+                throw loadError
+            }
+            return historyRecords
+        }
+
+        func replaceHistoryRecords(_ records: [TranslationRecord]) throws {
+            if let writeError {
+                throw writeError
+            }
+        }
+    }
+
     func testSavesAndLoadsRecentRecordsFromCoreData() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let repository = TranslationHistoryRepository(coreDataStore: coreDataStore, maximumCount: 2)
@@ -73,5 +97,38 @@ final class TranslationHistoryRepositoryTests: XCTestCase {
         XCTAssertEqual(repository.load(), [legacyRecord])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [legacyRecord])
         XCTAssertNil(defaults.data(forKey: "translationHistory"))
+    }
+
+    func testLoadOrThrowPropagatesCoreDataReadFailureInsteadOfFallingBackToLegacy() throws {
+        let suiteName = "TranslationHistoryRepositoryTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let legacyStore = TranslationHistoryStore(defaults: defaults)
+        legacyStore.save([
+            TranslationRecord(sourceText: "legacy", translatedText: "旧", sourceLanguage: .en, targetLanguage: .zh)
+        ])
+        let repository = TranslationHistoryRepository(
+            coreDataStore: FailingHistoryCoreDataStore(loadError: RepositoryTestError.loadFailed),
+            legacyStore: legacyStore
+        )
+
+        XCTAssertThrowsError(try repository.loadOrThrow()) { error in
+            XCTAssertEqual(error as? RepositoryTestError, .loadFailed)
+        }
+    }
+
+    func testSaveOrThrowPropagatesCoreDataWriteFailure() {
+        let repository = TranslationHistoryRepository(
+            coreDataStore: FailingHistoryCoreDataStore(writeError: RepositoryTestError.writeFailed)
+        )
+
+        XCTAssertThrowsError(try repository.saveOrThrow([
+            TranslationRecord(sourceText: "hello", translatedText: "你好", sourceLanguage: .en, targetLanguage: .zh)
+        ])) { error in
+            XCTAssertEqual(error as? RepositoryTestError, .writeFailed)
+        }
     }
 }

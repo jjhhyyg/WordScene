@@ -36,6 +36,10 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
         return []
     }
 
+    func loadOrThrow() throws -> [TranslationRecord] {
+        load()
+    }
+
     func save(_ records: [TranslationRecord]) {
         let trimmedRecords = Array(records.prefix(maximumCount))
         let document = TranslationHistoryDocument(
@@ -47,6 +51,10 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
         }
 
         defaults.set(data, forKey: key)
+    }
+
+    func saveOrThrow(_ records: [TranslationRecord]) throws {
+        save(records)
     }
 
     func clear() {

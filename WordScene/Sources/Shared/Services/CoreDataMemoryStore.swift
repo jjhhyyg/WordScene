@@ -7,6 +7,11 @@ protocol CoreDataMemoryDataStore {
     func softDelete(id: UUID, deletedAt: Date) throws
 }
 
+protocol CoreDataTranslationHistoryDataStore {
+    func loadHistoryRecords() throws -> [TranslationRecord]
+    func replaceHistoryRecords(_ records: [TranslationRecord]) throws
+}
+
 extension CoreDataMemoryDataStore {
     func softDelete(id: UUID) throws {
         try softDelete(id: id, deletedAt: Date())
@@ -18,7 +23,7 @@ struct CoreDataDeletionTombstone: Equatable {
     let deletedAt: Date
 }
 
-struct CoreDataMemoryStore: CoreDataMemoryDataStore {
+struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryDataStore {
     private static let modelName = "WordSceneModel"
     private static let translationItemEntityName = "TranslationItem"
     private static let historyRecordEntityName = "TranslationHistoryRecord"

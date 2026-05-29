@@ -165,10 +165,12 @@ Verification:
 - Added tests proving Core Data bootstrap failures are reported through `AppDataController`.
 - Added throwing memory-library repository APIs so Core Data read/write failures can be surfaced instead of silently falling back.
 - Wired Library, Translate, Search, and Settings import/export memory access to the explicit error path.
+- Added throwing translation-history repository APIs so Core Data recent-history read/write failures can be surfaced instead of silently falling back.
+- Wired Translate and Search recent-history access to the explicit error path, with non-blocking warnings when translation succeeds but history persistence fails.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Apply the same explicit error path to recent translation history reads and writes.
+- Audit remaining `UserDefaults` encode/decode paths and decide whether corrupt local documents should surface as warnings or reset to empty.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.

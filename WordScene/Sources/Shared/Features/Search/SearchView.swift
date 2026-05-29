@@ -106,12 +106,12 @@ struct SearchView: View {
     private func loadSearchData() {
         do {
             memoryItems = try memoryStore.loadOrThrow()
-            history = historyStore.load()
+            history = try historyStore.loadOrThrow()
             persistenceErrorMessage = nil
         } catch {
             memoryItems = []
             history = []
-            persistenceErrorMessage = "收藏数据读取失败：\(error.localizedDescription)"
+            persistenceErrorMessage = "本地搜索数据读取失败：\(error.localizedDescription)"
         }
         hasLoaded = true
     }

@@ -14,6 +14,7 @@ struct TranslationView: View {
     @State private var lastTranslatedRecord: TranslationRecord?
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
+    @State private var persistenceWarningMessage: String?
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -83,6 +84,7 @@ struct TranslationView: View {
         if usesCompactPhoneLayout {
             VStack(alignment: .leading, spacing: 18) {
                 mobileTranslationPanel
+                persistenceWarningBanner
                 translationActionBar
             }
         } else if usesMacDesktopLayout {
@@ -90,6 +92,7 @@ struct TranslationView: View {
         } else {
             VStack(alignment: .leading, spacing: 18) {
                 commandBar
+                persistenceWarningBanner
 
                 if usesTwoColumnLayout {
                     VStack(alignment: .leading, spacing: 14) {
@@ -120,6 +123,7 @@ struct TranslationView: View {
     private func macDesktopContent(for layout: MacTranslationLayout) -> some View {
         VStack(alignment: .leading, spacing: layout.sectionSpacing) {
             macCommandBar(for: layout)
+            persistenceWarningBanner
 
             switch layout.kind {
             case .compact:
@@ -326,6 +330,18 @@ struct TranslationView: View {
             }
         }
         .panelStyle()
+    }
+
+    @ViewBuilder
+    private var persistenceWarningBanner: some View {
+        if let persistenceWarningMessage {
+            Label(persistenceWarningMessage, systemImage: "exclamationmark.triangle")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
     }
 
     private var mobileTranslationPanel: some View {
@@ -705,7 +721,12 @@ struct TranslationView: View {
 
     @MainActor
     private func loadHistory() {
-        history = historyStore.load()
+        do {
+            history = try historyStore.loadOrThrow()
+        } catch {
+            history = []
+            persistenceWarningMessage = "翻译历史读取失败：\(error.localizedDescription)"
+        }
     }
 
     @MainActor
@@ -714,7 +735,7 @@ struct TranslationView: View {
             memoryItems = try memoryStore.loadOrThrow()
         } catch {
             memoryItems = []
-            translationState = .failed("收藏数据读取失败：\(error.localizedDescription)")
+            persistenceWarningMessage = "收藏数据读取失败：\(error.localizedDescription)"
         }
     }
 
@@ -730,8 +751,9 @@ struct TranslationView: View {
         do {
             try memoryStore.saveOrThrow(updatedItems)
             memoryItems = updatedItems
+            persistenceWarningMessage = nil
         } catch {
-            translationState = .failed("收藏保存失败：\(error.localizedDescription)")
+            persistenceWarningMessage = "收藏保存失败：\(error.localizedDescription)"
         }
     }
 
@@ -764,10 +786,15 @@ struct TranslationView: View {
                 targetLanguage: targetLanguage
             )
             let updatedHistory = historyStore.adding(record, to: history)
-            history = updatedHistory
-            historyStore.save(updatedHistory)
             lastTranslatedRecord = record
             translationState = .translated(translatedText)
+            do {
+                try historyStore.saveOrThrow(updatedHistory)
+                history = updatedHistory
+                persistenceWarningMessage = nil
+            } catch {
+                persistenceWarningMessage = "译文已生成，但翻译历史保存失败：\(error.localizedDescription)"
+            }
         } catch {
             translationState = .failed(translationErrorMessage(for: error))
         }

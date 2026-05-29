@@ -3,16 +3,18 @@ import Foundation
 protocol TranslationHistoryDataStore {
     func load() -> [TranslationRecord]
     func save(_ records: [TranslationRecord])
+    func loadOrThrow() throws -> [TranslationRecord]
+    func saveOrThrow(_ records: [TranslationRecord]) throws
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord]
 }
 
 struct TranslationHistoryRepository: TranslationHistoryDataStore {
-    private let coreDataStore: CoreDataMemoryStore?
+    private let coreDataStore: (any CoreDataTranslationHistoryDataStore)?
     private let legacyStore: TranslationHistoryStore
     private let maximumCount: Int
 
     init(
-        coreDataStore: CoreDataMemoryStore? = try? CoreDataMemoryStore(),
+        coreDataStore: (any CoreDataTranslationHistoryDataStore)? = try? CoreDataMemoryStore(),
         legacyStore: TranslationHistoryStore = TranslationHistoryStore(),
         maximumCount: Int = 50
     ) {
@@ -22,47 +24,52 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     }
 
     func load() -> [TranslationRecord] {
+        (try? loadOrThrow()) ?? legacyStore.load()
+    }
+
+    func loadOrThrow() throws -> [TranslationRecord] {
         guard let coreDataStore else {
             return legacyStore.load()
         }
 
-        migrateLegacyRecordsIfNeeded(into: coreDataStore)
-        return loadRecentRecords(from: coreDataStore)
+        try migrateLegacyRecordsIfNeeded(into: coreDataStore)
+        return try loadRecentRecords(from: coreDataStore)
     }
 
     func save(_ records: [TranslationRecord]) {
+        do {
+            try saveOrThrow(records)
+        } catch {
+            legacyStore.save(records)
+        }
+    }
+
+    func saveOrThrow(_ records: [TranslationRecord]) throws {
         guard let coreDataStore else {
             legacyStore.save(records)
             return
         }
 
-        migrateLegacyRecordsIfNeeded(into: coreDataStore)
-        try? coreDataStore.replaceHistoryRecords(Array(records.prefix(maximumCount)))
+        try migrateLegacyRecordsIfNeeded(into: coreDataStore)
+        try coreDataStore.replaceHistoryRecords(Array(records.prefix(maximumCount)))
     }
 
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {
         Array(([record] + records).prefix(maximumCount))
     }
 
-    private func migrateLegacyRecordsIfNeeded(into coreDataStore: CoreDataMemoryStore) {
+    private func migrateLegacyRecordsIfNeeded(into coreDataStore: any CoreDataTranslationHistoryDataStore) throws {
         let legacyRecords = legacyStore.load()
         guard !legacyRecords.isEmpty else {
             return
         }
 
-        do {
-            try coreDataStore.replaceHistoryRecords(Array(legacyRecords.prefix(maximumCount)))
-            legacyStore.clear()
-        } catch {
-            return
-        }
+        try coreDataStore.replaceHistoryRecords(Array(legacyRecords.prefix(maximumCount)))
+        legacyStore.clear()
     }
 
-    private func loadRecentRecords(from coreDataStore: CoreDataMemoryStore) -> [TranslationRecord] {
-        guard let records = try? coreDataStore.loadHistoryRecords() else {
-            return legacyStore.load()
-        }
-
+    private func loadRecentRecords(from coreDataStore: any CoreDataTranslationHistoryDataStore) throws -> [TranslationRecord] {
+        let records = try coreDataStore.loadHistoryRecords()
         return Array(records.prefix(maximumCount))
     }
 }
