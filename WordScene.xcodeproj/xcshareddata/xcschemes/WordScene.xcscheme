@@ -48,6 +48,16 @@
                ReferencedContainer = "container:WordScene.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "59603EAB85B5516879D5F34B"
+               BuildableName = "WordSceneUITests.xctest"
+               BlueprintName = "WordSceneUITests"
+               ReferencedContainer = "container:WordScene.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

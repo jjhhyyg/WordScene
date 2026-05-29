@@ -128,6 +128,7 @@ struct SettingsView: View {
                     .textContentType(.password)
                     .textFieldStyle(.roundedBorder)
                     .accessibilityLabel("DeepSeek API Token")
+                    .accessibilityIdentifier("settings.deepSeek.token")
 
                 tokenStatusView
                 deepSeekTokenButtons
@@ -237,6 +238,7 @@ struct SettingsView: View {
                         .textContentType(.password)
                         .textFieldStyle(.roundedBorder)
                         .accessibilityLabel("DeepSeek API Token")
+                        .accessibilityIdentifier("settings.deepSeek.token")
                 }
 
                 tokenStatusView
@@ -277,6 +279,7 @@ struct SettingsView: View {
             .buttonStyle(.bordered)
             .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
             .accessibilityLabel("保存 DeepSeek Token")
+            .accessibilityIdentifier("settings.deepSeek.save")
 
             Button {
                 Task {
@@ -289,6 +292,7 @@ struct SettingsView: View {
             .buttonStyle(.borderedProminent)
             .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
             .accessibilityLabel("测试 DeepSeek Token")
+            .accessibilityIdentifier("settings.deepSeek.test")
 
             Button(role: .destructive) {
                 deleteToken()
@@ -299,6 +303,7 @@ struct SettingsView: View {
             .buttonStyle(.bordered)
             .disabled(tokenStatus.isWorking)
             .accessibilityLabel("删除 DeepSeek Token")
+            .accessibilityIdentifier("settings.deepSeek.delete")
         }
         .controlSize(.large)
     }

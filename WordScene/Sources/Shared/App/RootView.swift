@@ -37,6 +37,7 @@ struct RootView: View {
                     .buttonStyle(.plain)
                     .listRowBackground(selectedSection == section ? Color.accentColor.opacity(0.14) : Color.clear)
                     .accessibilityLabel(section.title)
+                    .accessibilityIdentifier("navigation.\(section.rawValue)")
                 }
             }
             .navigationTitle("词境")
@@ -68,6 +69,7 @@ struct RootView: View {
                     Label(section.title, systemImage: section.systemImage)
                 }
                 .tag(section)
+                .accessibilityIdentifier("tab.\(section.rawValue)")
             }
         }
         .toolbarBackground(.visible, for: .tabBar)

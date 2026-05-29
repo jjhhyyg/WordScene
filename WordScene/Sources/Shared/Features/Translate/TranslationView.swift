@@ -377,6 +377,7 @@ struct TranslationView: View {
                     textStyle: .largePrompt
                 )
                     .accessibilityLabel("待翻译文本")
+                    .accessibilityIdentifier("translation.input.editor")
             }
             .padding(.bottom, 10)
 
@@ -395,6 +396,7 @@ struct TranslationView: View {
                 .foregroundStyle(canSwapLanguageDirection ? Color.accentColor : Color.secondary)
                 .disabled(!canSwapLanguageDirection)
                 .accessibilityLabel("交换翻译方向")
+                .accessibilityIdentifier("translation.swapDirection")
             }
 
             VStack(alignment: .leading, spacing: 12) {
@@ -434,6 +436,7 @@ struct TranslationView: View {
             )
                 .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .accessibilityLabel("待翻译文本")
+                .accessibilityIdentifier("translation.input.editor")
         }
         .panelStyle()
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -471,6 +474,7 @@ struct TranslationView: View {
             .controlSize(.large)
             .disabled(!hasInput || translationState.isTranslating)
             .accessibilityLabel("开始翻译")
+            .accessibilityIdentifier("translation.start")
 
             Button {
                 inputText = ""
@@ -487,6 +491,7 @@ struct TranslationView: View {
             .disabled(!hasInput)
             .opacity(hasInput ? 1 : 0)
             .accessibilityHidden(!hasInput)
+            .accessibilityIdentifier("translation.clear")
         }
     }
 

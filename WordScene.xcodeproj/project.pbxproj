@@ -89,6 +89,7 @@
 		CD66F6383CF9B9FEF278BC0E /* DeepSeekBalanceResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D292D4CF8CBF1E54EC0932D9 /* DeepSeekBalanceResponseTests.swift */; };
 		CEF28723147A8B231DAB70FB /* AppBuildInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69311892584D2F886271DE06 /* AppBuildInfoTests.swift */; };
 		CF7EB547CD1BC2DBBDFE2522 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 930A284E1EE951193AB252A3 /* SettingsView.swift */; };
+		D0E565B8A4A90D20321F8764 /* WordSceneLaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F408F501A6A95AD07E0B0863 /* WordSceneLaunchUITests.swift */; };
 		D1F2AFD6AA8B965DAABB9995 /* LocalPersistenceStoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */; };
 		D245667910DAF40BCE19A0D5 /* MemorySearchIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */; };
 		D8FEA8870625A4556E0A93CF /* TranslationLanguageDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */; };
@@ -110,6 +111,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		43DACDF6921A1B653E554823 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F17162CD6AFC5E736E4645C7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 402B83A2920371E562FD6730;
+			remoteInfo = WordScene;
+		};
 		B35ED524E04BAD98301CA230 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F17162CD6AFC5E736E4645C7 /* Project object */;
@@ -153,6 +161,7 @@
 		685B7AD82D463A45F145A2B4 /* MemoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryItem.swift; sourceTree = "<group>"; };
 		69311892584D2F886271DE06 /* AppBuildInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBuildInfoTests.swift; sourceTree = "<group>"; };
 		69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySearchIndex.swift; sourceTree = "<group>"; };
+		6ACAC57C41469C43AE5D64A1 /* WordSceneUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WordSceneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportServiceTests.swift; sourceTree = "<group>"; };
 		721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		74C8385412454C45DC5ECE5B /* AppBuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBuildInfo.swift; sourceTree = "<group>"; };
@@ -177,6 +186,7 @@
 		E86CD1C4073069E019639A99 /* PinyinTransliterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinyinTransliterator.swift; sourceTree = "<group>"; };
 		E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = WordSceneLogo.png; sourceTree = "<group>"; };
 		F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneApp.swift; sourceTree = "<group>"; };
+		F408F501A6A95AD07E0B0863 /* WordSceneLaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneLaunchUITests.swift; sourceTree = "<group>"; };
 		F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationRecord.swift; sourceTree = "<group>"; };
 		F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImportExportController.swift; sourceTree = "<group>"; };
 		F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationWorkflow.swift; sourceTree = "<group>"; };
@@ -201,8 +211,18 @@
 				0F314AF1F84938579F60E246 /* Resources */,
 				ABEA8707CECD4A1913B0C13E /* Shared */,
 				F38DA02377D6CB95FD7B67CD /* Tests */,
+				2451E9D66BF47C8A4F80EC71 /* UITests */,
 				FDF283AE10D87F62171A9371 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		2451E9D66BF47C8A4F80EC71 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				F408F501A6A95AD07E0B0863 /* WordSceneLaunchUITests.swift */,
+			);
+			name = UITests;
+			path = WordScene/UITests;
 			sourceTree = "<group>";
 		};
 		38438A787E7D9A8F13DE1AE1 /* Translate */ = {
@@ -347,6 +367,7 @@
 				1B8242AC1FDB1CDF361985E3 /* WordSceneMac.app */,
 				62E99C711EE951EFB367F4B5 /* WordSceneMacTests.xctest */,
 				CA6D846071672B7E3755118C /* WordSceneTests.xctest */,
+				6ACAC57C41469C43AE5D64A1 /* WordSceneUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -389,6 +410,24 @@
 			productName = WordSceneMac;
 			productReference = 1B8242AC1FDB1CDF361985E3 /* WordSceneMac.app */;
 			productType = "com.apple.product-type.application";
+		};
+		59603EAB85B5516879D5F34B /* WordSceneUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB959ED262120A381ED761EA /* Build configuration list for PBXNativeTarget "WordSceneUITests" */;
+			buildPhases = (
+				A232128FF4FB6E53F76767EF /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AAC12EBAD5BE6EB17086AB80 /* PBXTargetDependency */,
+			);
+			name = WordSceneUITests;
+			packageProductDependencies = (
+			);
+			productName = WordSceneUITests;
+			productReference = 6ACAC57C41469C43AE5D64A1 /* WordSceneUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		929851A09527BCD39753C696 /* WordSceneTests */ = {
 			isa = PBXNativeTarget;
@@ -443,6 +482,11 @@
 						DevelopmentTeam = JU68L3U235;
 						ProvisioningStyle = Automatic;
 					};
+					59603EAB85B5516879D5F34B = {
+						DevelopmentTeam = JU68L3U235;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 402B83A2920371E562FD6730;
+					};
 					929851A09527BCD39753C696 = {
 						DevelopmentTeam = JU68L3U235;
 						ProvisioningStyle = Automatic;
@@ -471,6 +515,7 @@
 				5014EC536FD1F8A94C35187B /* WordSceneMac */,
 				9440FE1B7D3D80400DD69B76 /* WordSceneMacTests */,
 				929851A09527BCD39753C696 /* WordSceneTests */,
+				59603EAB85B5516879D5F34B /* WordSceneUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -542,6 +587,14 @@
 				AC65FFFB9A83544D8D9E2DA8 /* TranslationHistoryRepositoryTests.swift in Sources */,
 				40D429323A1B11DBAE9BFE66 /* TranslationHistoryStoreTests.swift in Sources */,
 				EBB18BFE15879357DE3B3855 /* TranslationWorkflowTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A232128FF4FB6E53F76767EF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0E565B8A4A90D20321F8764 /* WordSceneLaunchUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -629,6 +682,11 @@
 			target = 5014EC536FD1F8A94C35187B /* WordSceneMac */;
 			targetProxy = C79621CCDEB15C9D839F78E4 /* PBXContainerItemProxy */;
 		};
+		AAC12EBAD5BE6EB17086AB80 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 402B83A2920371E562FD6730 /* WordScene */;
+			targetProxy = 43DACDF6921A1B653E554823 /* PBXContainerItemProxy */;
+		};
 		FE2F6D493D790CEC0309F2BB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 402B83A2920371E562FD6730 /* WordScene */;
@@ -700,6 +758,26 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3226B4854A13B68B653BE62B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.erikssonhou.leximemory.uitests;
+				PRODUCT_MODULE_NAME = WordSceneUITests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WordScene;
 			};
 			name = Debug;
 		};
@@ -922,6 +1000,26 @@
 			};
 			name = Debug;
 		};
+		E3A938844AA894A64FD6EAD9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.erikssonhou.leximemory.uitests;
+				PRODUCT_MODULE_NAME = WordSceneUITests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WordScene;
+			};
+			name = Release;
+		};
 		E784D52EDCE9E27E1D88E4A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -986,6 +1084,15 @@
 			buildConfigurations = (
 				295113FA9053A72B9EA9445D /* Debug */,
 				A29B3B8A4CAAD3EB8F6AB1EA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DB959ED262120A381ED761EA /* Build configuration list for PBXNativeTarget "WordSceneUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3226B4854A13B68B653BE62B /* Debug */,
+				E3A938844AA894A64FD6EAD9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
