@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- | --- |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | `scripts/verify_release_readiness.sh` passed script syntax checks, shell regression tests, `git diff --check`, token leak scan, XcodeGen version-marker scan, macOS 72-test suite, and iOS generic build. |
 | Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` records the macOS signing blocker, continues to build iOS, refreshes current candidate evidence, and exits non-zero until all requested platforms produce signed candidates. |
-| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` used the ignored local token file, verified JSON Output with the real DeepSeek API, and returned a Chinese translation without printing the token. |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-29T18:13:40Z using the ignored local token file, verified JSON Output with the real DeepSeek API, and returned `你好世界` without printing the token. |
 
 
 ## Release Candidate Build Blocker

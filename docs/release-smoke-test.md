@@ -12,6 +12,9 @@ and pass/fail notes for each run.
   is signed in to the Apple Developer account. If provisioning has already been
   prepared locally, the flag can be omitted. Use `--platform ios` or
   `--platform macos` only when recording a platform-specific build blocker.
+- If macOS signing fails with missing Xcode account or Mac App Development
+  profile errors, follow `docs/release-signing-runbook.md` before changing
+  project settings.
 - Run `scripts/verify_release_readiness.sh` before manual smoke testing. It
   covers script syntax, release evidence script tests, `git diff --check`, token
   leak scanning, XcodeGen version-marker scanning, macOS tests, and iOS generic

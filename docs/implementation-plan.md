@@ -49,6 +49,7 @@ Baseline already completed:
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
+- macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Real DeepSeek translation protocol can be smoke-tested without a signed app through `scripts/run_live_deepseek_translation_smoke.sh`.
 
 Known gaps:
@@ -264,6 +265,8 @@ Verification:
 - Updated the release candidate gate so each run replaces stale candidate build evidence while preserving non-manual readiness and live DeepSeek smoke records.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; macOS remains blocked by missing Xcode account/profile state, while iOS signed Release candidate evidence was refreshed.
 - Reran `scripts/verify_release_readiness.sh`; script syntax checks, shell regression tests, token leak scan, XcodeGen marker scan, the macOS 72-test suite, and the iOS generic build passed.
+- Added `docs/release-signing-runbook.md` so the current macOS signing blocker is treated as an Xcode account/profile recovery task instead of a project configuration change.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh`; the ignored local token still works against the real DeepSeek JSON Output path without printing the token.
 
 Next:
 
