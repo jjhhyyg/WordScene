@@ -344,6 +344,7 @@ Verification:
 - Normalized Translate language direction state so changing the source language cannot leave an invalid same-language target selected internally, and translation requests use the normalized direction.
 - Added regression coverage for same-language direction normalization and reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 81 macOS tests, iOS build, and unsigned Release compiles still pass after the language control fix.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `a9cb05318888`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `632fc6004711`.
 
 Next:
 
