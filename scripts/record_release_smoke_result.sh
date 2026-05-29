@@ -98,6 +98,26 @@ sanitize_cell() {
   printf '%s' "$1" | tr '\n' ' ' | sed 's/|/\//g; s/[[:space:]][[:space:]]*/ /g; s/^ //; s/ $//'
 }
 
+is_supported_manual_pair() {
+  case "$1|$2" in
+    "Translation loop|macOS" | \
+    "Translation loop|iPhone" | \
+    "Translation loop|iPad" | \
+    "Import/export|macOS" | \
+    "Import/export|iOS/iPadOS" | \
+    "Local recovery|macOS" | \
+    "Local recovery|iOS/iPadOS" | \
+    "iCloud create sync|iPhone + macOS" | \
+    "iCloud delete sync|iPhone + macOS" | \
+    "Local-only fallback|macOS/iOS")
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 ensure_section() {
   if grep -qF '## Manual Smoke Evidence' "$EVIDENCE_FILE"; then
     return
@@ -113,14 +133,33 @@ ensure_section() {
   } >>"$EVIDENCE_FILE"
 }
 
-ensure_section
-
 AREA_CELL="$(sanitize_cell "$AREA")"
 PLATFORM_CELL="$(sanitize_cell "$PLATFORM")"
 DEVICE_CELL="$(sanitize_cell "$DEVICE")"
 BUILD_CELL="$(sanitize_cell "$BUILD")"
 RESULT_CELL="$(sanitize_cell "$RESULT")"
 NOTES_CELL="$(sanitize_cell "$NOTES")"
+
+if ! is_supported_manual_pair "$AREA_CELL" "$PLATFORM_CELL"; then
+  cat >&2 <<ERROR
+Unsupported manual smoke area/platform: '$AREA_CELL' / '$PLATFORM_CELL'.
+Use one of the canonical pairs from docs/release-smoke-test.md:
+  Translation loop / macOS
+  Translation loop / iPhone
+  Translation loop / iPad
+  Import/export / macOS
+  Import/export / iOS/iPadOS
+  Local recovery / macOS
+  Local recovery / iOS/iPadOS
+  iCloud create sync / iPhone + macOS
+  iCloud delete sync / iPhone + macOS
+  Local-only fallback / macOS/iOS
+ERROR
+  exit 64
+fi
+
+ensure_section
+
 ROW="| $AREA_CELL | $PLATFORM_CELL | $DEVICE_CELL | $BUILD_CELL | $RESULT_CELL | $NOTES_CELL |"
 TEMP_FILE="$(mktemp)"
 
