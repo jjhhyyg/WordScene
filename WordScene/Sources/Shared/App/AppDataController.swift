@@ -15,6 +15,7 @@ struct AppDataController {
     init(
         coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
         syncMode: CoreDataSyncMode = .defaultForCurrentProcess(),
+        syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
@@ -23,13 +24,19 @@ struct AppDataController {
             coreDataStore = try (coreDataStoreFactory ?? { try CoreDataMemoryStore(syncMode: syncMode) })()
             persistenceStatus = .coreDataAvailable(syncMode: syncMode)
             syncStatus = AppSyncStatus(syncMode: syncMode)
-            syncEventMonitor = CloudKitSyncEventMonitor(syncStatus: syncStatus)
+            syncEventMonitor = CloudKitSyncEventMonitor(
+                syncStatus: syncStatus,
+                eventStore: syncEventStore
+            )
         } catch {
             let reason = Self.failureReason(for: error)
             coreDataStore = nil
             persistenceStatus = .legacyFallback(reason: reason)
             syncStatus = .unavailable(reason: reason)
-            syncEventMonitor = CloudKitSyncEventMonitor(syncStatus: syncStatus)
+            syncEventMonitor = CloudKitSyncEventMonitor(
+                syncStatus: syncStatus,
+                eventStore: syncEventStore
+            )
         }
 
         memoryLibrary = MemoryLibraryRepository(
@@ -46,12 +53,14 @@ struct AppDataController {
 
     init(
         coreDataStore: CoreDataMemoryStore,
+        syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
         self.init(
             coreDataStoreFactory: { coreDataStore },
             syncMode: .localOnly,
+            syncEventStore: syncEventStore,
             legacyMemoryStore: legacyMemoryStore,
             legacyHistoryStore: legacyHistoryStore
         )
@@ -161,7 +170,7 @@ enum AppSyncStatus: Equatable {
     }
 }
 
-enum CloudSyncEventKind: Equatable {
+enum CloudSyncEventKind: String, Codable, Equatable {
     case setup
     case importFromCloud
     case exportToCloud
@@ -178,7 +187,7 @@ enum CloudSyncEventKind: Equatable {
     }
 }
 
-struct CloudSyncEvent: Equatable {
+struct CloudSyncEvent: Codable, Equatable {
     let kind: CloudSyncEventKind
     let startDate: Date
     let endDate: Date?
@@ -281,19 +290,57 @@ enum AppSyncEventStatus: Equatable {
     }
 }
 
+struct CloudKitSyncEventStore {
+    private static let storageKey = "cloudKitSyncEvent.latest"
+
+    private let userDefaults: UserDefaults
+    private let storageKey: String
+
+    init(
+        userDefaults: UserDefaults = .standard,
+        storageKey: String = Self.storageKey
+    ) {
+        self.userDefaults = userDefaults
+        self.storageKey = storageKey
+    }
+
+    func load() -> CloudSyncEvent? {
+        guard let data = userDefaults.data(forKey: storageKey) else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(CloudSyncEvent.self, from: data)
+    }
+
+    func save(_ event: CloudSyncEvent) {
+        guard let data = try? JSONEncoder().encode(event) else {
+            return
+        }
+
+        userDefaults.set(data, forKey: storageKey)
+    }
+}
+
 // CloudKit event notifications are delivered on the main queue below.
 final class CloudKitSyncEventMonitor: ObservableObject, @unchecked Sendable {
     @Published private(set) var status: AppSyncEventStatus
 
     private var observer: NSObjectProtocol?
     private let notificationCenter: NotificationCenter
+    private let eventStore: CloudKitSyncEventStore
 
     init(
         syncStatus: AppSyncStatus,
+        eventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
         notificationCenter: NotificationCenter = .default
     ) {
-        status = AppSyncEventStatus(syncStatus: syncStatus)
+        var initialStatus = AppSyncEventStatus(syncStatus: syncStatus)
+        if case .cloudKitConfigured = syncStatus, let latestEvent = eventStore.load() {
+            initialStatus.record(latestEvent)
+        }
+        status = initialStatus
         self.notificationCenter = notificationCenter
+        self.eventStore = eventStore
 
         if case .cloudKitConfigured = syncStatus {
             observer = notificationCenter.addObserver(
@@ -316,6 +363,7 @@ final class CloudKitSyncEventMonitor: ObservableObject, @unchecked Sendable {
     }
 
     func record(_ event: CloudSyncEvent) {
+        eventStore.save(event)
         status.record(event)
     }
 

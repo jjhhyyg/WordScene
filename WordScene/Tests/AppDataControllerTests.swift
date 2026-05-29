@@ -10,6 +10,13 @@ final class AppDataControllerTests: XCTestCase {
         }
     }
 
+    private var temporaryDefaults: UserDefaults {
+        let suiteName = "WordSceneTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        return defaults
+    }
+
     func testRepositoriesShareInjectedCoreDataStore() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(coreDataStore: coreDataStore)
@@ -37,7 +44,8 @@ final class AppDataControllerTests: XCTestCase {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(
             coreDataStoreFactory: { coreDataStore },
-            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier),
+            syncEventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
         )
 
         XCTAssertEqual(
@@ -81,7 +89,8 @@ final class AppDataControllerTests: XCTestCase {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(
             coreDataStoreFactory: { coreDataStore },
-            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier),
+            syncEventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
         )
 
         XCTAssertEqual(controller.syncEventMonitor.status.title, "等待 iCloud 同步事件")
@@ -89,7 +98,10 @@ final class AppDataControllerTests: XCTestCase {
     }
 
     func testCloudSyncEventStatusRecordsSuccessfulImportEvent() {
-        let monitor = CloudKitSyncEventMonitor(syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"))
+        let monitor = CloudKitSyncEventMonitor(
+            syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"),
+            eventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
+        )
 
         monitor.record(CloudSyncEvent(
             kind: .importFromCloud,
@@ -104,7 +116,10 @@ final class AppDataControllerTests: XCTestCase {
     }
 
     func testCloudSyncEventStatusRecordsFailedExportEvent() {
-        let monitor = CloudKitSyncEventMonitor(syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"))
+        let monitor = CloudKitSyncEventMonitor(
+            syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"),
+            eventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
+        )
 
         monitor.record(CloudSyncEvent(
             kind: .exportToCloud,
@@ -117,5 +132,51 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(monitor.status.title, "同步出现错误")
         XCTAssertTrue(monitor.status.message.contains("向 iCloud 上传"))
         XCTAssertTrue(monitor.status.message.contains("quota exceeded"))
+    }
+
+    func testCloudSyncEventStatusRestoresLastRecordedEvent() {
+        let eventStore = CloudKitSyncEventStore(userDefaults: temporaryDefaults)
+        let notificationCenter = NotificationCenter()
+        let monitor = CloudKitSyncEventMonitor(
+            syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"),
+            eventStore: eventStore,
+            notificationCenter: notificationCenter
+        )
+        monitor.record(CloudSyncEvent(
+            kind: .importFromCloud,
+            startDate: Date(timeIntervalSince1970: 10),
+            endDate: Date(timeIntervalSince1970: 20),
+            succeeded: true,
+            errorDescription: nil
+        ))
+
+        let restoredMonitor = CloudKitSyncEventMonitor(
+            syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"),
+            eventStore: eventStore,
+            notificationCenter: notificationCenter
+        )
+
+        XCTAssertEqual(restoredMonitor.status.title, "最近同步成功")
+        XCTAssertTrue(restoredMonitor.status.message.contains("从 iCloud 导入"))
+    }
+
+    func testLocalOnlySyncStatusDoesNotRestoreCloudEvents() {
+        let eventStore = CloudKitSyncEventStore(userDefaults: temporaryDefaults)
+        eventStore.save(CloudSyncEvent(
+            kind: .exportToCloud,
+            startDate: Date(timeIntervalSince1970: 10),
+            endDate: Date(timeIntervalSince1970: 20),
+            succeeded: true,
+            errorDescription: nil
+        ))
+
+        let monitor = CloudKitSyncEventMonitor(
+            syncStatus: .localOnly,
+            eventStore: eventStore,
+            notificationCenter: NotificationCenter()
+        )
+
+        XCTAssertEqual(monitor.status.title, "没有同步事件")
+        XCTAssertTrue(monitor.status.message.contains("仅本机存储"))
     }
 }

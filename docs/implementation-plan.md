@@ -36,6 +36,7 @@ Baseline already completed:
 - CloudKit sync is entitlement-gated at runtime so unsigned or non-iCloud builds stay local-only instead of crashing.
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
+- The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
 
 Known gaps:
 
@@ -126,6 +127,7 @@ Deliverables:
 - Keep the Core Data model compatible with CloudKit validation rules and keep persistent history enabled for local fallback stores.
 - Surface storage bootstrap status and iCloud sync readiness as separate states in Settings.
 - Observe `NSPersistentCloudKitContainer` sync events so recent sync success and errors are visible.
+- Persist the latest CloudKit sync event locally so relaunch does not reset diagnostics to an unhelpful waiting state.
 
 Verification:
 
@@ -133,6 +135,7 @@ Verification:
 - Store-description tests for CloudKit container options and remote-change history tracking.
 - Runtime sync-mode selection tests for signed CloudKit and unsigned local-only processes.
 - Sync event status tests for waiting, success, and failure states.
+- Sync event persistence tests across monitor recreation and local-only mode.
 - Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
 
@@ -205,6 +208,8 @@ Verification:
 - Added a CloudKit sync event monitor backed by `NSPersistentCloudKitContainer.eventChangedNotification`.
 - Updated Settings to show waiting, recent success, and error states for CloudKit sync events.
 - Added tests for initial sync-event waiting, successful import, and failed export status reporting.
+- Persisted the latest CloudKit sync event snapshot in `UserDefaults` and restored it for Settings diagnostics after relaunch.
+- Added tests proving persisted sync events restore for CloudKit mode without leaking into local-only mode.
 
 Next:
 
