@@ -50,7 +50,11 @@ struct DeepSeekBalanceClient {
 
         switch httpResponse.statusCode {
         case 200:
-            return try JSONDecoder().decode(DeepSeekBalanceResponse.self, from: data)
+            let response = try JSONDecoder().decode(DeepSeekBalanceResponse.self, from: data)
+            guard response.isAvailable else {
+                throw DeepSeekBalanceError.unavailableBalance
+            }
+            return response
         case 401:
             throw DeepSeekBalanceError.unauthorized
         default:
@@ -61,6 +65,7 @@ struct DeepSeekBalanceClient {
 
 enum DeepSeekBalanceError: Error, Equatable {
     case invalidResponse
+    case unavailableBalance
     case unauthorized
     case httpStatus(Int)
 }

@@ -24,6 +24,7 @@ Baseline already completed:
 - Keychain abstraction.
 - DeepSeek balance response decoder and tests.
 - DeepSeek token save/delete/test flow in Settings.
+- DeepSeek token validation rejects authenticated but balance-unavailable accounts.
 - DeepSeek chat-completions translation loop in Translate.
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
@@ -53,6 +54,7 @@ Target status: completed.
 Deliverables:
 
 - Settings page loads, saves, deletes, and validates the DeepSeek token through Keychain.
+- Token validation requires both authentication success and available DeepSeek balance status.
 - Translate page reads the saved token and calls DeepSeek.
 - Code-level translation calls go through a provider abstraction instead of hard-coding DeepSeek directly into UI logic.
 - Translation request supports auto source language and concrete target language.
@@ -219,6 +221,8 @@ Verification:
 - Added `docs/release-smoke-test.md` as the manual release gate covering translation, language controls, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 - Added an explicit export privacy notice in Settings and export preparation metadata: exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Added a Settings import/export controller test for the export privacy notice.
+- Rejected DeepSeek balance responses with `is_available=false` during token testing so authenticated but unusable accounts are not saved as valid.
+- Added a DeepSeek balance client test for the authenticated-but-unavailable token path and surfaced a specific Settings error message.
 
 Next:
 

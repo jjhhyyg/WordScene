@@ -608,6 +608,8 @@ struct SettingsView: View {
             switch balanceError {
             case .invalidResponse:
                 return "DeepSeek 返回无效响应。"
+            case .unavailableBalance:
+                return "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。"
             case .unauthorized:
                 return "Token 无效或已过期。"
             case .httpStatus(let status):
