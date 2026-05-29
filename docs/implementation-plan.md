@@ -328,6 +328,7 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` and `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; iOS candidate and live API smoke evidence now point at commit `0da0b9310ae8`, while macOS signing remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Hardened release completion and manual smoke recording so manual PASS rows must use the same build number as the recorded release candidate, preventing stale build smoke results from satisfying the current candidate.
 - Reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, macOS tests, iOS build, and unsigned Release compiles still pass after build-number consistency hardening.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` and `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; iOS candidate and live API smoke evidence now point at commit `4151041cfea4`, while macOS signing remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
