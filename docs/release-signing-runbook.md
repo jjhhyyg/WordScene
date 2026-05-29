@@ -53,12 +53,13 @@ signing error and confirm whether Xcode is missing the account, the certificate,
 the provisioning profile, or access to the CloudKit container.
 
 You can classify the latest release-candidate signing log without rerunning the
-build:
+build. By default the script reads
+`/tmp/WordSceneReleaseCandidates/logs/<platform>-release-candidate.log`; pass
+`--log` only when diagnosing a different log file:
 
 ```bash
 scripts/diagnose_release_signing.sh \
-  --platform macos \
-  --log /tmp/WordSceneReleaseCandidates/logs/macos-release-candidate.log
+  --platform macos
 ```
 
 The release candidate gate runs the same diagnosis automatically when a platform

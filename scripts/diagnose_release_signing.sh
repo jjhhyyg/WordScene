@@ -3,9 +3,10 @@ set -euo pipefail
 
 PLATFORM=""
 LOG_FILE=""
+DERIVED_DATA_BASE="${DERIVED_DATA_BASE:-/tmp/WordSceneReleaseCandidates}"
 
 usage() {
-  echo "Usage: $0 --platform macos|ios --log <xcodebuild-log>" >&2
+  echo "Usage: $0 --platform macos|ios [--log <xcodebuild-log>]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -40,6 +41,10 @@ case "$PLATFORM" in
     exit 64
     ;;
 esac
+
+if [[ -z "$LOG_FILE" ]]; then
+  LOG_FILE="$DERIVED_DATA_BASE/logs/$PLATFORM-release-candidate.log"
+fi
 
 if [[ ! -f "$LOG_FILE" ]]; then
   echo "xcodebuild log not found: $LOG_FILE" >&2
