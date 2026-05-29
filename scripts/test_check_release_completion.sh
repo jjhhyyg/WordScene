@@ -11,6 +11,7 @@ INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 STALE_COMMIT_EVIDENCE="$TMPDIR/stale-commit-evidence.md"
 MISSING_LIVE_COMMIT_EVIDENCE="$TMPDIR/missing-live-commit-evidence.md"
+MISMATCHED_BUILD_EVIDENCE="$TMPDIR/mismatched-build-evidence.md"
 ANCESTOR_DOCS_ONLY_EVIDENCE="$TMPDIR/ancestor-docs-only-evidence.md"
 ANCESTOR_PRODUCT_CHANGE_EVIDENCE="$TMPDIR/ancestor-product-change-evidence.md"
 NON_ANCESTOR_EVIDENCE="$TMPDIR/non-ancestor-evidence.md"
@@ -57,6 +58,7 @@ cat >>"$PASSING_EVIDENCE" <<COMMIT_MD
 
 | Field | Value |
 | --- | --- |
+| Build | 1 |
 | Git commit | $CURRENT_COMMIT |
 COMMIT_MD
 
@@ -190,6 +192,18 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Missing DeepSeek live protocol smoke Git commit metadata.' /tmp/wordscene-completion-missing-live-commit.err
+
+cp "$PASSING_EVIDENCE" "$MISMATCHED_BUILD_EVIDENCE"
+sed -i '' 's/| Translation loop | macOS | MacBook Pro \/ macOS 26.5 | 1 | PASS |/| Translation loop | macOS | MacBook Pro \/ macOS 26.5 | 2 | PASS |/' "$MISMATCHED_BUILD_EVIDENCE"
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$MISMATCHED_BUILD_EVIDENCE" \
+  >/tmp/wordscene-completion-mismatched-build.out 2>/tmp/wordscene-completion-mismatched-build.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke build mismatch: Translation loop / macOS recorded build 2 but candidate build is 1.' /tmp/wordscene-completion-mismatched-build.err
 
 cp "$PASSING_EVIDENCE" "$STALE_COMMIT_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_COMMIT_EVIDENCE"

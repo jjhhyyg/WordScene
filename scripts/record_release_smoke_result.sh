@@ -134,6 +134,19 @@ candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+candidate_build_number() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Build" {
+      print trim($3)
+      exit
+    }
+  ' "$EVIDENCE_FILE"
+}
+
 live_smoke_git_commit() {
   awk -F'|' '
     function trim(value) {
@@ -298,6 +311,21 @@ assert_current_candidate_metadata() {
   assert_current_candidate_commit "$evidence_commit"
 }
 
+assert_candidate_build_number() {
+  local evidence_build
+
+  evidence_build="$(candidate_build_number)"
+  if [[ -z "$evidence_build" ]]; then
+    echo "Manual smoke evidence requires candidate build number metadata. Run scripts/run_release_candidate_gate.sh first." >&2
+    exit 1
+  fi
+
+  if [[ "$BUILD_CELL" != "$evidence_build" ]]; then
+    echo "Manual smoke evidence requires build $evidence_build, got $BUILD_CELL." >&2
+    exit 1
+  fi
+}
+
 required_candidate_platforms() {
   case "$1|$2" in
     "Translation loop|macOS" | \
@@ -399,6 +427,7 @@ fi
 
 assert_current_candidate_metadata
 assert_current_live_smoke_metadata
+assert_candidate_build_number
 assert_required_candidate_builds
 
 ensure_section

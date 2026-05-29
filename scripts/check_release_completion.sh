@@ -114,6 +114,19 @@ candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+candidate_build_number() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Build" {
+      print trim($3)
+      exit
+    }
+  ' "$EVIDENCE_FILE"
+}
+
 candidate_matches_current_head() {
   local evidence_commit="$1"
 
@@ -233,6 +246,63 @@ Local-only fallback|macOS/iOS
 ROWS
 }
 
+manual_rows() {
+  cat <<'ROWS'
+Translation loop|macOS
+Translation loop|iPhone
+Translation loop|iPad
+Import/export|macOS
+Import/export|iOS/iPadOS
+Local recovery|macOS
+Local recovery|iOS/iPadOS
+iCloud create sync|iPhone + macOS
+iCloud delete sync|iPhone + macOS
+Local-only fallback|macOS/iOS
+ROWS
+}
+
+pass_build_numbers() {
+  local area="$1"
+  local platform="$2"
+
+  awk -F'|' -v expected_area="$area" -v expected_platform="$platform" '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == expected_area &&
+    trim($3) == expected_platform &&
+    trim($6) == "PASS" {
+      print trim($5)
+    }
+  ' "$EVIDENCE_FILE"
+}
+
+validate_manual_smoke_build_numbers() {
+  local expected_build
+  local area
+  local platform
+  local recorded_build
+  local status=0
+
+  expected_build="$(candidate_build_number)"
+  if [[ -z "$expected_build" ]]; then
+    echo "Missing candidate build number metadata." >&2
+    return 1
+  fi
+
+  while IFS='|' read -r area platform; do
+    while IFS= read -r recorded_build; do
+      if [[ -n "$recorded_build" && "$recorded_build" != "$expected_build" ]]; then
+        echo "Manual smoke build mismatch: $area / $platform recorded build $recorded_build but candidate build is $expected_build." >&2
+        status=1
+      fi
+    done < <(pass_build_numbers "$area" "$platform")
+  done < <(manual_rows)
+
+  return "$status"
+}
+
 status=0
 
 required_table_sections=(
@@ -300,6 +370,10 @@ else
 fi
 
 if ! validate_live_smoke_git_commit; then
+  status=1
+fi
+
+if ! validate_manual_smoke_build_numbers; then
   status=1
 fi
 

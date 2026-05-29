@@ -14,6 +14,7 @@ ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE="$TMPDIR/ancestor-product-change-cand
 IOS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ios-only-candidate-evidence.md"
 MISSING_LIVE_SMOKE_EVIDENCE="$TMPDIR/missing-live-smoke-evidence.md"
 STALE_LIVE_SMOKE_EVIDENCE="$TMPDIR/stale-live-smoke-evidence.md"
+MISMATCHED_BUILD_EVIDENCE="$TMPDIR/mismatched-build-evidence.md"
 
 cat >"$EVIDENCE" <<EVIDENCE_MD
 ## Non-Manual Release Gate
@@ -31,6 +32,7 @@ cat >"$EVIDENCE" <<EVIDENCE_MD
 
 | Field | Value |
 | --- | --- |
+| Build | 1 |
 | Git commit | $CURRENT_COMMIT |
 EVIDENCE_MD
 
@@ -129,6 +131,23 @@ if grep -qF '## Manual Smoke Evidence' "$MISSING_CANDIDATE_EVIDENCE"; then
   exit 1
 fi
 
+cp "$EVIDENCE" "$MISMATCHED_BUILD_EVIDENCE"
+
+set +e
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$MISMATCHED_BUILD_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro" \
+  --build "2" \
+  --result "PASS" \
+  --notes "Should require the current candidate build number" >"$TMPDIR/mismatched-build.out" 2>"$TMPDIR/mismatched-build.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires build 1, got 2.' "$TMPDIR/mismatched-build.err"
+
 cat >"$MISSING_LIVE_SMOKE_EVIDENCE" <<MISSING_LIVE_SMOKE_MD
 ## Non-Manual Release Gate
 
@@ -144,6 +163,7 @@ cat >"$MISSING_LIVE_SMOKE_EVIDENCE" <<MISSING_LIVE_SMOKE_MD
 
 | Field | Value |
 | --- | --- |
+| Build | 1 |
 | Git commit | $CURRENT_COMMIT |
 MISSING_LIVE_SMOKE_MD
 
@@ -223,6 +243,7 @@ cat >"$STALE_LIVE_SMOKE_EVIDENCE" <<STALE_LIVE_SMOKE_MD
 
 | Field | Value |
 | --- | --- |
+| Build | 1 |
 | Git commit | bbbbbbbbbbbb |
 STALE_LIVE_SMOKE_MD
 
@@ -277,6 +298,7 @@ cat >"$IOS_ONLY_CANDIDATE_EVIDENCE" <<IOS_ONLY_MD
 
 | Field | Value |
 | --- | --- |
+| Build | 1 |
 | Git commit | $CURRENT_COMMIT |
 IOS_ONLY_MD
 
