@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 SHOW_COMMANDS=0
+CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 usage() {
   echo "Usage: $0 [--evidence <markdown>] [--commands]" >&2
@@ -54,20 +55,15 @@ has_pass_candidate_build() {
   ' "$EVIDENCE_FILE"
 }
 
-has_live_smoke_pass() {
+candidate_git_commit() {
   awk -F'|' '
     function trim(value) {
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
       return value
     }
-    trim($2) == "DeepSeek live protocol smoke" &&
-    trim($3) == "API" &&
-    trim($6) == "PASS" &&
-    trim($7) ~ /Git commit `/ {
-      found = 1
-    }
-    END {
-      exit(found == 1 ? 0 : 1)
+    trim($2) == "Git commit" {
+      print trim($3)
+      exit
     }
   ' "$EVIDENCE_FILE"
 }
@@ -83,6 +79,156 @@ candidate_build_number() {
       exit
     }
   ' "$EVIDENCE_FILE"
+}
+
+live_smoke_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "DeepSeek live protocol smoke" &&
+    trim($3) == "API" &&
+    trim($6) == "PASS" {
+      print trim($7)
+      exit
+    }
+  ' "$EVIDENCE_FILE" |
+    sed -n 's/.*Git commit `\([^`][^`]*\)`.*/\1/p'
+}
+
+commit_matches_current_head() {
+  local evidence_commit="$1"
+
+  [[ "${evidence_commit:0:12}" == "${CURRENT_COMMIT:0:12}" ]]
+}
+
+candidate_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CANDIDATE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_CANDIDATE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_candidate() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
+}
+
+live_smoke_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_LIVE_SMOKE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_LIVE_SMOKE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_live_smoke() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
+}
+
+is_allowed_post_candidate_file() {
+  case "$1" in
+    docs/release-smoke-evidence.md | \
+    docs/implementation-plan.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+candidate_freshness_reason() {
+  local evidence_commit
+  local disallowed=()
+  local file
+  local joined
+
+  evidence_commit="$(candidate_git_commit)"
+  if [[ -z "$evidence_commit" ]]; then
+    printf 'fresh release candidate evidence required: missing candidate Git commit metadata'
+    return
+  fi
+
+  if commit_matches_current_head "$evidence_commit"; then
+    return
+  fi
+
+  if ! candidate_is_ancestor_of_head "$evidence_commit"; then
+    printf 'fresh release candidate evidence required: evidence %s is not an ancestor of current %s' "$evidence_commit" "$CURRENT_COMMIT"
+    return
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_candidate "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    printf 'fresh release candidate evidence required: %s changed after candidate build' "$joined"
+  fi
+}
+
+live_smoke_freshness_reason() {
+  local evidence_commit
+  local disallowed=()
+  local file
+  local joined
+
+  evidence_commit="$(live_smoke_git_commit)"
+  if [[ -z "$evidence_commit" ]]; then
+    printf 'missing current DeepSeek live protocol smoke PASS'
+    return
+  fi
+
+  if commit_matches_current_head "$evidence_commit"; then
+    return
+  fi
+
+  if ! live_smoke_is_ancestor_of_head "$evidence_commit"; then
+    printf 'fresh DeepSeek live protocol smoke required: evidence %s is not an ancestor of current %s' "$evidence_commit" "$CURRENT_COMMIT"
+    return
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_live_smoke "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    printf 'fresh DeepSeek live protocol smoke required: %s changed after live smoke' "$joined"
+  fi
 }
 
 manual_rows() {
@@ -157,10 +303,8 @@ COMMAND
 }
 
 build_number="$(candidate_build_number)"
-live_smoke_ready=0
-if has_live_smoke_pass; then
-  live_smoke_ready=1
-fi
+candidate_freshness_blocker="$(candidate_freshness_reason)"
+live_smoke_freshness_blocker="$(live_smoke_freshness_reason)"
 
 echo "Manual Smoke Readiness"
 if [[ -n "$build_number" ]]; then
@@ -175,8 +319,10 @@ while IFS='|' read -r area platform required_platforms; do
 
   if [[ -z "$build_number" ]]; then
     reason="missing candidate build number metadata"
-  elif [[ "$live_smoke_ready" -ne 1 ]]; then
-    reason="missing current DeepSeek live protocol smoke PASS"
+  elif [[ -n "$candidate_freshness_blocker" ]]; then
+    reason="$candidate_freshness_blocker"
+  elif [[ -n "$live_smoke_freshness_blocker" ]]; then
+    reason="$live_smoke_freshness_blocker"
   elif [[ -n "$missing_platforms" ]]; then
     reason="missing PASS candidate build: $missing_platforms"
   fi

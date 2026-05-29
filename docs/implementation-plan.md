@@ -68,6 +68,7 @@ Baseline already completed:
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
 - Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
+- Manual smoke readiness now applies candidate and DeepSeek live-smoke freshness checks before printing READY rows or recording command templates.
 - Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
 
 Known gaps:
@@ -372,6 +373,7 @@ Verification:
 - Extended `scripts/manual_smoke_readiness.sh --commands` to print ready-row `record_release_smoke_result.sh` command templates without printing commands for blocked rows.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b8760d156497`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `a80d52add923`.
+- Tightened `scripts/manual_smoke_readiness.sh` so stale candidate or stale DeepSeek live-smoke evidence keeps manual rows in WAITING and suppresses record command templates; reran `scripts/verify_release_readiness.sh`, including 86 macOS tests and unsigned iOS/macOS Release builds.
 
 Next:
 
