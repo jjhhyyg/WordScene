@@ -37,11 +37,13 @@ Baseline already completed:
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
+- Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 
 Known gaps:
 
 - CloudKit/iCloud sync is wired at the store configuration and entitlement level, but cross-device sync still needs a signed-device smoke test.
 - Import/export still needs a manual macOS and iOS smoke test before release.
+- The release smoke checklist exists, but its evidence table has not been filled for a signed release candidate yet.
 
 ## Milestone 1: Real Translation Loop
 
@@ -138,6 +140,7 @@ Verification:
 - Sync event persistence tests across monitor recreation and local-only mode.
 - Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
+- Completed release smoke evidence in `docs/release-smoke-test.md` for the target release candidate.
 
 ## Implementation Log
 
@@ -210,10 +213,9 @@ Verification:
 - Added tests for initial sync-event waiting, successful import, and failed export status reporting.
 - Persisted the latest CloudKit sync event snapshot in `UserDefaults` and restored it for Settings diagnostics after relaunch.
 - Added tests proving persisted sync events restore for CloudKit mode without leaking into local-only mode.
+- Added `docs/release-smoke-test.md` as the manual release gate covering translation, language controls, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 
 Next:
 
-- Manually smoke test import/export on macOS and iOS.
-- Manually smoke test the local document recovery flow on macOS and iOS.
-- Run a signed-device iCloud sync smoke test with two devices/simulators on the same Apple ID.
+- Execute `docs/release-smoke-test.md` on a signed release candidate and record evidence.
 - Keep local-only mode fully usable while sync is being prepared.
