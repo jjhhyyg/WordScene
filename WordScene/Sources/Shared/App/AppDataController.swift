@@ -11,7 +11,7 @@ struct AppDataController {
 
     init(
         coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
-        syncMode: CoreDataSyncMode = .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier),
+        syncMode: CoreDataSyncMode = .defaultForCurrentProcess(),
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {

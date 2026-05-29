@@ -35,7 +35,10 @@ final class AppDataControllerTests: XCTestCase {
 
     func testReportsPrimaryPersistenceWhenCoreDataLoads() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
-        let controller = AppDataController(coreDataStoreFactory: { coreDataStore })
+        let controller = AppDataController(
+            coreDataStoreFactory: { coreDataStore },
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
 
         XCTAssertEqual(
             controller.persistenceStatus,

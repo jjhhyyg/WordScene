@@ -32,6 +32,7 @@ Baseline already completed:
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
+- CloudKit sync is entitlement-gated at runtime so unsigned or non-iCloud builds stay local-only instead of crashing.
 
 Known gaps:
 
@@ -118,11 +119,14 @@ Deliverables:
 - Store local memory and recent history in versioned documents while retaining compatibility with legacy array data.
 - Configure the production Core Data store with the app's CloudKit container and persistent history tracking.
 - Add iCloud entitlements for the shared iOS/macOS targets.
+- Keep the Core Data model compatible with CloudKit validation rules and keep persistent history enabled for local fallback stores.
 
 Verification:
 
 - Data migration tests.
 - Store-description tests for CloudKit container options and remote-change history tracking.
+- Runtime sync-mode selection tests for signed CloudKit and unsigned local-only processes.
+- Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
 
 ## Implementation Log
@@ -179,6 +183,10 @@ Verification:
 - Added CloudKit entitlements for the shared iOS/macOS targets.
 - Surfaced the configured iCloud sync mode in Settings persistence status instead of describing the store as local-only.
 - Added tests for CloudKit store-description options and persistence status messaging.
+- Added runtime entitlement gating so unsigned test builds fall back to local-only storage instead of constructing CloudKit containers.
+- Kept persistent history and remote-change notifications enabled for local fallback stores to avoid reopening an existing history-tracked SQLite store in read-only mode.
+- Made programmatic Core Data attributes CloudKit-compatible by allowing optional fields at the store layer while retaining domain-model defaults when reading.
+- Added tests for entitlement-based sync-mode selection, local fallback history tracking, and CloudKit model compatibility.
 
 Next:
 

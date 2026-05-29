@@ -1,5 +1,8 @@
 import CoreData
 import Foundation
+#if os(macOS)
+import Security
+#endif
 
 protocol CoreDataMemoryDataStore {
     func upsert(_ item: MemoryItem) throws
@@ -26,6 +29,45 @@ struct CoreDataDeletionTombstone: Equatable {
 enum CoreDataSyncMode: Equatable {
     case localOnly
     case cloudKit(containerIdentifier: String)
+
+    static func defaultForCurrentProcess(
+        containerIdentifier: String = CoreDataMemoryStore.productionCloudKitContainerIdentifier,
+        entitlementValue: (String) -> Any? = ProcessEntitlementReader.value
+    ) -> CoreDataSyncMode {
+        guard
+            let services = entitlementValue("com.apple.developer.icloud-services") as? [String],
+            services.contains("CloudKit") || services.contains("CloudKit-Anonymous"),
+            let containers = entitlementValue("com.apple.developer.icloud-container-identifiers") as? [String],
+            containers.contains(containerIdentifier)
+        else {
+            return .localOnly
+        }
+
+        return .cloudKit(containerIdentifier: containerIdentifier)
+    }
+}
+
+private enum ProcessEntitlementReader {
+    static func value(for key: String) -> Any? {
+#if os(macOS)
+        guard let task = SecTaskCreateFromSelf(kCFAllocatorDefault) else {
+            return nil
+        }
+
+        return SecTaskCopyValueForEntitlement(task, key as CFString, nil)
+#else
+        // iOS does not expose SecTask entitlement reads to app code. The app's
+        // CloudKit capability is defined by the target entitlements instead.
+        switch key {
+        case "com.apple.developer.icloud-services":
+            return ["CloudKit"]
+        case "com.apple.developer.icloud-container-identifiers":
+            return [CoreDataMemoryStore.productionCloudKitContainerIdentifier]
+        default:
+            return nil
+        }
+#endif
+    }
 }
 
 struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryDataStore {
@@ -40,7 +82,7 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
 
     init(
         inMemory: Bool = false,
-        syncMode: CoreDataSyncMode = .cloudKit(containerIdentifier: Self.productionCloudKitContainerIdentifier)
+        syncMode: CoreDataSyncMode = .defaultForCurrentProcess()
     ) throws {
         let resolvedSyncMode: CoreDataSyncMode = inMemory ? .localOnly : syncMode
         let model = Self.makeModel()
@@ -97,15 +139,31 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
         description.shouldInferMappingModelAutomatically = true
         description.shouldAddStoreAsynchronously = false
 
-        if case .cloudKit(let containerIdentifier) = syncMode, !inMemory {
-            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                containerIdentifier: containerIdentifier
-            )
+        if !inMemory {
             description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
             description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+
+            if case .cloudKit(let containerIdentifier) = syncMode {
+                description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                    containerIdentifier: containerIdentifier
+                )
+            }
         }
 
         return description
+    }
+
+    static func cloudKitModelValidationFailures() -> [String] {
+        makeModel().entities.flatMap { entity in
+            entity.properties.compactMap { property in
+                guard let attribute = property as? NSAttributeDescription,
+                      !attribute.isOptional,
+                      attribute.defaultValue == nil else {
+                    return nil
+                }
+                return "\(entity.name ?? "Unknown").\(attribute.name)"
+            }
+        }
     }
 
     func upsert(_ item: MemoryItem) throws {
@@ -344,7 +402,7 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
     private static func attribute(
         _ name: String,
         type: NSAttributeType,
-        isOptional: Bool = false,
+        isOptional: Bool = true,
         defaultValue: Any? = nil
     ) -> NSAttributeDescription {
         let attribute = NSAttributeDescription()

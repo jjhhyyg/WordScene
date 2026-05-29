@@ -2,6 +2,36 @@ import XCTest
 @testable import WordScene
 
 final class CoreDataMemoryStoreTests: XCTestCase {
+    func testDefaultSyncModeFallsBackToLocalOnlyWithoutCloudKitEntitlements() {
+        let syncMode = CoreDataSyncMode.defaultForCurrentProcess { _ in nil }
+
+        XCTAssertEqual(syncMode, .localOnly)
+    }
+
+    func testDefaultSyncModeUsesCloudKitWhenEntitlementsMatchContainer() {
+        let syncMode = CoreDataSyncMode.defaultForCurrentProcess { entitlement in
+            switch entitlement {
+            case "com.apple.developer.icloud-services":
+                return ["CloudKit"]
+            case "com.apple.developer.icloud-container-identifiers":
+                return [CoreDataMemoryStore.productionCloudKitContainerIdentifier]
+            default:
+                return nil
+            }
+        }
+
+        XCTAssertEqual(
+            syncMode,
+            .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
+    }
+
+    func testCloudKitSyncedAttributesAreOptionalOrDefaulted() {
+        let failures = CoreDataMemoryStore.cloudKitModelValidationFailures()
+
+        XCTAssertTrue(failures.isEmpty, failures.joined(separator: ", "))
+    }
+
     func testPersistentStoreDescriptionConfiguresCloudKitSyncOptions() {
         let storeURL = URL(fileURLWithPath: "/tmp/WordScene.sqlite")
 
@@ -13,6 +43,21 @@ final class CoreDataMemoryStoreTests: XCTestCase {
 
         XCTAssertEqual(description.url, storeURL)
         XCTAssertEqual(description.cloudKitContainerOptions?.containerIdentifier, "iCloud.com.erikssonhou.leximemory")
+        XCTAssertEqual(description.options[NSPersistentHistoryTrackingKey] as? NSNumber, true)
+        XCTAssertEqual(description.options[NSPersistentStoreRemoteChangeNotificationPostOptionKey] as? NSNumber, true)
+    }
+
+    func testPersistentLocalStoreDescriptionKeepsHistoryTrackingEnabled() {
+        let storeURL = URL(fileURLWithPath: "/tmp/WordScene.sqlite")
+
+        let description = CoreDataMemoryStore.makeStoreDescription(
+            inMemory: false,
+            syncMode: .localOnly,
+            storeURL: storeURL
+        )
+
+        XCTAssertEqual(description.url, storeURL)
+        XCTAssertNil(description.cloudKitContainerOptions)
         XCTAssertEqual(description.options[NSPersistentHistoryTrackingKey] as? NSNumber, true)
         XCTAssertEqual(description.options[NSPersistentStoreRemoteChangeNotificationPostOptionKey] as? NSNumber, true)
     }
