@@ -10,14 +10,15 @@ struct AppDataController {
     let persistenceStatus: AppPersistenceStatus
 
     init(
-        coreDataStoreFactory: () throws -> CoreDataMemoryStore = { try CoreDataMemoryStore() },
+        coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
+        syncMode: CoreDataSyncMode = .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier),
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
         let coreDataStore: CoreDataMemoryStore?
         do {
-            coreDataStore = try coreDataStoreFactory()
-            persistenceStatus = .coreDataAvailable
+            coreDataStore = try (coreDataStoreFactory ?? { try CoreDataMemoryStore(syncMode: syncMode) })()
+            persistenceStatus = .coreDataAvailable(syncMode: syncMode)
         } catch {
             coreDataStore = nil
             persistenceStatus = .legacyFallback(reason: Self.failureReason(for: error))
@@ -42,6 +43,7 @@ struct AppDataController {
     ) {
         self.init(
             coreDataStoreFactory: { coreDataStore },
+            syncMode: .localOnly,
             legacyMemoryStore: legacyMemoryStore,
             legacyHistoryStore: legacyHistoryStore
         )
@@ -54,13 +56,18 @@ struct AppDataController {
 }
 
 enum AppPersistenceStatus: Equatable {
-    case coreDataAvailable
+    case coreDataAvailable(syncMode: CoreDataSyncMode)
     case legacyFallback(reason: String)
 
     var title: String {
         switch self {
-        case .coreDataAvailable:
-            return "Core Data 已启用"
+        case .coreDataAvailable(let syncMode):
+            switch syncMode {
+            case .cloudKit:
+                return "Core Data + iCloud 已启用"
+            case .localOnly:
+                return "Core Data 已启用"
+            }
         case .legacyFallback:
             return "兼容存储模式"
         }
@@ -68,8 +75,13 @@ enum AppPersistenceStatus: Equatable {
 
     var message: String {
         switch self {
-        case .coreDataAvailable:
-            return "本机数据正在写入主存储。"
+        case .coreDataAvailable(let syncMode):
+            switch syncMode {
+            case .cloudKit(let containerIdentifier):
+                return "本机数据写入 Core Data，并配置通过 \(containerIdentifier) 在 iCloud 私有空间同步。同步时间取决于系统状态和网络。"
+            case .localOnly:
+                return "本机数据正在写入主存储。"
+            }
         case .legacyFallback(let reason):
             return "主存储初始化失败，当前使用兼容存储：\(reason)"
         }
@@ -77,8 +89,13 @@ enum AppPersistenceStatus: Equatable {
 
     var systemImage: String {
         switch self {
-        case .coreDataAvailable:
-            return "internaldrive"
+        case .coreDataAvailable(let syncMode):
+            switch syncMode {
+            case .cloudKit:
+                return "icloud"
+            case .localOnly:
+                return "internaldrive"
+            }
         case .legacyFallback:
             return "externaldrive.badge.exclamationmark"
         }

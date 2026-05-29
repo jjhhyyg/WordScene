@@ -14,7 +14,7 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: Milestone 5 started; local persistence now has a migration path before CloudKit.
+Status: Milestone 5 in progress; the production Core Data store is now CloudKit-capable, with local migration and recovery paths in place.
 
 Baseline already completed:
 
@@ -31,10 +31,11 @@ Baseline already completed:
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
+- Core Data is configured with the project CloudKit container for the production persistent store.
 
 Known gaps:
 
-- CloudKit/iCloud sync is not connected.
+- CloudKit/iCloud sync is wired at the store configuration and entitlement level, but cross-device sync still needs a signed-device smoke test.
 - Import/export still needs a manual macOS and iOS smoke test before release.
 
 ## Milestone 1: Real Translation Loop
@@ -115,10 +116,13 @@ Deliverables:
 - Add data model migration story before shipping sync.
 - Keep local-only mode fully usable.
 - Store local memory and recent history in versioned documents while retaining compatibility with legacy array data.
+- Configure the production Core Data store with the app's CloudKit container and persistent history tracking.
+- Add iCloud entitlements for the shared iOS/macOS targets.
 
 Verification:
 
 - Data migration tests.
+- Store-description tests for CloudKit container options and remote-change history tracking.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
 
 ## Implementation Log
@@ -171,10 +175,14 @@ Verification:
 - Added tests proving corrupt local documents throw through `loadOrThrow()` and are preserved for recovery instead of being cleared or treated as empty.
 - Added a Settings recovery affordance for early local documents: export raw `UserDefaults` payloads as a backup, then reset only the known legacy memory/history keys after confirmation.
 - Added recovery controller tests proving raw corrupt documents are exportable and reset does not touch unrelated preferences.
+- Switched the production Core Data stack to `NSPersistentCloudKitContainer` with the configured `iCloud.com.erikssonhou.leximemory` container.
+- Added CloudKit entitlements for the shared iOS/macOS targets.
+- Surfaced the configured iCloud sync mode in Settings persistence status instead of describing the store as local-only.
+- Added tests for CloudKit store-description options and persistence status messaging.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
 - Manually smoke test the local document recovery flow on macOS and iOS.
-- Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
+- Run a signed-device iCloud sync smoke test with two devices/simulators on the same Apple ID.
 - Keep local-only mode fully usable while sync is being prepared.

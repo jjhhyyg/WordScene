@@ -37,7 +37,11 @@ final class AppDataControllerTests: XCTestCase {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(coreDataStoreFactory: { coreDataStore })
 
-        XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable)
+        XCTAssertEqual(
+            controller.persistenceStatus,
+            .coreDataAvailable(syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier))
+        )
+        XCTAssertEqual(controller.persistenceStatus.title, "Core Data + iCloud 已启用")
     }
 
     func testReportsFallbackPersistenceWhenCoreDataBootstrapFails() {

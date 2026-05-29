@@ -23,35 +23,50 @@ struct CoreDataDeletionTombstone: Equatable {
     let deletedAt: Date
 }
 
+enum CoreDataSyncMode: Equatable {
+    case localOnly
+    case cloudKit(containerIdentifier: String)
+}
+
 struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryDataStore {
     private static let modelName = "WordSceneModel"
     private static let translationItemEntityName = "TranslationItem"
     private static let historyRecordEntityName = "TranslationHistoryRecord"
     private static let tombstoneEntityName = "DeletionTombstone"
     private static let schemaVersion = 1
+    static let productionCloudKitContainerIdentifier = "iCloud.com.erikssonhou.leximemory"
 
     private let container: NSPersistentContainer
 
-    init(inMemory: Bool = false) throws {
-        container = NSPersistentContainer(
-            name: Self.modelName,
-            managedObjectModel: Self.makeModel()
-        )
+    init(
+        inMemory: Bool = false,
+        syncMode: CoreDataSyncMode = .cloudKit(containerIdentifier: Self.productionCloudKitContainerIdentifier)
+    ) throws {
+        let resolvedSyncMode: CoreDataSyncMode = inMemory ? .localOnly : syncMode
+        let model = Self.makeModel()
+        switch resolvedSyncMode {
+        case .cloudKit:
+            container = NSPersistentCloudKitContainer(name: Self.modelName, managedObjectModel: model)
+        case .localOnly:
+            container = NSPersistentContainer(name: Self.modelName, managedObjectModel: model)
+        }
 
-        let description = NSPersistentStoreDescription()
+        let storeURL: URL?
         if inMemory {
-            description.type = NSInMemoryStoreType
+            storeURL = nil
         } else {
             let storeDirectory = try Self.storeDirectoryURL()
             try FileManager.default.createDirectory(
                 at: storeDirectory,
                 withIntermediateDirectories: true
             )
-            description.url = storeDirectory.appendingPathComponent("WordScene.sqlite")
+            storeURL = storeDirectory.appendingPathComponent("WordScene.sqlite")
         }
-        description.shouldMigrateStoreAutomatically = true
-        description.shouldInferMappingModelAutomatically = true
-        description.shouldAddStoreAsynchronously = false
+        let description = Self.makeStoreDescription(
+            inMemory: inMemory,
+            syncMode: resolvedSyncMode,
+            storeURL: storeURL
+        )
         container.persistentStoreDescriptions = [description]
 
         var persistentStoreError: Error?
@@ -65,6 +80,32 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
 
         container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+
+    static func makeStoreDescription(
+        inMemory: Bool,
+        syncMode: CoreDataSyncMode,
+        storeURL: URL? = nil
+    ) -> NSPersistentStoreDescription {
+        let description = NSPersistentStoreDescription()
+        if inMemory {
+            description.type = NSInMemoryStoreType
+        } else {
+            description.url = storeURL
+        }
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
+        description.shouldAddStoreAsynchronously = false
+
+        if case .cloudKit(let containerIdentifier) = syncMode, !inMemory {
+            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                containerIdentifier: containerIdentifier
+            )
+            description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        }
+
+        return description
     }
 
     func upsert(_ item: MemoryItem) throws {
