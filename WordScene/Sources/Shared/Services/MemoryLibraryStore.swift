@@ -1,6 +1,6 @@
 import Foundation
 
-struct MemoryLibraryStore {
+struct MemoryLibraryStore: MemoryLibraryDataStore {
     private static let schemaVersion = 1
 
     private let defaults: UserDefaults
@@ -47,6 +47,10 @@ struct MemoryLibraryStore {
         }
 
         defaults.set(data, forKey: key)
+    }
+
+    func clear() {
+        defaults.removeObject(forKey: key)
     }
 
     func item(matching record: TranslationRecord, in items: [MemoryItem]) -> MemoryItem? {

@@ -5,7 +5,7 @@ struct LibraryView: View {
     @State private var hasLoaded = false
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
-    private let store = MemoryLibraryStore()
+    private let store = MemoryLibraryRepository()
 
     var body: some View {
         Group {

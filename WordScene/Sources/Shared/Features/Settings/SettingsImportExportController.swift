@@ -1,11 +1,11 @@
 import Foundation
 
 struct SettingsImportExportController {
-    private let memoryStore: MemoryLibraryStore
+    private let memoryStore: any MemoryLibraryDataStore
     private let importExportService: MemoryImportExportService
 
     init(
-        memoryStore: MemoryLibraryStore = MemoryLibraryStore(),
+        memoryStore: any MemoryLibraryDataStore = MemoryLibraryRepository(),
         importExportService: MemoryImportExportService = MemoryImportExportService()
     ) {
         self.memoryStore = memoryStore

@@ -7,7 +7,7 @@ struct SearchView: View {
     @State private var hasLoaded = false
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
-    private let memoryStore = MemoryLibraryStore()
+    private let memoryStore = MemoryLibraryRepository()
     private let historyStore = TranslationHistoryStore()
     private let searchIndex = MemorySearchIndex()
 

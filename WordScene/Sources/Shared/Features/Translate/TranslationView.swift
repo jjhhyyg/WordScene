@@ -20,7 +20,7 @@ struct TranslationView: View {
     private let credentialStore = KeychainCredentialStore()
     private let translationClient = DeepSeekTranslationClient()
     private let historyStore = TranslationHistoryStore()
-    private let memoryStore = MemoryLibraryStore()
+    private let memoryStore = MemoryLibraryRepository()
 
     var body: some View {
         contentContainer

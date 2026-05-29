@@ -151,11 +151,13 @@ Verification:
 - Added compatibility tests proving legacy raw-array data loads and is rewritten to `schema_version: 1` documents.
 - Started the Core Data local authority layer with programmatic `TranslationItem` and `DeletionTombstone` entities.
 - Added in-memory Core Data tests for memory item upsert/load and soft-delete tombstone behavior.
+- Added `MemoryLibraryRepository` as the Core Data-backed memory library facade.
+- Wired Translate, Library, Search, and Settings import/export memory access to the Core Data repository.
+- Added legacy `UserDefaults` migration into Core Data, with migration source cleanup to prevent deleted items from resurfacing.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Wire the app's memory library reads/writes from `UserDefaults` to the Core Data store.
-- Migrate legacy `UserDefaults` memory data into Core Data before enabling cross-device sync.
+- Move recent translation history from `UserDefaults` to Core Data or a Core Data-backed history repository.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.
