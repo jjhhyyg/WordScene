@@ -8,6 +8,7 @@ struct AppDataController {
     let settingsImportExport: SettingsImportExportController
     let localDocumentRecovery: LocalPersistenceRecoveryController
     let persistenceStatus: AppPersistenceStatus
+    let syncStatus: AppSyncStatus
 
     init(
         coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
@@ -19,9 +20,12 @@ struct AppDataController {
         do {
             coreDataStore = try (coreDataStoreFactory ?? { try CoreDataMemoryStore(syncMode: syncMode) })()
             persistenceStatus = .coreDataAvailable(syncMode: syncMode)
+            syncStatus = AppSyncStatus(syncMode: syncMode)
         } catch {
+            let reason = Self.failureReason(for: error)
             coreDataStore = nil
-            persistenceStatus = .legacyFallback(reason: Self.failureReason(for: error))
+            persistenceStatus = .legacyFallback(reason: reason)
+            syncStatus = .unavailable(reason: reason)
         }
 
         memoryLibrary = MemoryLibraryRepository(
@@ -61,13 +65,8 @@ enum AppPersistenceStatus: Equatable {
 
     var title: String {
         switch self {
-        case .coreDataAvailable(let syncMode):
-            switch syncMode {
-            case .cloudKit:
-                return "Core Data + iCloud 已启用"
-            case .localOnly:
-                return "Core Data 已启用"
-            }
+        case .coreDataAvailable:
+            return "Core Data 已启用"
         case .legacyFallback:
             return "兼容存储模式"
         }
@@ -75,13 +74,8 @@ enum AppPersistenceStatus: Equatable {
 
     var message: String {
         switch self {
-        case .coreDataAvailable(let syncMode):
-            switch syncMode {
-            case .cloudKit(let containerIdentifier):
-                return "本机数据写入 Core Data，并配置通过 \(containerIdentifier) 在 iCloud 私有空间同步。同步时间取决于系统状态和网络。"
-            case .localOnly:
-                return "本机数据正在写入主存储。"
-            }
+        case .coreDataAvailable:
+            return "本机数据正在写入主存储。"
         case .legacyFallback(let reason):
             return "主存储初始化失败，当前使用兼容存储：\(reason)"
         }
@@ -89,13 +83,8 @@ enum AppPersistenceStatus: Equatable {
 
     var systemImage: String {
         switch self {
-        case .coreDataAvailable(let syncMode):
-            switch syncMode {
-            case .cloudKit:
-                return "icloud"
-            case .localOnly:
-                return "internaldrive"
-            }
+        case .coreDataAvailable:
+            return "internaldrive"
         case .legacyFallback:
             return "externaldrive.badge.exclamationmark"
         }
@@ -106,6 +95,65 @@ enum AppPersistenceStatus: Equatable {
             return true
         }
         return false
+    }
+}
+
+enum AppSyncStatus: Equatable {
+    case cloudKitConfigured(containerIdentifier: String)
+    case localOnly
+    case unavailable(reason: String)
+
+    init(syncMode: CoreDataSyncMode) {
+        switch syncMode {
+        case .cloudKit(let containerIdentifier):
+            self = .cloudKitConfigured(containerIdentifier: containerIdentifier)
+        case .localOnly:
+            self = .localOnly
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .cloudKitConfigured:
+            return "iCloud 同步已配置"
+        case .localOnly:
+            return "仅本机存储"
+        case .unavailable:
+            return "同步不可用"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .cloudKitConfigured(let containerIdentifier):
+            return "已配置通过 \(containerIdentifier) 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。"
+        case .localOnly:
+            return "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。"
+        case .unavailable(let reason):
+            return "主存储初始化失败，当前无法使用 iCloud 同步：\(reason)"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .cloudKitConfigured:
+            return "icloud"
+        case .localOnly:
+            return "internaldrive"
+        case .unavailable:
+            return "icloud.slash"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .cloudKitConfigured:
+            return .secondary
+        case .localOnly:
+            return .orange
+        case .unavailable:
+            return .red
+        }
     }
 }
 

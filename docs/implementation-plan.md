@@ -34,6 +34,7 @@ Baseline already completed:
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
 - CloudKit sync is entitlement-gated at runtime so unsigned or non-iCloud builds stay local-only instead of crashing.
+- Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 
 Known gaps:
 
@@ -122,6 +123,7 @@ Deliverables:
 - Configure the production Core Data store with the app's CloudKit container and persistent history tracking.
 - Add iCloud entitlements for the shared iOS/macOS targets.
 - Keep the Core Data model compatible with CloudKit validation rules and keep persistent history enabled for local fallback stores.
+- Surface storage bootstrap status and iCloud sync readiness as separate states in Settings.
 
 Verification:
 
@@ -191,6 +193,12 @@ Verification:
 - Made programmatic Core Data attributes CloudKit-compatible by allowing optional fields at the store layer while retaining domain-model defaults when reading.
 - Added tests for entitlement-based sync-mode selection, local fallback history tracking, and CloudKit model compatibility.
 - Added provider tests proving the OpenAI-compatible adapter builds the expected Chat Completions request and that the DeepSeek translation client delegates through the provider boundary.
+
+### 2026-05-30
+
+- Split primary storage status from iCloud sync readiness in `AppDataController`.
+- Updated Settings to show Core Data availability separately from CloudKit configured, local-only, and sync-unavailable states.
+- Added tests for CloudKit-configured, local-only, and unavailable sync status reporting.
 
 Next:
 

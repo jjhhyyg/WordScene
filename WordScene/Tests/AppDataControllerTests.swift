@@ -44,7 +44,12 @@ final class AppDataControllerTests: XCTestCase {
             controller.persistenceStatus,
             .coreDataAvailable(syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier))
         )
-        XCTAssertEqual(controller.persistenceStatus.title, "Core Data + iCloud 已启用")
+        XCTAssertEqual(controller.persistenceStatus.title, "Core Data 已启用")
+        XCTAssertEqual(
+            controller.syncStatus,
+            .cloudKitConfigured(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
+        XCTAssertEqual(controller.syncStatus.title, "iCloud 同步已配置")
     }
 
     func testReportsFallbackPersistenceWhenCoreDataBootstrapFails() {
@@ -56,5 +61,19 @@ final class AppDataControllerTests: XCTestCase {
             controller.persistenceStatus,
             .legacyFallback(reason: "Core Data store unavailable")
         )
+        XCTAssertEqual(controller.syncStatus, .unavailable(reason: "Core Data store unavailable"))
+        XCTAssertEqual(controller.syncStatus.title, "同步不可用")
+    }
+
+    func testReportsLocalOnlySyncStatusWhenCloudKitIsNotAvailable() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let controller = AppDataController(
+            coreDataStoreFactory: { coreDataStore },
+            syncMode: .localOnly
+        )
+
+        XCTAssertEqual(controller.syncStatus, .localOnly)
+        XCTAssertEqual(controller.syncStatus.title, "仅本机存储")
+        XCTAssertTrue(controller.syncStatus.message.contains("不会通过 iCloud 同步"))
     }
 }

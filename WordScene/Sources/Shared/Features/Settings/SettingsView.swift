@@ -138,6 +138,7 @@ struct SettingsView: View {
 
             Section("数据存储") {
                 persistenceStatusView
+                syncStatusView
                 recoveryStatusView
 
                 HStack {
@@ -301,6 +302,7 @@ struct SettingsView: View {
         SettingsCard(title: "数据存储", systemImage: "internaldrive") {
             VStack(alignment: .leading, spacing: 14) {
                 persistenceStatusView
+                syncStatusView
 
                 Divider()
 
@@ -317,6 +319,19 @@ struct SettingsView: View {
                 .foregroundStyle(persistenceStatusTint)
 
             Text(dataController.persistenceStatus.message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var syncStatusView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(dataController.syncStatus.title, systemImage: dataController.syncStatus.systemImage)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(dataController.syncStatus.tint)
+
+            Text(dataController.syncStatus.message)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
