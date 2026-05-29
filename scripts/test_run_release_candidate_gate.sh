@@ -10,6 +10,20 @@ COLLECT_SCRIPT="$TMPDIR/fake_collect_release_candidate_evidence.sh"
 EVIDENCE="$TMPDIR/evidence.md"
 LOG="$TMPDIR/commands.log"
 
+cat >"$EVIDENCE" <<'STALE_EVIDENCE'
+## Non-Manual Release Gate
+
+PRESERVED READINESS EVIDENCE
+
+## Release Candidate Build Evidence
+
+STALE RELEASE EVIDENCE
+
+## Current Build Blockers
+
+STALE BUILD BLOCKER
+STALE_EVIDENCE
+
 cat >"$BUILD_SCRIPT" <<'FAKE_BUILD'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -89,6 +103,15 @@ test "$status" -eq 65
 grep -qF 'build macos' "$LOG"
 grep -qF 'build ios' "$LOG"
 grep -qF 'collect ios' "$LOG"
+if grep -qF 'STALE RELEASE EVIDENCE' "$EVIDENCE"; then
+  echo "release candidate gate should replace stale evidence instead of appending to it" >&2
+  exit 1
+fi
+if grep -qF 'STALE BUILD BLOCKER' "$EVIDENCE"; then
+  echo "release candidate gate should replace stale build blockers instead of preserving them" >&2
+  exit 1
+fi
+grep -qF 'PRESERVED READINESS EVIDENCE' "$EVIDENCE"
 grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$EVIDENCE"
 grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED |' "$EVIDENCE"
 grep -qF 'No profiles for com.erikssonhou.leximemory' "$EVIDENCE"

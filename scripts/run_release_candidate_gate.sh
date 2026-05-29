@@ -63,6 +63,32 @@ esac
 
 mkdir -p "$(dirname "$EVIDENCE_FILE")" "$DERIVED_DATA_BASE/logs"
 
+prepare_evidence_file() {
+  local temp_file
+  temp_file="$(mktemp)"
+
+  if [[ -f "$EVIDENCE_FILE" ]]; then
+    awk '
+      /^## Release Candidate Build Evidence$/ ||
+      /^## Release Candidate Build Blocker$/ ||
+      /^## Current Build Blockers$/ {
+        skip = 1
+        next
+      }
+      /^## / {
+        skip = 0
+      }
+      skip != 1 {
+        print
+      }
+    ' "$EVIDENCE_FILE" >"$temp_file"
+  fi
+
+  mv "$temp_file" "$EVIDENCE_FILE"
+}
+
+prepare_evidence_file
+
 platform_label() {
   case "$1" in
     ios) printf 'iOS' ;;

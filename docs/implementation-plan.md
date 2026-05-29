@@ -261,6 +261,9 @@ Verification:
 - Structured the DeepSeek user prompt payload as JSON so the model translates only the `text` field instead of receiving a free-form `Text:` block.
 - Added `scripts/run_live_deepseek_translation_smoke.sh` plus a shell regression test so the real DeepSeek JSON Output path can be checked with the ignored local token before signed app smoke testing.
 - Added a Debug-only Raw API Response recorder for the OpenAI-compatible provider, including a Settings debug switch, local capped `UserDefaults` storage, and tests proving the recorder captures responses only when enabled.
+- Updated the release candidate gate so each run replaces stale candidate build evidence while preserving non-manual readiness and live DeepSeek smoke records.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; macOS remains blocked by missing Xcode account/profile state, while iOS signed Release candidate evidence was refreshed.
+- Reran `scripts/verify_release_readiness.sh`; script syntax checks, shell regression tests, token leak scan, XcodeGen marker scan, the macOS 72-test suite, and the iOS generic build passed.
 
 Next:
 
