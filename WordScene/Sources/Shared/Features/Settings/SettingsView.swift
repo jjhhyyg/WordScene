@@ -7,6 +7,9 @@ import AppKit
 
 struct SettingsView: View {
     @AppStorage("allowsAnonymousCrashReports") private var allowsAnonymousCrashReports = false
+    #if DEBUG
+    @AppStorage(DebugRawAPIResponseSettings.isEnabledKey) private var storesRawAPIResponses = false
+    #endif
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
     @State private var importExportStatus: SettingsImportExportStatus = .idle
@@ -134,6 +137,15 @@ struct SettingsView: View {
                 Text("默认关闭，不包含 Token、原文、译文或导出文件。敏感内容仅保存在本机设置和系统凭据存储中。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+
+                #if DEBUG
+                Toggle("保存 Raw API Response", isOn: $storesRawAPIResponses)
+                    .accessibilityLabel("保存 Raw API Response")
+
+                Text("仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                #endif
             }
 
             Section("数据存储") {
@@ -292,6 +304,19 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.switch)
                 .accessibilityLabel("允许发送匿名崩溃日志")
+
+                #if DEBUG
+                Toggle(isOn: $storesRawAPIResponses) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("保存 Raw API Response")
+                        Text("仅 Debug build 可用；Release build 不保存、不同步、不导出。")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+                .accessibilityLabel("保存 Raw API Response")
+                #endif
 
                 Label("敏感内容仅保存在本机设置和系统凭据存储中。", systemImage: "lock")
                     .font(.footnote)

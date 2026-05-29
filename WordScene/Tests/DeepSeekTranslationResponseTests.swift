@@ -244,6 +244,165 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertEqual(attemptCounter.value(), 2)
     }
 
+    #if DEBUG
+    func testProviderRecordsRawAPIResponseWhenDebugRecorderIsEnabled() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        let rawResponses = RawAPIResponseCapture()
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = """
+            {
+              "choices": [
+                {
+                  "index": 0,
+                  "finish_reason": "stop",
+                  "message": {
+                    "role": "assistant",
+                    "content": "{\\"translated_text\\":\\"你好\\"}"
+                  }
+                }
+              ]
+            }
+            """.data(using: .utf8)!
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt",
+            rawResponseRecorder: DebugRawAPIResponseRecorder(
+                isEnabled: { true },
+                record: { response in
+                    await rawResponses.append(response)
+                }
+            )
+        )
+
+        _ = try await provider.translate(
+            TranslationProviderRequest(text: "Hello", source: .en, target: .zh),
+            credential: TranslationProviderCredential(apiToken: "test-token")
+        )
+
+        let recordedResponses = await rawResponses.all()
+        let response = try XCTUnwrap(recordedResponses.first)
+        XCTAssertEqual(recordedResponses.count, 1)
+        XCTAssertEqual(response.provider, "adapter-model")
+        XCTAssertEqual(response.endpoint, "https://example.test/v1/chat/completions")
+        XCTAssertEqual(response.statusCode, 200)
+        XCTAssertTrue(response.body.contains("translated_text"))
+        XCTAssertTrue(response.body.contains("你好"))
+        XCTAssertFalse(response.body.contains("test-token"))
+    }
+
+    func testProviderDoesNotRecordRawAPIResponseWhenDebugRecorderIsDisabled() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        let rawResponses = RawAPIResponseCapture()
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = """
+            {
+              "choices": [
+                {
+                  "index": 0,
+                  "finish_reason": "stop",
+                  "message": {
+                    "role": "assistant",
+                    "content": "{\\"translated_text\\":\\"你好\\"}"
+                  }
+                }
+              ]
+            }
+            """.data(using: .utf8)!
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt",
+            rawResponseRecorder: DebugRawAPIResponseRecorder(
+                isEnabled: { false },
+                record: { response in
+                    await rawResponses.append(response)
+                }
+            )
+        )
+
+        _ = try await provider.translate(
+            TranslationProviderRequest(text: "Hello", source: .en, target: .zh),
+            credential: TranslationProviderCredential(apiToken: "test-token")
+        )
+
+        let recordedResponses = await rawResponses.all()
+        XCTAssertTrue(recordedResponses.isEmpty)
+    }
+
+    func testDebugRawAPIResponseStorePersistsMostRecentResponsesLocally() async throws {
+        let suiteName = "DebugRawAPIResponseStoreTests-\(UUID().uuidString)"
+        defer {
+            UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+        }
+        let store = DebugRawAPIResponseUserDefaultsStore(suiteName: suiteName, limit: 2)
+
+        await store.save(
+            DebugRawAPIResponse(
+                provider: "model-a",
+                endpoint: "https://example.test/first",
+                statusCode: 200,
+                body: "first",
+                capturedAt: Date(timeIntervalSince1970: 1)
+            )
+        )
+        await store.save(
+            DebugRawAPIResponse(
+                provider: "model-b",
+                endpoint: "https://example.test/second",
+                statusCode: 500,
+                body: "second",
+                capturedAt: Date(timeIntervalSince1970: 2)
+            )
+        )
+        await store.save(
+            DebugRawAPIResponse(
+                provider: "model-c",
+                endpoint: "https://example.test/third",
+                statusCode: 200,
+                body: "third",
+                capturedAt: Date(timeIntervalSince1970: 3)
+            )
+        )
+
+        let restoredStore = DebugRawAPIResponseUserDefaultsStore(suiteName: suiteName, limit: 2)
+        let responses = await restoredStore.load()
+
+        XCTAssertEqual(responses.map(\.provider), ["model-c", "model-b"])
+        XCTAssertEqual(responses.map(\.body), ["third", "second"])
+    }
+    #endif
+
     func testDeepSeekTranslationClientDelegatesToProvider() async throws {
         let provider = CapturingTranslationProvider(result: TranslationLLMResult(translatedText: "你好"))
         let client = DeepSeekTranslationClient(provider: provider)
@@ -289,6 +448,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
 
         return data
     }
+
 }
 
 private final class AttemptCounter: @unchecked Sendable {
@@ -325,6 +485,20 @@ private final class RequestCapture: @unchecked Sendable {
         return request
     }
 }
+
+#if DEBUG
+private actor RawAPIResponseCapture {
+    private var responses: [DebugRawAPIResponse] = []
+
+    func append(_ response: DebugRawAPIResponse) {
+        responses.append(response)
+    }
+
+    func all() -> [DebugRawAPIResponse] {
+        responses
+    }
+}
+#endif
 
 private final class CapturingURLProtocol: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) static var handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?

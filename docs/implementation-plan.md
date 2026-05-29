@@ -27,6 +27,7 @@ Baseline already completed:
 - DeepSeek token validation rejects authenticated but balance-unavailable accounts.
 - DeepSeek chat-completions translation loop in Translate.
 - DeepSeek translation requests use JSON Output, send the source/target/text as a structured JSON prompt payload, parse only `translated_text`, retry one empty assistant response, and reject truncated/filter/resource finish reasons before saving history.
+- Debug builds can optionally record raw API responses locally for model-response diagnosis; Release builds do not expose or wire this recorder.
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
@@ -259,6 +260,7 @@ Verification:
 - Hardened the DeepSeek translation adapter to request JSON Output, extract only `translated_text`, retry one empty assistant response, and surface truncated/filter/resource finish reasons as explicit translation errors.
 - Structured the DeepSeek user prompt payload as JSON so the model translates only the `text` field instead of receiving a free-form `Text:` block.
 - Added `scripts/run_live_deepseek_translation_smoke.sh` plus a shell regression test so the real DeepSeek JSON Output path can be checked with the ignored local token before signed app smoke testing.
+- Added a Debug-only Raw API Response recorder for the OpenAI-compatible provider, including a Settings debug switch, local capped `UserDefaults` storage, and tests proving the recorder captures responses only when enabled.
 
 Next:
 

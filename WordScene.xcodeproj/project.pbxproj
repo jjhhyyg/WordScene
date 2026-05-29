@@ -23,6 +23,7 @@
 		135D99D273777D3420083E87 /* CoreDataMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */; };
 		17F311650DEBB0F7621F968A /* PinyinTransliterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86CD1C4073069E019639A99 /* PinyinTransliterator.swift */; };
 		1CC84765351E1A9CE13617BA /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0810899951479D6FBD559709 /* SearchView.swift */; };
+		1D272F40CF2071079A053F15 /* DebugRawAPIResponseRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */; };
 		1D6B8A92C3FDC97C4A422064 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */; };
 		2410A73DB9FC0D3870C49871 /* SettingsImportExportController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */; };
 		261538CC6268D556FF32E9AA /* TranslationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372CB65BBB01171BE108F83E /* TranslationView.swift */; };
@@ -43,6 +44,7 @@
 		4B092C560E36716FA36BB078 /* MemoryLibraryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */; };
 		4EF9E0FF93BCAA01045EE0F8 /* WordSceneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */; };
 		4F46BEAA4AB8DC57D8EB9575 /* TranslationLanguageDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */; };
+		4F9F3DF50F9EC0FAC283925F /* DebugRawAPIResponseRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */; };
 		51A7D2152AAEDC76A7575CA1 /* MemoryLibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD8C4290705F81BA86674BC /* MemoryLibraryStoreTests.swift */; };
 		54AA5AEAA990601A284040CA /* DeepSeekCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B861A782D48915285586521 /* DeepSeekCredential.swift */; };
 		5AA52AD95D961059839402F1 /* TranslationHistoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4A7FB7FCC5F7BD59669735 /* TranslationHistoryRepository.swift */; };
@@ -135,6 +137,7 @@
 		4D4A7FB7FCC5F7BD59669735 /* TranslationHistoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryRepository.swift; sourceTree = "<group>"; };
 		4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageDirection.swift; sourceTree = "<group>"; };
 		52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceStoreError.swift; sourceTree = "<group>"; };
+		61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRawAPIResponseRecorder.swift; sourceTree = "<group>"; };
 		62E99C711EE951EFB367F4B5 /* WordSceneMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WordSceneMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		685B7AD82D463A45F145A2B4 /* MemoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryItem.swift; sourceTree = "<group>"; };
@@ -207,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */,
+				61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */,
 				34F3D453013B5CDB55D10CE9 /* DeepSeekBalanceClient.swift */,
 				2B861A782D48915285586521 /* DeepSeekCredential.swift */,
 				9C12FD3785C7C960302258E6 /* DeepSeekTranslationClient.swift */,
@@ -523,6 +527,7 @@
 				BDFAED11B6771D1197923B93 /* AppDataController.swift in Sources */,
 				5CDE955C2035798FB02E1F34 /* AppSection.swift in Sources */,
 				135D99D273777D3420083E87 /* CoreDataMemoryStore.swift in Sources */,
+				4F9F3DF50F9EC0FAC283925F /* DebugRawAPIResponseRecorder.swift in Sources */,
 				A9460D82F6024D2375A935A2 /* DeepSeekBalanceClient.swift in Sources */,
 				54AA5AEAA990601A284040CA /* DeepSeekCredential.swift in Sources */,
 				043498A7445FCFA8D53626E7 /* DeepSeekTranslationClient.swift in Sources */,
@@ -558,6 +563,7 @@
 				E52F57F2A8F6D00761F689F6 /* AppDataController.swift in Sources */,
 				E09554AFBB7DD4768B82DC15 /* AppSection.swift in Sources */,
 				0F01AF2937029ED82C6A143C /* CoreDataMemoryStore.swift in Sources */,
+				1D272F40CF2071079A053F15 /* DebugRawAPIResponseRecorder.swift in Sources */,
 				B1617BC8C90214DE4CF412C6 /* DeepSeekBalanceClient.swift in Sources */,
 				5C49BD02C7FBE77B1F092DD2 /* DeepSeekCredential.swift in Sources */,
 				46CCF4A9897F51A4CD0E21EA /* DeepSeekTranslationClient.swift in Sources */,

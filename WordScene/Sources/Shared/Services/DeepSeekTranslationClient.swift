@@ -57,6 +57,17 @@ struct DeepSeekProvider: TranslationProvider {
         baseURL: URL = URL(string: "https://api.deepseek.com")!,
         model: String = "deepseek-v4-flash"
     ) {
+        #if DEBUG
+        chatProvider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: baseURL,
+            model: model,
+            systemPrompt: """
+            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"..."}. Do not add explanations, alternatives, markdown, or notes.
+            """,
+            rawResponseRecorder: .userDefaultsBacked()
+        )
+        #else
         chatProvider = OpenAICompatibleChatProvider(
             session: session,
             baseURL: baseURL,
@@ -65,6 +76,7 @@ struct DeepSeekProvider: TranslationProvider {
             You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"..."}. Do not add explanations, alternatives, markdown, or notes.
             """
         )
+        #endif
     }
 
     func translate(
@@ -80,6 +92,9 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
     private let baseURL: URL
     private let model: String
     private let systemPrompt: String
+    #if DEBUG
+    private let rawResponseRecorder: DebugRawAPIResponseRecorder?
+    #endif
 
     init(
         session: URLSession = .shared,
@@ -91,7 +106,26 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         self.baseURL = baseURL
         self.model = model
         self.systemPrompt = systemPrompt
+        #if DEBUG
+        self.rawResponseRecorder = nil
+        #endif
     }
+
+    #if DEBUG
+    init(
+        session: URLSession = .shared,
+        baseURL: URL,
+        model: String,
+        systemPrompt: String,
+        rawResponseRecorder: DebugRawAPIResponseRecorder?
+    ) {
+        self.session = session
+        self.baseURL = baseURL
+        self.model = model
+        self.systemPrompt = systemPrompt
+        self.rawResponseRecorder = rawResponseRecorder
+    }
+    #endif
 
     func translate(
         _ providerRequest: TranslationProviderRequest,
@@ -154,6 +188,14 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw DeepSeekTranslationError.invalidResponse
         }
+        #if DEBUG
+        await rawResponseRecorder?.record(
+            provider: model,
+            endpoint: request.url ?? baseURL,
+            statusCode: httpResponse.statusCode,
+            bodyData: data
+        )
+        #endif
 
         switch httpResponse.statusCode {
         case 200:
