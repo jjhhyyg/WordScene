@@ -364,6 +364,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `5c23f284eda5`.
 - Added `AppBuildInfo` and surfaced version/build/smoke-test identifier in Settings so manual smoke testers can copy the build metadata from the app instead of inspecting the bundle.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `c39eb83105c0`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `e0ac24e00202`.
 
 Next:
 
