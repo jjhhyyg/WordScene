@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 
 usage() {
   echo "Usage: $0 [--evidence <markdown>]" >&2
@@ -100,6 +101,19 @@ has_candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+candidate_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Git commit" {
+      print trim($3)
+      exit
+    }
+  ' "$EVIDENCE_FILE"
+}
+
 required_rows() {
   cat <<'ROWS'
 Readiness script|macOS + iOS generic
@@ -179,6 +193,12 @@ fi
 if ! has_candidate_git_commit; then
   echo "Missing candidate build Git commit metadata." >&2
   status=1
+else
+  evidence_commit="$(candidate_git_commit)"
+  if [[ "${evidence_commit:0:12}" != "$CURRENT_COMMIT" ]]; then
+    echo "Candidate build Git commit does not match current HEAD: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
+    status=1
+  fi
 fi
 
 if [[ "$status" -ne 0 ]]; then

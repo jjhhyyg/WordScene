@@ -27,7 +27,9 @@ and pass/fail notes for each run.
   Git commit used to produce the app bundle.
 - Run `scripts/check_release_completion.sh` only after recording all candidate
   build and manual smoke evidence. It must pass before calling the release
-  complete or the cross-platform product loop genuinely usable.
+  complete or the cross-platform product loop genuinely usable. The candidate
+  build Git commit recorded in evidence must match the current repository HEAD,
+  so rerun the candidate gate after any code change.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek
@@ -213,5 +215,5 @@ scripts/check_release_completion.sh
 
 The script fails if any required row does not have exactly one PASS entry, if
 the evidence table structure is malformed, if candidate Git commit metadata is
-missing, or if any BLOCKED/FAIL row is still present in
-`docs/release-smoke-evidence.md`.
+missing or stale relative to the current repository HEAD, or if any
+BLOCKED/FAIL row is still present in `docs/release-smoke-evidence.md`.

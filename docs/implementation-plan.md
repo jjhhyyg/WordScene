@@ -60,6 +60,7 @@ Baseline already completed:
 - Manual smoke recording rejects non-canonical Area/Platform pairs so typos cannot create evidence rows ignored by release completion.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
+- Release completion rejects stale candidate Git commit metadata when evidence does not match the current repository HEAD.
 
 Known gaps:
 
@@ -296,6 +297,7 @@ Verification:
 - Hardened `scripts/check_release_completion.sh` to validate standard evidence table headers for release gate, candidate build, blocker, and manual smoke sections before treating rows as auditable release evidence.
 - Deduplicated recent translation history insertion so repeating the same source/translation/language direction moves the newest record to the top instead of cluttering the history list.
 - Hardened `scripts/record_release_smoke_result.sh` to reject non-canonical manual Area/Platform pairs, preventing typo rows such as `iPadOS` from being recorded but ignored by the completion audit.
+- Hardened `scripts/check_release_completion.sh` so candidate build evidence must match the current repository HEAD, preventing stale signed-build evidence from making a changed tree look releasable.
 
 Next:
 

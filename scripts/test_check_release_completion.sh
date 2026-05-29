@@ -9,6 +9,7 @@ CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
+STALE_COMMIT_EVIDENCE="$TMPDIR/stale-commit-evidence.md"
 DUPLICATE_PASS_EVIDENCE="$TMPDIR/duplicate-pass-evidence.md"
 MALFORMED_TABLE_EVIDENCE="$TMPDIR/malformed-table-evidence.md"
 
@@ -133,3 +134,15 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Missing candidate build Git commit metadata.' /tmp/wordscene-completion-missing-commit.err
+
+cp "$PASSING_EVIDENCE" "$STALE_COMMIT_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_COMMIT_EVIDENCE"
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$STALE_COMMIT_EVIDENCE" \
+  >/tmp/wordscene-completion-stale-commit.out 2>/tmp/wordscene-completion-stale-commit.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF "Candidate build Git commit does not match current HEAD: evidence 000000000000, current $CURRENT_COMMIT." /tmp/wordscene-completion-stale-commit.err
