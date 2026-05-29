@@ -26,6 +26,7 @@ Baseline already completed:
 - DeepSeek token save/delete/test flow in Settings.
 - DeepSeek token validation rejects authenticated but balance-unavailable accounts.
 - DeepSeek chat-completions translation loop in Translate.
+- DeepSeek translation requests use JSON Output, parse only `translated_text`, retry one empty assistant response, and reject truncated/filter/resource finish reasons before saving history.
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
@@ -254,6 +255,7 @@ Verification:
 - Added `scripts/verify_release_readiness.sh` with a shell regression test so non-manual release gates can be rerun consistently before smoke testing.
 - Added `scripts/run_release_candidate_gate.sh` with a shell regression test so candidate build evidence and platform-specific signing blockers are recorded by one command.
 - Verified the candidate gate records the macOS signing blocker while still continuing to collect iOS signed-build evidence.
+- Hardened the DeepSeek translation adapter to request JSON Output, extract only `translated_text`, retry one empty assistant response, and surface truncated/filter/resource finish reasons as explicit translation errors.
 
 Next:
 

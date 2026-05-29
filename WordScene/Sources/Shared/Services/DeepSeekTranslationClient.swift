@@ -62,7 +62,7 @@ struct DeepSeekProvider: TranslationProvider {
             baseURL: baseURL,
             model: model,
             systemPrompt: """
-            You are a precise translation engine for a language learning app. Return only the translated text. Do not add explanations, alternatives, quotation marks, markdown, or notes.
+            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"..."}. Do not add explanations, alternatives, markdown, or notes.
             """
         )
     }
@@ -109,25 +109,47 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONEncoder().encode(
-            OpenAIChatCompletionRequest(
-                model: model,
-                messages: [
-                    .init(role: "system", content: systemPrompt),
-                    .init(
-                        role: "user",
-                        content: userPrompt(
-                            text: trimmedText,
-                            source: providerRequest.source,
-                            target: providerRequest.target
-                        )
-                    )
-                ],
-                thinking: .init(type: "disabled"),
-                temperature: 0.2,
-                stream: false
+            chatCompletionRequest(
+                text: trimmedText,
+                source: providerRequest.source,
+                target: providerRequest.target
             )
         )
 
+        for attempt in 0..<2 {
+            do {
+                return try await perform(request)
+            } catch DeepSeekTranslationError.emptyOutput where attempt == 0 {
+                continue
+            }
+        }
+
+        throw DeepSeekTranslationError.emptyOutput
+    }
+
+    private func chatCompletionRequest(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection
+    ) -> OpenAIChatCompletionRequest {
+        OpenAIChatCompletionRequest(
+            model: model,
+            messages: [
+                .init(role: "system", content: systemPrompt),
+                .init(
+                    role: "user",
+                    content: userPrompt(text: text, source: source, target: target)
+                )
+            ],
+            thinking: .init(type: "disabled"),
+            responseFormat: .init(type: "json_object"),
+            maxTokens: 1_200,
+            temperature: 0.2,
+            stream: false
+        )
+    }
+
+    private func perform(_ request: URLRequest) async throws -> TranslationLLMResult {
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw DeepSeekTranslationError.invalidResponse
@@ -135,12 +157,10 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
 
         switch httpResponse.statusCode {
         case 200:
-            let decoded = try JSONDecoder().decode(OpenAIChatCompletionResponse.self, from: data)
-            let translatedText = decoded.choices.first?.message.content.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            guard !translatedText.isEmpty else {
-                throw DeepSeekTranslationError.emptyOutput
-            }
-            return TranslationLLMResult(translatedText: translatedText)
+            let decoded = try decodeResponse(from: data)
+            let choice = try decoded.firstChoice()
+            try validateFinishReason(choice.finishReason)
+            return TranslationLLMResult(translatedText: try translatedText(from: choice.message.content))
         case 401:
             throw DeepSeekTranslationError.unauthorized
         default:
@@ -148,13 +168,61 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         }
     }
 
+    private func decodeResponse(from data: Data) throws -> OpenAIChatCompletionResponse {
+        do {
+            return try JSONDecoder().decode(OpenAIChatCompletionResponse.self, from: data)
+        } catch {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+    }
+
     private func userPrompt(text: String, source: LanguageSelection, target: LanguageSelection) -> String {
         """
         Source language: \(source.translationPromptName)
         Target language: \(target.translationPromptName)
+        Return json matching {"translated_text":"..."}.
         Text:
         \(text)
         """
+    }
+
+    private func validateFinishReason(_ finishReason: String?) throws {
+        switch finishReason {
+        case nil, "stop":
+            return
+        case "length":
+            throw DeepSeekTranslationError.incompleteOutput
+        case "content_filter":
+            throw DeepSeekTranslationError.filteredOutput
+        case "insufficient_system_resource":
+            throw DeepSeekTranslationError.insufficientSystemResource
+        default:
+            throw DeepSeekTranslationError.invalidResponse
+        }
+    }
+
+    private func translatedText(from content: String) throws -> String {
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedContent.isEmpty else {
+            throw DeepSeekTranslationError.emptyOutput
+        }
+
+        guard let data = trimmedContent.data(using: .utf8) else {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+
+        do {
+            let output = try JSONDecoder().decode(TranslationJSONOutput.self, from: data)
+            let translatedText = output.translatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !translatedText.isEmpty else {
+                throw DeepSeekTranslationError.emptyOutput
+            }
+            return translatedText
+        } catch let error as DeepSeekTranslationError {
+            throw error
+        } catch {
+            throw DeepSeekTranslationError.invalidResponse
+        }
     }
 }
 
@@ -168,11 +236,27 @@ private struct OpenAIChatCompletionRequest: Encodable {
         let type: String
     }
 
+    struct ResponseFormat: Encodable {
+        let type: String
+    }
+
     let model: String
     let messages: [Message]
     let thinking: Thinking
+    let responseFormat: ResponseFormat
+    let maxTokens: Int
     let temperature: Double
     let stream: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case model
+        case messages
+        case thinking
+        case responseFormat = "response_format"
+        case maxTokens = "max_tokens"
+        case temperature
+        case stream
+    }
 }
 
 struct OpenAIChatCompletionResponse: Decodable, Equatable {
@@ -194,13 +278,31 @@ struct OpenAIChatCompletionResponse: Decodable, Equatable {
     }
 
     let choices: [Choice]
+
+    func firstChoice() throws -> Choice {
+        guard let choice = choices.first else {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+        return choice
+    }
 }
 
 typealias DeepSeekChatCompletionResponse = OpenAIChatCompletionResponse
 
+private struct TranslationJSONOutput: Decodable {
+    let translatedText: String
+
+    enum CodingKeys: String, CodingKey {
+        case translatedText = "translated_text"
+    }
+}
+
 enum DeepSeekTranslationError: Error, Equatable {
     case emptyInput
     case emptyOutput
+    case incompleteOutput
+    case filteredOutput
+    case insufficientSystemResource
     case invalidResponse
     case unauthorized
     case httpStatus(Int)

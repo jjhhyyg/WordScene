@@ -811,6 +811,12 @@ struct TranslationView: View {
                 return "请输入需要翻译的文本。"
             case .emptyOutput:
                 return "DeepSeek 没有返回可用译文。"
+            case .incompleteOutput:
+                return "DeepSeek 输出被截断，请缩短文本后重试。"
+            case .filteredOutput:
+                return "DeepSeek 拒绝了该内容，请调整文本后重试。"
+            case .insufficientSystemResource:
+                return "DeepSeek 暂时资源不足，请稍后重试。"
             case .invalidResponse:
                 return "DeepSeek 返回无效响应。"
             case .unauthorized:

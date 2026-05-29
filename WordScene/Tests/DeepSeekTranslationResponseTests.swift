@@ -45,7 +45,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                   "finish_reason": "stop",
                   "message": {
                     "role": "assistant",
-                    "content": "你好"
+                    "content": "{\\"translated_text\\":\\"你好\\"}"
                   }
                 }
               ]
@@ -82,6 +82,8 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertEqual(payload["model"] as? String, "adapter-model")
         XCTAssertEqual(payload["stream"] as? Bool, false)
         XCTAssertEqual((payload["thinking"] as? [String: Any])?["type"] as? String, "disabled")
+        XCTAssertEqual((payload["response_format"] as? [String: Any])?["type"] as? String, "json_object")
+        XCTAssertEqual(payload["max_tokens"] as? Int, 1_200)
 
         let messages = try XCTUnwrap(payload["messages"] as? [[String: String]])
         XCTAssertEqual(messages.first?["role"], "system")
@@ -90,6 +92,153 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertTrue(messages.last?["content"]?.contains("Source language: English") == true)
         XCTAssertTrue(messages.last?["content"]?.contains("Target language: Chinese") == true)
         XCTAssertTrue(messages.last?["content"]?.contains("Hello") == true)
+        XCTAssertTrue(messages.last?["content"]?.contains("json") == true)
+        XCTAssertTrue(messages.last?["content"]?.contains("translated_text") == true)
+    }
+
+    func testProviderDecodesTranslatedTextFromJSONAssistantContent() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = """
+            {
+              "choices": [
+                {
+                  "index": 0,
+                  "finish_reason": "stop",
+                  "message": {
+                    "role": "assistant",
+                    "content": "{\\"translated_text\\":\\"你好，世界。\\"}"
+                  }
+                }
+              ]
+            }
+            """.data(using: .utf8)!
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt"
+        )
+
+        let result = try await provider.translate(
+            TranslationProviderRequest(text: "Hello, world.", source: .en, target: .zh),
+            credential: TranslationProviderCredential(apiToken: "test-token")
+        )
+
+        XCTAssertEqual(result.translatedText, "你好，世界。")
+    }
+
+    func testProviderRejectsLengthFinishReason() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = """
+            {
+              "choices": [
+                {
+                  "index": 0,
+                  "finish_reason": "length",
+                  "message": {
+                    "role": "assistant",
+                    "content": "{\\"translated_text\\":\\"截断"
+                  }
+                }
+              ]
+            }
+            """.data(using: .utf8)!
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt"
+        )
+
+        do {
+            _ = try await provider.translate(
+                TranslationProviderRequest(text: "Hello", source: .en, target: .zh),
+                credential: TranslationProviderCredential(apiToken: "test-token")
+            )
+            XCTFail("Expected truncated DeepSeek output to be rejected.")
+        } catch {
+            XCTAssertEqual(error as? DeepSeekTranslationError, .incompleteOutput)
+        }
+    }
+
+    func testProviderRetriesOnceWhenAssistantContentIsEmpty() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        let attemptCounter = AttemptCounter()
+        CapturingURLProtocol.handler = { request in
+            let attempt = attemptCounter.next()
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let content = attempt == 1 ? "" : "{\\\"translated_text\\\":\\\"你好\\\"}"
+            let data = """
+            {
+              "choices": [
+                {
+                  "index": 0,
+                  "finish_reason": "stop",
+                  "message": {
+                    "role": "assistant",
+                    "content": "\(content)"
+                  }
+                }
+              ]
+            }
+            """.data(using: .utf8)!
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt"
+        )
+
+        let result = try await provider.translate(
+            TranslationProviderRequest(text: "Hello", source: .en, target: .zh),
+            credential: TranslationProviderCredential(apiToken: "test-token")
+        )
+
+        XCTAssertEqual(result.translatedText, "你好")
+        XCTAssertEqual(attemptCounter.value(), 2)
     }
 
     func testDeepSeekTranslationClientDelegatesToProvider() async throws {
@@ -136,6 +285,24 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         }
 
         return data
+    }
+}
+
+private final class AttemptCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+
+    func next() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        count += 1
+        return count
+    }
+
+    func value() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return count
     }
 }
 
