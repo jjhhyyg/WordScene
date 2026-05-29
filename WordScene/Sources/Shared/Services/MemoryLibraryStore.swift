@@ -1,6 +1,8 @@
 import Foundation
 
 struct MemoryLibraryStore {
+    private static let schemaVersion = 1
+
     private let defaults: UserDefaults
     private let key: String
     private let maximumCount: Int
@@ -20,12 +22,27 @@ struct MemoryLibraryStore {
             return []
         }
 
-        return (try? JSONDecoder().decode([MemoryItem].self, from: data)) ?? []
+        let decoder = JSONDecoder()
+        if let document = try? decoder.decode(MemoryLibraryDocument.self, from: data) {
+            return Array(document.items.prefix(maximumCount))
+        }
+
+        if let legacyItems = try? decoder.decode([MemoryItem].self, from: data) {
+            let trimmedItems = Array(legacyItems.prefix(maximumCount))
+            save(trimmedItems)
+            return trimmedItems
+        }
+
+        return []
     }
 
     func save(_ items: [MemoryItem]) {
         let trimmedItems = Array(items.prefix(maximumCount))
-        guard let data = try? JSONEncoder().encode(trimmedItems) else {
+        let document = MemoryLibraryDocument(
+            schemaVersion: Self.schemaVersion,
+            items: trimmedItems
+        )
+        guard let data = try? JSONEncoder().encode(document) else {
             return
         }
 
@@ -64,6 +81,16 @@ struct MemoryLibraryStore {
             updatedItem.updatedAt = Date()
             return updatedItem
         }
+    }
+}
+
+private struct MemoryLibraryDocument: Codable {
+    let schemaVersion: Int
+    let items: [MemoryItem]
+
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion = "schema_version"
+        case items
     }
 }
 

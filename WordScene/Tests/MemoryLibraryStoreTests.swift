@@ -23,6 +23,43 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(store.load(), [item])
     }
 
+    func testSavesVersionedDocumentForFutureMigrations() throws {
+        let suiteName = "MemoryLibraryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = MemoryLibraryStore(defaults: defaults)
+        let item = MemoryItem(sourceText: "hello", translatedText: "你好", sourceLanguage: .en, targetLanguage: .zh)
+
+        store.save([item])
+
+        let data = try XCTUnwrap(defaults.data(forKey: "memoryLibrary"))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(object["schema_version"] as? Int, 1)
+        XCTAssertEqual((object["items"] as? [[String: Any]])?.count, 1)
+    }
+
+    func testLoadsLegacyArrayAndMigratesToVersionedDocument() throws {
+        let suiteName = "MemoryLibraryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = MemoryLibraryStore(defaults: defaults)
+        let item = MemoryItem(sourceText: "legacy", translatedText: "旧", sourceLanguage: .en, targetLanguage: .zh)
+        defaults.set(try JSONEncoder().encode([item]), forKey: "memoryLibrary")
+
+        XCTAssertEqual(store.load(), [item])
+
+        let migratedData = try XCTUnwrap(defaults.data(forKey: "memoryLibrary"))
+        let migratedObject = try XCTUnwrap(JSONSerialization.jsonObject(with: migratedData) as? [String: Any])
+        XCTAssertEqual(migratedObject["schema_version"] as? Int, 1)
+        XCTAssertEqual((migratedObject["items"] as? [[String: Any]])?.first?["sourceText"] as? String, "legacy")
+    }
+
     func testAddingSameTranslationDoesNotCreateDuplicate() {
         let store = MemoryLibraryStore(defaults: UserDefaults.standard)
         let record = TranslationRecord(

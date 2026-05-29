@@ -14,7 +14,7 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: Milestone 4 implemented in code; Sync Readiness is next.
+Status: Milestone 5 started; local persistence now has a migration path before CloudKit.
 
 Baseline already completed:
 
@@ -27,6 +27,7 @@ Baseline already completed:
 - DeepSeek chat-completions translation loop in Translate.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
+- Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
@@ -106,13 +107,14 @@ Verification:
 
 ## Milestone 5: Sync Readiness
 
-Target status: pending.
+Target status: in progress.
 
 Deliverables:
 
 - Decide whether to use SwiftData/Core Data with CloudKit or a custom JSON-backed sync layer.
 - Add data model migration story before shipping sync.
 - Keep local-only mode fully usable.
+- Store local memory and recent history in versioned documents while retaining compatibility with legacy array data.
 
 Verification:
 
@@ -145,9 +147,12 @@ Verification:
 - Implemented JSON memory import/export with schema version, checksum validation, duplicate conflict handling, and export file naming.
 - Wired Settings import/export buttons to native JSON file import/export flows with status feedback and Token exclusion messaging.
 - Added import/export service and Settings import/export controller tests.
+- Started sync readiness by migrating `UserDefaults` persistence for memory library and recent history from raw arrays to versioned documents.
+- Added compatibility tests proving legacy raw-array data loads and is rewritten to `schema_version: 1` documents.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Start Milestone 5 by deciding the local data model migration path before CloudKit/iCloud sync.
+- Decide whether the CloudKit-backed authority should be SwiftData/Core Data or a custom JSON-backed sync layer.
+- Define delete/tombstone behavior before enabling cross-device sync.
 - Keep local-only mode fully usable while sync is being prepared.
