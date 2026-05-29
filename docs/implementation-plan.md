@@ -289,6 +289,7 @@ Verification:
 - Added Git commit metadata to release candidate build evidence and made the final release completion audit fail when candidate traceability metadata is missing.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS signed Release candidate evidence now includes the source Git commit, while macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
 - Reran `scripts/check_release_completion.sh`; candidate Git commit metadata is now present, and the remaining blockers are macOS signed candidate build plus manual translation/import-export/recovery/iCloud/local-only smoke evidence.
+- Hardened `scripts/record_release_smoke_result.sh` so rerunning a manual smoke row for the same area/platform replaces stale evidence instead of leaving contradictory PASS/FAIL/BLOCKED rows in the release evidence file.
 
 Next:
 

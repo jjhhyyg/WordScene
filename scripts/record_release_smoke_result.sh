@@ -115,10 +115,51 @@ ensure_section() {
 
 ensure_section
 
-printf '| %s | %s | %s | %s | %s | %s |\n' \
-  "$(sanitize_cell "$AREA")" \
-  "$(sanitize_cell "$PLATFORM")" \
-  "$(sanitize_cell "$DEVICE")" \
-  "$(sanitize_cell "$BUILD")" \
-  "$(sanitize_cell "$RESULT")" \
-  "$(sanitize_cell "$NOTES")" >>"$EVIDENCE_FILE"
+AREA_CELL="$(sanitize_cell "$AREA")"
+PLATFORM_CELL="$(sanitize_cell "$PLATFORM")"
+DEVICE_CELL="$(sanitize_cell "$DEVICE")"
+BUILD_CELL="$(sanitize_cell "$BUILD")"
+RESULT_CELL="$(sanitize_cell "$RESULT")"
+NOTES_CELL="$(sanitize_cell "$NOTES")"
+ROW="| $AREA_CELL | $PLATFORM_CELL | $DEVICE_CELL | $BUILD_CELL | $RESULT_CELL | $NOTES_CELL |"
+TEMP_FILE="$(mktemp)"
+
+awk -F'|' \
+  -v expected_area="$AREA_CELL" \
+  -v expected_platform="$PLATFORM_CELL" \
+  -v replacement_row="$ROW" '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    function maybe_insert_replacement() {
+      if (in_manual == 1 && inserted == 0) {
+        print replacement_row
+        inserted = 1
+      }
+    }
+    /^## Manual Smoke Evidence$/ {
+      in_manual = 1
+      print
+      next
+    }
+    /^## / && in_manual == 1 {
+      maybe_insert_replacement()
+      in_manual = 0
+      print
+      next
+    }
+    in_manual == 1 &&
+    trim($2) == expected_area &&
+    trim($3) == expected_platform {
+      next
+    }
+    {
+      print
+    }
+    END {
+      maybe_insert_replacement()
+    }
+  ' "$EVIDENCE_FILE" >"$TEMP_FILE"
+
+mv "$TEMP_FILE" "$EVIDENCE_FILE"

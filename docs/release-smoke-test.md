@@ -171,7 +171,9 @@ Expected result:
 Use this table for each release candidate. Build metadata and blocker evidence
 for the current candidate is recorded in `docs/release-smoke-evidence.md`.
 Prefer recording manual rows with `scripts/record_release_smoke_result.sh` so
-the table format stays consistent:
+the table format stays consistent. Recording the same `Area` and `Platform`
+again replaces the stale manual row, so a retest can move a row from `BLOCKED`
+or `FAIL` to the current result without leaving contradictory evidence behind:
 
 ```bash
 scripts/record_release_smoke_result.sh \
