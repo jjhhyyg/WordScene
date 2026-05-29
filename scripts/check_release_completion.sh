@@ -216,6 +216,9 @@ live_smoke_git_commit() {
 
 validate_live_smoke_git_commit() {
   local evidence_commit
+  local disallowed=()
+  local file
+  local joined
 
   evidence_commit="$(live_smoke_git_commit)"
   if [[ -z "$evidence_commit" ]]; then
@@ -223,7 +226,51 @@ validate_live_smoke_git_commit() {
     return 1
   fi
 
-  validate_candidate_git_commit "$evidence_commit"
+  if candidate_matches_current_head "$evidence_commit"; then
+    return 0
+  fi
+
+  if ! live_smoke_is_ancestor_of_head "$evidence_commit"; then
+    echo "DeepSeek live protocol smoke Git commit is not an ancestor of current HEAD: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
+    return 1
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_live_smoke "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    echo "DeepSeek live protocol smoke Git commit is stale for release-critical files: $joined. Rerun scripts/run_live_deepseek_translation_smoke.sh." >&2
+    return 1
+  fi
+}
+
+live_smoke_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_LIVE_SMOKE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_LIVE_SMOKE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_live_smoke() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
 }
 
 required_rows() {

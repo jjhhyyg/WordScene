@@ -11,6 +11,7 @@ INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 STALE_COMMIT_EVIDENCE="$TMPDIR/stale-commit-evidence.md"
 MISSING_LIVE_COMMIT_EVIDENCE="$TMPDIR/missing-live-commit-evidence.md"
+STALE_LIVE_COMMIT_EVIDENCE="$TMPDIR/stale-live-commit-evidence.md"
 MISMATCHED_BUILD_EVIDENCE="$TMPDIR/mismatched-build-evidence.md"
 ANCESTOR_DOCS_ONLY_EVIDENCE="$TMPDIR/ancestor-docs-only-evidence.md"
 ANCESTOR_PRODUCT_CHANGE_EVIDENCE="$TMPDIR/ancestor-product-change-evidence.md"
@@ -90,6 +91,25 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Candidate build Git commit is stale for release-critical files: WordScene/Sources/Features/TranslateView.swift. Rerun scripts/run_release_candidate_gate.sh.' /tmp/wordscene-completion-ancestor-product-change.err
+
+cp "$PASSING_EVIDENCE" "$STALE_LIVE_COMMIT_EVIDENCE"
+sed -i '' "s/Git commit \`$CURRENT_COMMIT\`/Git commit \`aaaaaaaaaaaa\`/" "$STALE_LIVE_COMMIT_EVIDENCE"
+
+set +e
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\nscripts/run_live_deepseek_translation_smoke.sh' \
+  "$ROOT/scripts/check_release_completion.sh" --evidence "$STALE_LIVE_COMMIT_EVIDENCE" \
+  >/tmp/wordscene-completion-stale-live-commit.out 2>/tmp/wordscene-completion-stale-live-commit.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'DeepSeek live protocol smoke Git commit is stale for release-critical files: scripts/run_live_deepseek_translation_smoke.sh. Rerun scripts/run_live_deepseek_translation_smoke.sh.' /tmp/wordscene-completion-stale-live-commit.err
+if grep -qF 'Candidate build Git commit is stale for release-critical files: scripts/run_live_deepseek_translation_smoke.sh' /tmp/wordscene-completion-stale-live-commit.err; then
+  echo "check_release_completion should report live smoke drift with live-smoke wording" >&2
+  exit 1
+fi
 
 cp "$PASSING_EVIDENCE" "$NON_ANCESTOR_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$NON_ANCESTOR_EVIDENCE"
