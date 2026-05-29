@@ -34,8 +34,9 @@ and pass/fail notes for each run.
   it. Rerun the candidate gate after any product, project, script, checklist, or
   release-critical code change.
 - Run `scripts/manual_smoke_readiness.sh` after candidate and live API evidence
-  are refreshed to see which manual rows can be tested now. It is read-only and
-  does not record PASS evidence.
+  are refreshed to see which manual rows can be tested now. Add `--commands` to
+  print `scripts/record_release_smoke_result.sh` templates for READY rows. It is
+  read-only and does not record PASS evidence.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

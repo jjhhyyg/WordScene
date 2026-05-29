@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
+SHOW_COMMANDS=0
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--commands]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -17,6 +18,10 @@ while [[ $# -gt 0 ]]; do
       fi
       EVIDENCE_FILE="$2"
       shift 2
+      ;;
+    --commands)
+      SHOW_COMMANDS=1
+      shift
       ;;
     *)
       usage
@@ -114,6 +119,43 @@ missing_platforms_for() {
   fi
 }
 
+suggested_device_for() {
+  case "$1|$2" in
+    "Translation loop|iPhone" | \
+    "Local recovery|iOS/iPadOS")
+      printf 'iPhone 17 Pro Max / iOS 26.0'
+      ;;
+    "Translation loop|iPad" | \
+    "Import/export|iOS/iPadOS")
+      printf 'iPad Pro 11-inch / iPadOS 26.0'
+      ;;
+    "Local-only fallback|macOS/iOS")
+      printf 'Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0'
+      ;;
+    *)
+      printf '<device / OS>'
+      ;;
+  esac
+}
+
+print_record_command() {
+  local area="$1"
+  local platform="$2"
+  local device
+
+  device="$(suggested_device_for "$area" "$platform")"
+  cat <<COMMAND
+scripts/record_release_smoke_result.sh \\
+  --evidence docs/release-smoke-evidence.md \\
+  --area "$area" \\
+  --platform "$platform" \\
+  --device "$device" \\
+  --build "$build_number" \\
+  --result "PASS" \\
+  --notes "<manual smoke notes>"
+COMMAND
+}
+
 build_number="$(candidate_build_number)"
 live_smoke_ready=0
 if has_live_smoke_pass; then
@@ -141,6 +183,9 @@ while IFS='|' read -r area platform required_platforms; do
 
   if [[ -z "$reason" ]]; then
     echo "READY $area / $platform"
+    if [[ "$SHOW_COMMANDS" -eq 1 ]]; then
+      print_record_command "$area" "$platform"
+    fi
   else
     echo "WAITING $area / $platform - $reason"
   fi

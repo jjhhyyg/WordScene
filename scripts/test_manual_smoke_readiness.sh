@@ -45,3 +45,16 @@ grep -qF 'READY Local-only fallback / macOS/iOS' "$TMPDIR/readiness.out"
 grep -qF 'WAITING Translation loop / macOS - missing PASS candidate build: macOS' "$TMPDIR/readiness.out"
 grep -qF 'WAITING iCloud create sync / iPhone + macOS - missing PASS candidate build: macOS' "$TMPDIR/readiness.out"
 grep -qF 'WAITING iCloud delete sync / iPhone + macOS - missing PASS candidate build: macOS' "$TMPDIR/readiness.out"
+
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands >"$TMPDIR/commands.out"
+
+grep -qF 'READY Translation loop / iPhone' "$TMPDIR/commands.out"
+grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/commands.out"
+grep -qF '  --area "Translation loop" \' "$TMPDIR/commands.out"
+grep -qF '  --platform "iPhone" \' "$TMPDIR/commands.out"
+grep -qF '  --build "1" \' "$TMPDIR/commands.out"
+grep -qF '  --notes "<manual smoke notes>"' "$TMPDIR/commands.out"
+if grep -qF -- '--platform "macOS"' "$TMPDIR/commands.out"; then
+  echo "manual_smoke_readiness --commands should not print blocked macOS record commands" >&2
+  exit 1
+fi

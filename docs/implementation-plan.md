@@ -63,7 +63,7 @@ Baseline already completed:
 - Manual smoke recording rejects non-canonical Area/Platform pairs so typos cannot create evidence rows ignored by release completion.
 - Manual smoke recording requires current release candidate Git metadata before writing evidence rows.
 - Manual smoke recording requires PASS release candidate build evidence for the platform being tested.
-- Manual smoke readiness can be listed through `scripts/manual_smoke_readiness.sh` so eligible rows are explicit before recording evidence.
+- Manual smoke readiness can be listed through `scripts/manual_smoke_readiness.sh`, with optional command templates, so eligible rows are explicit before recording evidence.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
@@ -366,7 +366,7 @@ Verification:
 - Added `AppBuildInfo` and surfaced version/build/smoke-test identifier in Settings so manual smoke testers can copy the build metadata from the app instead of inspecting the bundle.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `c39eb83105c0`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `e0ac24e00202`.
-- Added `scripts/manual_smoke_readiness.sh` plus regression coverage so the currently eligible manual smoke rows can be listed without writing PASS evidence.
+- Added `scripts/manual_smoke_readiness.sh` plus regression coverage so the currently eligible manual smoke rows and optional recording command templates can be listed without writing PASS evidence.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `7d76ba8911b5`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `6303c97a9b24`.
 
