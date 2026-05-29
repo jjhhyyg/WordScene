@@ -14,7 +14,7 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: Milestone 3 implemented; Import and Export is next.
+Status: Milestone 4 implemented in code; Sync Readiness is next.
 
 Baseline already completed:
 
@@ -33,8 +33,8 @@ Baseline already completed:
 
 Known gaps:
 
-- Import/export remains a placeholder.
 - CloudKit/iCloud sync is not connected.
+- Import/export still needs a manual macOS and iOS smoke test before release.
 
 ## Milestone 1: Real Translation Loop
 
@@ -89,17 +89,19 @@ Verification:
 
 ## Milestone 4: Import and Export
 
-Target status: pending.
+Target status: implemented in code; manual smoke pending.
 
 Deliverables:
 
 - Export all local memory data as `memory-book-export-YYYYMMDD.json`.
 - Import the same JSON format with validation and conflict handling.
 - Keep API token out of export files.
+- Wire Settings import/export buttons to native file importer/exporter flows.
 
 Verification:
 
 - Round-trip JSON test.
+- Settings import/export controller tests.
 - Manual export/import test on macOS and iOS.
 
 ## Milestone 5: Sync Readiness
@@ -140,9 +142,12 @@ Verification:
 - Implemented `MemorySearchIndex` for saved memory and recent history search.
 - Replaced the Search placeholder with real query-empty, no-results, loading, and content states.
 - Added search tests for original text, translated text, language labels, notes, duplicate suppression, and Chinese pinyin.
+- Implemented JSON memory import/export with schema version, checksum validation, duplicate conflict handling, and export file naming.
+- Wired Settings import/export buttons to native JSON file import/export flows with status feedback and Token exclusion messaging.
+- Added import/export service and Settings import/export controller tests.
 
 Next:
 
-- Start Milestone 4 by adding JSON import/export for all local memory data.
-- Keep the DeepSeek API token out of exported files.
-- Add round-trip validation tests before wiring the Settings import/export buttons.
+- Manually smoke test import/export on macOS and iOS.
+- Start Milestone 5 by deciding the local data model migration path before CloudKit/iCloud sync.
+- Keep local-only mode fully usable while sync is being prepared.

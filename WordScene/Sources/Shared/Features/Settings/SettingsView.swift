@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 #if os(macOS)
 import AppKit
@@ -8,17 +9,40 @@ struct SettingsView: View {
     @AppStorage("allowsAnonymousCrashReports") private var allowsAnonymousCrashReports = false
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
+    @State private var importExportStatus: SettingsImportExportStatus = .idle
+    @State private var exportDocument = MemoryExportFileDocument()
+    @State private var exportFileName = "memory-book-export.json"
+    @State private var isExportingMemory = false
+    @State private var isImportingMemory = false
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
     private let credentialStore = KeychainCredentialStore()
     private let balanceClient = DeepSeekBalanceClient()
+    private let importExportController = SettingsImportExportController()
 
     var body: some View {
+        Group {
         #if os(macOS)
-        macSettingsBody
+            macSettingsBody
         #else
-        mobileSettingsBody
+            mobileSettingsBody
         #endif
+        }
+        .fileExporter(
+            isPresented: $isExportingMemory,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: exportFileName
+        ) { result in
+            handleExportCompletion(result)
+        }
+        .fileImporter(
+            isPresented: $isImportingMemory,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImportSelection(result)
+        }
     }
 
     private var mobileSettingsBody: some View {
@@ -82,20 +106,23 @@ struct SettingsView: View {
             Section("导入导出") {
                 settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
                 settingValueRow("范围", value: "全量导入 / 全量导出")
+                importExportStatusView
 
                 HStack {
                     Spacer()
                     Button {
-                        // Import workflow will be connected after persistence is finalized.
+                        presentImport()
                     } label: {
                         Label("导入", systemImage: "square.and.arrow.down")
                     }
+                    .disabled(importExportStatus.isWorking)
 
                     Button {
-                        // Export workflow will be connected after persistence is finalized.
+                        prepareExport()
                     } label: {
                         Label("导出", systemImage: "square.and.arrow.up")
                     }
+                    .disabled(importExportStatus.isWorking)
                 }
             }
         }
@@ -152,6 +179,13 @@ struct SettingsView: View {
         Label(tokenStatus.message, systemImage: tokenStatus.systemImage)
             .font(.footnote)
             .foregroundStyle(tokenStatus.tint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var importExportStatusView: some View {
+        Label(importExportStatus.message, systemImage: importExportStatus.systemImage)
+            .font(.footnote)
+            .foregroundStyle(importExportStatus.tint)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -218,21 +252,24 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
                 settingValueRow("范围", value: "全量导入 / 全量导出")
+                importExportStatusView
 
                 HStack(spacing: 10) {
                     Button {
-                        // Import workflow will be connected after persistence is finalized.
+                        presentImport()
                     } label: {
                         Label("导入", systemImage: "square.and.arrow.down")
                     }
                     .buttonStyle(.bordered)
+                    .disabled(importExportStatus.isWorking)
 
                     Button {
-                        // Export workflow will be connected after persistence is finalized.
+                        prepareExport()
                     } label: {
                         Label("导出", systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
+                    .disabled(importExportStatus.isWorking)
                 }
                 .controlSize(.large)
             }
@@ -352,6 +389,71 @@ struct SettingsView: View {
         }
     }
 
+    @MainActor
+    private func prepareExport() {
+        importExportStatus = .working("正在准备导出文件...")
+
+        do {
+            let export = try importExportController.prepareExport()
+            exportDocument = MemoryExportFileDocument(data: export.data)
+            exportFileName = export.fileName
+            importExportStatus = .working("准备导出 \(export.itemCount) 条记忆。")
+            isExportingMemory = true
+        } catch {
+            importExportStatus = .failed(importExportErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func handleExportCompletion(_ result: Result<URL, Error>) {
+        switch result {
+        case .success:
+            importExportStatus = .success("导出文件已生成，请妥善保管。")
+        case .failure(let error):
+            importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func presentImport() {
+        importExportStatus = .working("请选择要导入的 JSON 文件。")
+        isImportingMemory = true
+    }
+
+    @MainActor
+    private func handleImportSelection(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else {
+                importExportStatus = .idle
+                return
+            }
+            importMemory(from: url)
+        case .failure(let error):
+            importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+        }
+    }
+
+    @MainActor
+    private func importMemory(from url: URL) {
+        let didAccess = url.startAccessingSecurityScopedResource()
+        defer {
+            if didAccess {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let summary = try importExportController.importMemory(from: data)
+            importExportStatus = .success(
+                "已导入 \(summary.importedCount) 条，覆盖 \(summary.replacedCount) 条，跳过 \(summary.skippedCount) 条。"
+            )
+        } catch {
+            importExportStatus = .failed(importExportErrorMessage(for: error))
+        }
+    }
+
     private func settingsErrorMessage(for error: Error) -> String {
         if let balanceError = error as? DeepSeekBalanceError {
             switch balanceError {
@@ -372,6 +474,26 @@ struct SettingsView: View {
         }
 
         return "操作失败，请稍后重试。"
+    }
+
+    private func importExportErrorMessage(for error: Error) -> String {
+        if let importExportError = error as? MemoryImportExportError {
+            switch importExportError {
+            case .invalidJSON:
+                return "导入文件不是有效的 WordScene JSON。"
+            case .unsupportedSchemaVersion:
+                return "导入文件版本不支持，请升级 App 后重试。"
+            case .checksumMismatch:
+                return "导入文件校验失败，文件可能已被修改或损坏。"
+            }
+        }
+
+        return error.localizedDescription.isEmpty ? "导入导出失败，请稍后重试。" : error.localizedDescription
+    }
+
+    private func isUserCancelled(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError
     }
 }
 
@@ -427,6 +549,75 @@ private enum SettingsTokenStatus: Equatable {
 
     var isWorking: Bool {
         self == .testing
+    }
+}
+
+private enum SettingsImportExportStatus: Equatable {
+    case idle
+    case working(String)
+    case success(String)
+    case failed(String)
+
+    var message: String {
+        switch self {
+        case .idle:
+            return "导出文件包含收藏内容，不包含 API Token。"
+        case .working(let message), .success(let message), .failed(let message):
+            return message
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .idle:
+            return "lock.doc"
+        case .working:
+            return "arrow.triangle.2.circlepath"
+        case .success:
+            return "checkmark.seal.fill"
+        case .failed:
+            return "exclamationmark.triangle.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .idle:
+            return .secondary
+        case .working:
+            return .accentColor
+        case .success:
+            return .green
+        case .failed:
+            return .red
+        }
+    }
+
+    var isWorking: Bool {
+        if case .working = self {
+            return true
+        }
+        return false
+    }
+}
+
+private struct MemoryExportFileDocument: FileDocument {
+    static var readableContentTypes: [UTType] {
+        [.json]
+    }
+
+    var data: Data
+
+    init(data: Data = Data()) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        self.data = configuration.file.regularFileContents ?? Data()
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
 
