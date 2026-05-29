@@ -7,6 +7,7 @@ RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_LIVE_DEEPS
 CHECK_RELEASE_COMPLETION_TEST_SCRIPT="${WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT:-scripts/test_check_release_completion.sh}"
 PRIVACY_MANIFEST_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT:-scripts/test_privacy_manifest.sh}"
 PRIVACY_SURFACE_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT:-scripts/test_privacy_surface.sh}"
+PUSH_BACKGROUND_MODE_TEST_SCRIPT="${WORDSCENE_TEST_CLOUDKIT_BACKGROUND_MODE_SCRIPT:-scripts/test_cloudkit_background_mode.sh}"
 REQUIRED_REASON_API_SCAN_SCRIPT="${WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT:-scripts/test_required_reason_api_scan.sh}"
 MANUAL_SMOKE_READINESS_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_READINESS_SCRIPT:-scripts/test_manual_smoke_readiness.sh}"
 RELEASE_NEXT_ACTIONS_TEST_SCRIPT="${WORDSCENE_TEST_RELEASE_NEXT_ACTIONS_SCRIPT:-scripts/test_release_next_actions.sh}"
@@ -65,6 +66,7 @@ run bash -n \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
   scripts/test_privacy_surface.sh \
+  scripts/test_cloudkit_background_mode.sh \
   scripts/test_required_reason_api_scan.sh \
   scripts/run_release_candidate_gate.sh \
   scripts/test_run_release_candidate_gate.sh \
@@ -79,6 +81,7 @@ run "$RELEASE_NEXT_ACTIONS_TEST_SCRIPT"
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
 run "$PRIVACY_SURFACE_TEST_SCRIPT"
+run "$PUSH_BACKGROUND_MODE_TEST_SCRIPT"
 run "$REQUIRED_REASON_API_SCAN_SCRIPT"
 run "$RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT"
 run "$RUN_CANDIDATE_GATE_TEST_SCRIPT"

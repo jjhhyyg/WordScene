@@ -39,6 +39,7 @@ Baseline already completed:
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
 - CloudKit sync is entitlement-gated at runtime so unsigned or non-iCloud builds stay local-only instead of crashing.
+- iOS declares the `remote-notification` background mode required by CloudKit push notifications.
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
@@ -394,6 +395,7 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `74fb40dde8aa`.
 - Added iOS simulator unit tests to `scripts/verify_release_readiness.sh`, fixed the iOS test bundle's Core Data import, and made simulator hosts default to local-only storage instead of bootstrapping CloudKit without signed iCloud entitlements.
 - Reran iOS simulator tests on iPhone 17 Pro Max / iOS 26.5, targeted macOS Core Data tests, `scripts/test_verify_release_readiness.sh`, and `scripts/verify_release_readiness.sh`; the non-manual gate now covers 88 iOS simulator tests.
+- Added iOS `remote-notification` background mode for CloudKit push notifications and a readiness check that verifies both `project.yml` and the generated Xcode project keep that setting.
 
 Next:
 

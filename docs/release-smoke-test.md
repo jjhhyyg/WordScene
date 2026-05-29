@@ -18,8 +18,9 @@ and pass/fail notes for each run.
 - Run `scripts/verify_release_readiness.sh` before manual smoke testing. It
   covers script syntax, release evidence script tests, `git diff --check`, token
   leak scanning, privacy manifest validation, required-reason API scanning,
-  privacy surface validation, XcodeGen version-marker scanning, macOS tests, iOS
-  simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles.
+  privacy surface validation, CloudKit background-mode validation, XcodeGen
+  version-marker scanning, macOS tests, iOS simulator tests, iOS generic build,
+  and unsigned macOS/iOS Release compiles.
 - Use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to
   rerun readiness checks, refresh the non-manual gate evidence, build each
   release candidate, and append build evidence or blocker rows to
