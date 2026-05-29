@@ -14,7 +14,7 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: Milestone 2 implemented; Search is next.
+Status: Milestone 3 implemented; Import and Export is next.
 
 Baseline already completed:
 
@@ -27,12 +27,13 @@ Baseline already completed:
 - DeepSeek chat-completions translation loop in Translate.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
+- Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 
 Known gaps:
 
-- Search and import/export remain placeholders.
+- Import/export remains a placeholder.
 - CloudKit/iCloud sync is not connected.
 
 ## Milestone 1: Real Translation Loop
@@ -73,7 +74,7 @@ Verification:
 
 ## Milestone 3: Search
 
-Target status: pending.
+Target status: completed.
 
 Deliverables:
 
@@ -136,9 +137,12 @@ Verification:
 - Added favorite/unfavorite controls in the translation result and recent history views.
 - Replaced the Library placeholder with persisted saved items, empty/loading/content states, deletion, and note editing.
 - Added memory library persistence, duplicate prevention, removal, and note update tests.
+- Implemented `MemorySearchIndex` for saved memory and recent history search.
+- Replaced the Search placeholder with real query-empty, no-results, loading, and content states.
+- Added search tests for original text, translated text, language labels, notes, duplicate suppression, and Chinese pinyin.
 
 Next:
 
-- Start Milestone 3 by adding local search across saved memory items and recent history.
-- Use the existing pinyin transliterator for Chinese search matching.
-- Keep import/export and CloudKit sync behind later milestones.
+- Start Milestone 4 by adding JSON import/export for all local memory data.
+- Keep the DeepSeek API token out of exported files.
+- Add round-trip validation tests before wiring the Settings import/export buttons.
