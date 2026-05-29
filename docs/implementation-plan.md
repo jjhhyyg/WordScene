@@ -30,6 +30,7 @@ Baseline already completed:
 - Debug builds can optionally record raw API responses locally for model-response diagnosis; Release builds do not expose or wire this recorder.
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
+- Recent translation history deduplicates repeated translations by normalized source text, translated text, and language direction.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
@@ -292,6 +293,7 @@ Verification:
 - Hardened `scripts/record_release_smoke_result.sh` so rerunning a manual smoke row for the same area/platform replaces stale evidence instead of leaving contradictory PASS/FAIL/BLOCKED rows in the release evidence file.
 - Hardened `scripts/check_release_completion.sh` so each required release row must have exactly one PASS entry, preventing duplicate stale PASS rows from making completion evidence look cleaner than it is.
 - Hardened `scripts/check_release_completion.sh` to validate standard evidence table headers for release gate, candidate build, blocker, and manual smoke sections before treating rows as auditable release evidence.
+- Deduplicated recent translation history insertion so repeating the same source/translation/language direction moves the newest record to the top instead of cluttering the history list.
 
 Next:
 

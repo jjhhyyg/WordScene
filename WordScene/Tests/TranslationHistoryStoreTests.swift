@@ -21,6 +21,38 @@ final class TranslationHistoryStoreTests: XCTestCase {
         XCTAssertEqual(loaded.map(\.sourceText), ["cat", "world"])
     }
 
+    func testAddingDuplicateTranslationMovesLatestRecordToTopWithoutDuplicate() {
+        let store = TranslationHistoryStore(defaults: UserDefaults.standard, maximumCount: 3)
+        let oldRecord = TranslationRecord(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10)
+        )
+        let otherRecord = TranslationRecord(
+            sourceText: "world",
+            translatedText: "世界",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 20)
+        )
+        let latestDuplicate = TranslationRecord(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+            sourceText: " hello ",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 30)
+        )
+
+        let records = store.adding(latestDuplicate, to: [otherRecord, oldRecord])
+
+        XCTAssertEqual(records.map(\.id), [latestDuplicate.id, otherRecord.id])
+        XCTAssertEqual(records.first?.sourceText, " hello ")
+    }
+
     func testSavesVersionedDocumentForFutureMigrations() throws {
         let suiteName = "TranslationHistoryStoreTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

@@ -24,3 +24,16 @@ struct TranslationRecord: Identifiable, Codable, Equatable {
         self.createdAt = createdAt
     }
 }
+
+extension TranslationRecord {
+    func hasSameTranslationContent(as other: TranslationRecord) -> Bool {
+        Self.normalized(sourceText) == Self.normalized(other.sourceText) &&
+            Self.normalized(translatedText) == Self.normalized(other.translatedText) &&
+            sourceLanguage == other.sourceLanguage &&
+            targetLanguage == other.targetLanguage
+    }
+
+    private static func normalized(_ value: String) -> String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+}

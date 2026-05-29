@@ -62,7 +62,8 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
     }
 
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {
-        Array(([record] + records).prefix(maximumCount))
+        let deduplicatedRecords = records.filter { !$0.hasSameTranslationContent(as: record) }
+        return Array(([record] + deduplicatedRecords).prefix(maximumCount))
     }
 }
 
