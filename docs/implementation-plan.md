@@ -397,6 +397,7 @@ Verification:
 - Reran iOS simulator tests on iPhone 17 Pro Max / iOS 26.5, targeted macOS Core Data tests, `scripts/test_verify_release_readiness.sh`, and `scripts/verify_release_readiness.sh`; the non-manual gate now covers 88 iOS simulator tests.
 - Added iOS `remote-notification` background mode for CloudKit push notifications and a readiness check that verifies both `project.yml` and the generated Xcode project keep that setting.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness now records iOS simulator tests and CloudKit background-mode validation, iOS candidate evidence points at commit `de1894ef8e57`, and macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `a04e8d9d3d4f`.
 
 Next:
 
