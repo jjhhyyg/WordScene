@@ -10,6 +10,9 @@ PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 STALE_COMMIT_EVIDENCE="$TMPDIR/stale-commit-evidence.md"
+ANCESTOR_DOCS_ONLY_EVIDENCE="$TMPDIR/ancestor-docs-only-evidence.md"
+ANCESTOR_PRODUCT_CHANGE_EVIDENCE="$TMPDIR/ancestor-product-change-evidence.md"
+NON_ANCESTOR_EVIDENCE="$TMPDIR/non-ancestor-evidence.md"
 DUPLICATE_PASS_EVIDENCE="$TMPDIR/duplicate-pass-evidence.md"
 MALFORMED_TABLE_EVIDENCE="$TMPDIR/malformed-table-evidence.md"
 
@@ -56,6 +59,46 @@ COMMIT_MD
 "$ROOT/scripts/check_release_completion.sh" --evidence "$PASSING_EVIDENCE" \
   >/tmp/wordscene-completion-pass.out 2>/tmp/wordscene-completion-pass.err
 grep -qF 'Release completion evidence is complete.' /tmp/wordscene-completion-pass.out
+
+cp "$PASSING_EVIDENCE" "$ANCESTOR_DOCS_ONLY_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$ANCESTOR_DOCS_ONLY_EVIDENCE"
+
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
+  "$ROOT/scripts/check_release_completion.sh" --evidence "$ANCESTOR_DOCS_ONLY_EVIDENCE" \
+  >/tmp/wordscene-completion-ancestor-docs-only.out 2>/tmp/wordscene-completion-ancestor-docs-only.err
+grep -qF 'Release completion evidence is complete.' /tmp/wordscene-completion-ancestor-docs-only.out
+
+cp "$PASSING_EVIDENCE" "$ANCESTOR_PRODUCT_CHANGE_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$ANCESTOR_PRODUCT_CHANGE_EVIDENCE"
+
+set +e
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\nWordScene/Sources/Features/TranslateView.swift' \
+  "$ROOT/scripts/check_release_completion.sh" --evidence "$ANCESTOR_PRODUCT_CHANGE_EVIDENCE" \
+  >/tmp/wordscene-completion-ancestor-product-change.out 2>/tmp/wordscene-completion-ancestor-product-change.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Candidate build Git commit is stale for release-critical files: WordScene/Sources/Features/TranslateView.swift. Rerun scripts/run_release_candidate_gate.sh.' /tmp/wordscene-completion-ancestor-product-change.err
+
+cp "$PASSING_EVIDENCE" "$NON_ANCESTOR_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$NON_ANCESTOR_EVIDENCE"
+
+set +e
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_CANDIDATE_IS_ANCESTOR=0 \
+WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE='' \
+  "$ROOT/scripts/check_release_completion.sh" --evidence "$NON_ANCESTOR_EVIDENCE" \
+  >/tmp/wordscene-completion-non-ancestor.out 2>/tmp/wordscene-completion-non-ancestor.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Candidate build Git commit is not an ancestor of current HEAD: evidence aaaaaaaaaaaa, current bbbbbbbbbbbb.' /tmp/wordscene-completion-non-ancestor.err
 
 cp "$PASSING_EVIDENCE" "$DUPLICATE_PASS_EVIDENCE"
 cat >>"$DUPLICATE_PASS_EVIDENCE" <<'DUPLICATE_MD'
@@ -145,4 +188,4 @@ status=$?
 set -e
 
 test "$status" -eq 1
-grep -qF "Candidate build Git commit does not match current HEAD: evidence 000000000000, current $CURRENT_COMMIT." /tmp/wordscene-completion-stale-commit.err
+grep -qF "Candidate build Git commit is not an ancestor of current HEAD: evidence 000000000000, current $CURRENT_COMMIT." /tmp/wordscene-completion-stale-commit.err

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
-CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
+CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 usage() {
   echo "Usage: $0 [--evidence <markdown>]" >&2
@@ -114,6 +114,77 @@ candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+candidate_matches_current_head() {
+  local evidence_commit="$1"
+
+  [[ "${evidence_commit:0:12}" == "${CURRENT_COMMIT:0:12}" ]]
+}
+
+candidate_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CANDIDATE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_CANDIDATE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_candidate() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
+}
+
+is_allowed_post_candidate_file() {
+  case "$1" in
+    docs/release-smoke-evidence.md | \
+    docs/implementation-plan.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+validate_candidate_git_commit() {
+  local evidence_commit="$1"
+  local disallowed=()
+  local file
+  local joined
+
+  if candidate_matches_current_head "$evidence_commit"; then
+    return 0
+  fi
+
+  if ! candidate_is_ancestor_of_head "$evidence_commit"; then
+    echo "Candidate build Git commit is not an ancestor of current HEAD: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
+    return 1
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_candidate "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    echo "Candidate build Git commit is stale for release-critical files: $joined. Rerun scripts/run_release_candidate_gate.sh." >&2
+    return 1
+  fi
+}
+
 required_rows() {
   cat <<'ROWS'
 Readiness script|macOS + iOS generic
@@ -195,8 +266,7 @@ if ! has_candidate_git_commit; then
   status=1
 else
   evidence_commit="$(candidate_git_commit)"
-  if [[ "${evidence_commit:0:12}" != "$CURRENT_COMMIT" ]]; then
-    echo "Candidate build Git commit does not match current HEAD: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
+  if ! validate_candidate_git_commit "$evidence_commit"; then
     status=1
   fi
 fi

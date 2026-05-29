@@ -29,8 +29,10 @@ and pass/fail notes for each run.
 - Run `scripts/check_release_completion.sh` only after recording all candidate
   build and manual smoke evidence. It must pass before calling the release
   complete or the cross-platform product loop genuinely usable. The candidate
-  build Git commit recorded in evidence must match the current repository HEAD,
-  so rerun the candidate gate after any code change.
+  build Git commit recorded in evidence must either match the current repository
+  HEAD or be an ancestor with only evidence/progress documentation changed after
+  it. Rerun the candidate gate after any product, project, script, checklist, or
+  release-critical code change.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek
@@ -178,8 +180,12 @@ the table format stays consistent. The script only accepts the canonical
 manual `Area` and `Platform` pairs listed in the template below, so typos such
 as `iPadOS` instead of `iOS/iPadOS` are rejected before they create evidence
 rows that the completion audit cannot count. It also requires release candidate
-metadata for the current repository HEAD before writing manual rows, so run the
-candidate gate again after any code change and before recording smoke results.
+metadata for the current repository state before writing manual rows. Candidate
+metadata may point to an ancestor commit only when the newer commits are limited
+to evidence/progress documentation such as `docs/release-smoke-evidence.md` and
+`docs/implementation-plan.md`; run the candidate gate again after any product,
+project, script, checklist, or release-critical code change and before recording
+smoke results.
 Each manual row must also have PASS candidate build evidence for the platform it
 tests: macOS rows require a macOS candidate, iPhone/iPad rows require an iOS
 candidate, and iCloud/local-only cross-platform rows require both.
@@ -221,5 +227,6 @@ scripts/check_release_completion.sh
 
 The script fails if any required row does not have exactly one PASS entry, if
 the evidence table structure is malformed, if candidate Git commit metadata is
-missing or stale relative to the current repository HEAD, or if any
+missing, if the candidate commit is not an ancestor of the current repository
+HEAD, if release-critical files changed after the candidate build, or if any
 BLOCKED/FAIL row is still present in `docs/release-smoke-evidence.md`.

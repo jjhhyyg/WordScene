@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
+CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 EVIDENCE_FILE=""
 AREA=""
@@ -134,6 +134,77 @@ candidate_git_commit() {
   ' "$EVIDENCE_FILE"
 }
 
+candidate_matches_current_head() {
+  local evidence_commit="$1"
+
+  [[ "${evidence_commit:0:12}" == "${CURRENT_COMMIT:0:12}" ]]
+}
+
+candidate_is_ancestor_of_head() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CANDIDATE_IS_ANCESTOR+x}" ]]; then
+    [[ "$WORDSCENE_CANDIDATE_IS_ANCESTOR" == "1" ]]
+    return
+  fi
+
+  git -C "$ROOT" merge-base --is-ancestor "$evidence_commit" HEAD
+}
+
+changed_files_since_candidate() {
+  local evidence_commit="$1"
+
+  if [[ -n "${WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE"
+    return
+  fi
+
+  git -C "$ROOT" diff --name-only "$evidence_commit"..HEAD
+}
+
+is_allowed_post_candidate_file() {
+  case "$1" in
+    docs/release-smoke-evidence.md | \
+    docs/implementation-plan.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+assert_current_candidate_commit() {
+  local evidence_commit="$1"
+  local disallowed=()
+  local file
+  local joined
+
+  if candidate_matches_current_head "$evidence_commit"; then
+    return
+  fi
+
+  if ! candidate_is_ancestor_of_head "$evidence_commit"; then
+    echo "Manual smoke evidence requires current release candidate metadata: evidence $evidence_commit is not an ancestor of current $CURRENT_COMMIT." >&2
+    exit 1
+  fi
+
+  while IFS= read -r file; do
+    if [[ -z "$file" ]]; then
+      continue
+    fi
+    if ! is_allowed_post_candidate_file "$file"; then
+      disallowed+=("$file")
+    fi
+  done < <(changed_files_since_candidate "$evidence_commit")
+
+  if [[ "${#disallowed[@]}" -gt 0 ]]; then
+    joined="$(IFS=', '; printf '%s' "${disallowed[*]}")"
+    echo "Manual smoke evidence requires fresh release candidate metadata; release-critical files changed since candidate build: $joined. Rerun scripts/run_release_candidate_gate.sh." >&2
+    exit 1
+  fi
+}
+
 assert_current_candidate_metadata() {
   local evidence_commit
 
@@ -143,10 +214,7 @@ assert_current_candidate_metadata() {
     exit 1
   fi
 
-  if [[ "${evidence_commit:0:12}" != "$CURRENT_COMMIT" ]]; then
-    echo "Manual smoke evidence requires current release candidate metadata: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
-    exit 1
-  fi
+  assert_current_candidate_commit "$evidence_commit"
 }
 
 required_candidate_platforms() {

@@ -63,7 +63,8 @@ Baseline already completed:
 - Manual smoke recording requires PASS release candidate build evidence for the platform being tested.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
-- Release completion rejects stale candidate Git commit metadata when evidence does not match the current repository HEAD.
+- Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
+- Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
 
 Known gaps:
 
@@ -300,12 +301,18 @@ Verification:
 - Hardened `scripts/check_release_completion.sh` to validate standard evidence table headers for release gate, candidate build, blocker, and manual smoke sections before treating rows as auditable release evidence.
 - Deduplicated recent translation history insertion so repeating the same source/translation/language direction moves the newest record to the top instead of cluttering the history list.
 - Hardened `scripts/record_release_smoke_result.sh` to reject non-canonical manual Area/Platform pairs, preventing typo rows such as `iPadOS` from being recorded but ignored by the completion audit.
-- Hardened `scripts/check_release_completion.sh` so candidate build evidence must match the current repository HEAD, preventing stale signed-build evidence from making a changed tree look releasable.
+- Hardened `scripts/check_release_completion.sh` so candidate build evidence must match the current repository HEAD or an ancestor with only evidence/progress documentation changed afterward, preventing stale signed-build evidence from making a changed product tree look releasable.
 - Hardened `scripts/run_release_candidate_gate.sh` so signed candidate evidence cannot be generated while the git worktree has uncommitted changes.
-- Hardened `scripts/record_release_smoke_result.sh` so manual smoke rows cannot be recorded unless release candidate evidence exists for the current repository HEAD.
+- Hardened `scripts/record_release_smoke_result.sh` so manual smoke rows cannot be recorded unless release candidate evidence exists for the current repository HEAD or an ancestor with only evidence/progress documentation changed afterward.
 - Hardened `scripts/record_release_smoke_result.sh` so platform-specific manual smoke rows require matching PASS candidate build evidence before they can be recorded.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness passed, iOS signed Release candidate evidence was refreshed for commit `b5e5741f9aa7`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
 - Reran `scripts/check_release_completion.sh`; candidate Git commit metadata now matches the current commit, and the remaining blockers are macOS signed candidate build plus manual translation/import-export/recovery/iCloud/local-only smoke evidence.
+
+### 2026-05-30
+
+- Fixed the release evidence freshness rule so committing evidence/progress documentation after a clean candidate build does not invalidate that candidate by itself.
+- Added regression coverage for candidate evidence that points to an ancestor commit with only `docs/release-smoke-evidence.md` and `docs/implementation-plan.md` changed afterward.
+- Added regression coverage proving product/source and release script changes after a candidate build still force a fresh candidate gate run before completion or manual smoke evidence can be accepted.
 
 Next:
 

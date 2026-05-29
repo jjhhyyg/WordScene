@@ -9,6 +9,8 @@ CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 EVIDENCE="$TMPDIR/release-smoke-evidence.md"
 MISSING_CANDIDATE_EVIDENCE="$TMPDIR/missing-candidate-evidence.md"
 STALE_CANDIDATE_EVIDENCE="$TMPDIR/stale-candidate-evidence.md"
+ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ancestor-docs-only-candidate-evidence.md"
+ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE="$TMPDIR/ancestor-product-change-candidate-evidence.md"
 IOS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ios-only-candidate-evidence.md"
 
 cat >"$EVIDENCE" <<EVIDENCE_MD
@@ -123,6 +125,44 @@ if grep -qF '## Manual Smoke Evidence' "$MISSING_CANDIDATE_EVIDENCE"; then
   exit 1
 fi
 
+cp "$EVIDENCE" "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
+
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
+  "$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro / macOS 26.5" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Manual smoke can be recorded after evidence-only commits."
+
+grep -qF '| Translation loop | macOS | MacBook Pro / macOS 26.5 | 1 | PASS | Manual smoke can be recorded after evidence-only commits. |' "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
+
+cp "$EVIDENCE" "$ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | aaaaaaaaaaaa |/" "$ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE"
+
+set +e
+WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
+WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
+WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\nscripts/run_release_candidate_gate.sh' \
+  "$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro / macOS 26.5" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Should reject candidate drift across script changes" >"$TMPDIR/ancestor-product-change.out" 2>"$TMPDIR/ancestor-product-change.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires fresh release candidate metadata; release-critical files changed since candidate build: scripts/run_release_candidate_gate.sh. Rerun scripts/run_release_candidate_gate.sh.' "$TMPDIR/ancestor-product-change.err"
+
 cp "$EVIDENCE" "$STALE_CANDIDATE_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_CANDIDATE_EVIDENCE"
 
@@ -139,7 +179,7 @@ status=$?
 set -e
 
 test "$status" -eq 1
-grep -qF "Manual smoke evidence requires current release candidate metadata: evidence 000000000000, current $CURRENT_COMMIT." "$TMPDIR/stale-candidate.err"
+grep -qF "Manual smoke evidence requires current release candidate metadata: evidence 000000000000 is not an ancestor of current $CURRENT_COMMIT." "$TMPDIR/stale-candidate.err"
 
 cat >"$IOS_ONLY_CANDIDATE_EVIDENCE" <<IOS_ONLY_MD
 ## Release Candidate Build Evidence
