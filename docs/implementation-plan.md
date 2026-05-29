@@ -149,10 +149,13 @@ Verification:
 - Added import/export service and Settings import/export controller tests.
 - Started sync readiness by migrating `UserDefaults` persistence for memory library and recent history from raw arrays to versioned documents.
 - Added compatibility tests proving legacy raw-array data loads and is rewritten to `schema_version: 1` documents.
+- Started the Core Data local authority layer with programmatic `TranslationItem` and `DeletionTombstone` entities.
+- Added in-memory Core Data tests for memory item upsert/load and soft-delete tombstone behavior.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Decide whether the CloudKit-backed authority should be SwiftData/Core Data or a custom JSON-backed sync layer.
-- Define delete/tombstone behavior before enabling cross-device sync.
+- Wire the app's memory library reads/writes from `UserDefaults` to the Core Data store.
+- Migrate legacy `UserDefaults` memory data into Core Data before enabling cross-device sync.
+- Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.
