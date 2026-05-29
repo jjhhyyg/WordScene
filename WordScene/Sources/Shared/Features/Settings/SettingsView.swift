@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
     @State private var importExportStatus: SettingsImportExportStatus = .idle
+    @State private var importConflictPolicy: SettingsMemoryImportConflictPolicy = .replaceExisting
     @State private var exportDocument = MemoryExportFileDocument()
     @State private var exportFileName = "memory-book-export.json"
     @State private var isExportingMemory = false
@@ -160,6 +161,12 @@ struct SettingsView: View {
             Section("导入导出") {
                 settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
                 settingValueRow("范围", value: "全量导入 / 全量导出")
+                Picker("重复项", selection: $importConflictPolicy) {
+                    ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
+                        Text(policy.title).tag(policy)
+                    }
+                }
+                .pickerStyle(.segmented)
                 importExportStatusView
 
                 HStack {
@@ -357,6 +364,19 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
                 settingValueRow("范围", value: "全量导入 / 全量导出")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("重复项")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Picker("重复项", selection: $importConflictPolicy) {
+                        ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
+                            Text(policy.title).tag(policy)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
                 importExportStatusView
 
                 HStack(spacing: 10) {
@@ -606,7 +626,10 @@ struct SettingsView: View {
 
         do {
             let data = try Data(contentsOf: url)
-            let summary = try importExportController.importMemory(from: data)
+            let summary = try importExportController.importMemory(
+                from: data,
+                conflictPolicy: importConflictPolicy
+            )
             importExportStatus = .success(
                 "已导入 \(summary.importedCount) 条，覆盖 \(summary.replacedCount) 条，跳过 \(summary.skippedCount) 条。"
             )

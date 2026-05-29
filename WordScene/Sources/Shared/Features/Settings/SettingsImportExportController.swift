@@ -27,12 +27,12 @@ struct SettingsImportExportController {
 
     func importMemory(
         from data: Data,
-        conflictStrategy: MemoryImportConflictStrategy = .replaceDuplicates
+        conflictPolicy: SettingsMemoryImportConflictPolicy = .replaceExisting
     ) throws -> SettingsMemoryImportSummary {
         let result = try importExportService.importItems(
             from: data,
             existingItems: try memoryStore.loadOrThrow(),
-            conflictStrategy: conflictStrategy
+            conflictStrategy: conflictPolicy.conflictStrategy
         )
         try memoryStore.saveOrThrow(result.items)
         changeRecorder()
@@ -60,4 +60,29 @@ struct SettingsMemoryImportSummary: Equatable {
     let replacedCount: Int
     let skippedCount: Int
     let totalCount: Int
+}
+
+enum SettingsMemoryImportConflictPolicy: String, CaseIterable, Identifiable {
+    case replaceExisting
+    case keepExisting
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .replaceExisting:
+            return "覆盖重复项"
+        case .keepExisting:
+            return "保留现有项"
+        }
+    }
+
+    var conflictStrategy: MemoryImportConflictStrategy {
+        switch self {
+        case .replaceExisting:
+            return .replaceDuplicates
+        case .keepExisting:
+            return .skipDuplicates
+        }
+    }
 }

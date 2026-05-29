@@ -337,6 +337,8 @@ Verification:
 - Reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 78 macOS tests, iOS build, and unsigned Release compiles still pass after the local recovery coverage.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `f82dcb8df41a`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `15d81784f49e`.
+- Added a Settings import conflict policy control so users can either overwrite duplicate imported memories or keep existing local entries, with skipped duplicate counts reported accurately.
+- Added regression coverage for the keep-existing import path and reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 79 macOS tests, iOS build, and unsigned Release compiles still pass after the import conflict UI change.
 
 Next:
 

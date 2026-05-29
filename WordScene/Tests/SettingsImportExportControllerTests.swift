@@ -65,6 +65,43 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertTrue(store.load().contains { $0.sourceText == "cat" })
     }
 
+    func testImportMemoryCanKeepExistingDuplicatesAndReportSkippedCount() throws {
+        let suiteName = "SettingsImportExportControllerTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = MemoryLibraryStore(defaults: defaults)
+        let service = MemoryImportExportService()
+        let controller = SettingsImportExportController(memoryStore: store, importExportService: service)
+        let existingItem = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "keep me"
+        )
+        let duplicateItem = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "incoming"
+        )
+        let newItem = MemoryItem(sourceText: "cat", translatedText: "猫", sourceLanguage: .en, targetLanguage: .zh)
+        store.save([existingItem])
+        let data = try service.exportData(items: [duplicateItem, newItem])
+
+        let summary = try controller.importMemory(from: data, conflictPolicy: .keepExisting)
+
+        XCTAssertEqual(summary.importedCount, 1)
+        XCTAssertEqual(summary.replacedCount, 0)
+        XCTAssertEqual(summary.skippedCount, 1)
+        XCTAssertEqual(store.load().count, 2)
+        XCTAssertEqual(store.load().first { $0.sourceText == "hello" }?.note, "keep me")
+        XCTAssertTrue(store.load().contains { $0.sourceText == "cat" })
+    }
+
     func testImportMemoryRecordsLocalDataChangeAfterSuccessfulSave() throws {
         let suiteName = "SettingsImportExportControllerTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
