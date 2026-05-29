@@ -157,10 +157,13 @@ Verification:
 - Added a Core Data-backed `TranslationHistoryRepository` and `TranslationHistoryRecord` entity for recent translation history.
 - Wired Translate and Search recent history access to the Core Data-backed repository.
 - Added legacy recent-history migration from `UserDefaults` into Core Data, with old data cleared only after a successful Core Data write.
+- Added `AppDataController` as the shared app data entry point so Translate, Library, Search, and Settings use one owned Core Data stack.
+- Injected the shared data controller through SwiftUI environment for the main window and macOS Settings scene.
+- Added tests proving memory and recent-history repositories share the injected Core Data store.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Introduce a shared app data controller for a single owned Core Data stack before enabling CloudKit.
+- Add an explicit Core Data load/error state so persistence failures surface in UI instead of silently falling back.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.

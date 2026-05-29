@@ -14,11 +14,14 @@ struct SettingsView: View {
     @State private var exportFileName = "memory-book-export.json"
     @State private var isExportingMemory = false
     @State private var isImportingMemory = false
+    @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
     private let credentialStore = KeychainCredentialStore()
     private let balanceClient = DeepSeekBalanceClient()
-    private let importExportController = SettingsImportExportController()
+    private var importExportController: SettingsImportExportController {
+        dataController.settingsImportExport
+    }
 
     var body: some View {
         Group {

@@ -3,9 +3,12 @@ import SwiftUI
 struct LibraryView: View {
     @State private var items: [MemoryItem] = []
     @State private var hasLoaded = false
+    @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
-    private let store = MemoryLibraryRepository()
+    private var store: MemoryLibraryRepository {
+        dataController.memoryLibrary
+    }
 
     var body: some View {
         Group {

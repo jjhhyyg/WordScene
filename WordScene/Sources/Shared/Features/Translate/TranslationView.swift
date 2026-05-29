@@ -14,13 +14,19 @@ struct TranslationView: View {
     @State private var lastTranslatedRecord: TranslationRecord?
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
+    @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private let credentialStore = KeychainCredentialStore()
     private let translationClient = DeepSeekTranslationClient()
-    private let historyStore = TranslationHistoryRepository()
-    private let memoryStore = MemoryLibraryRepository()
+    private var historyStore: TranslationHistoryRepository {
+        dataController.translationHistory
+    }
+
+    private var memoryStore: MemoryLibraryRepository {
+        dataController.memoryLibrary
+    }
 
     var body: some View {
         contentContainer

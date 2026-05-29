@@ -5,11 +5,18 @@ struct SearchView: View {
     @State private var memoryItems: [MemoryItem] = []
     @State private var history: [TranslationRecord] = []
     @State private var hasLoaded = false
+    @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
-    private let memoryStore = MemoryLibraryRepository()
-    private let historyStore = TranslationHistoryRepository()
     private let searchIndex = MemorySearchIndex()
+
+    private var memoryStore: MemoryLibraryRepository {
+        dataController.memoryLibrary
+    }
+
+    private var historyStore: TranslationHistoryRepository {
+        dataController.translationHistory
+    }
 
     private var trimmedQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
