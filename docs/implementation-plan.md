@@ -14,30 +14,30 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: in progress.
+Status: Milestone 1 completed; Milestone 2 is next.
 
 Baseline already completed:
 
 - XcodeGen project with iOS and macOS targets.
 - Shared SwiftUI app shell with Translate, Library, Search, and Settings sections.
-- Responsive startup UI for iPhone, iPad, and macOS.
+- Responsive startup UI for iPhone, iPad, and macOS, including the latest iPhone/iPad/macOS layout refinements.
 - Keychain abstraction.
 - DeepSeek balance response decoder and tests.
+- DeepSeek token save/delete/test flow in Settings.
+- DeepSeek chat-completions translation loop in Translate.
+- Local recent translation history backed by `UserDefaults`.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 
 Known gaps:
 
-- Settings UI does not yet persist the DeepSeek token.
-- Translate UI does not yet call the real DeepSeek chat/completions API.
-- Translation result, loading, and error states are placeholders.
-- Translation history is not persisted.
-- Library, Search, and import/export remain placeholders.
+- Saved memory library remains a placeholder.
+- Search and import/export remain placeholders.
 - CloudKit/iCloud sync is not connected.
 
 ## Milestone 1: Real Translation Loop
 
-Target status: next.
+Target status: completed.
 
 Deliverables:
 
@@ -57,7 +57,7 @@ Verification:
 
 ## Milestone 2: Local Memory Library
 
-Target status: pending.
+Target status: next.
 
 Deliverables:
 
@@ -131,9 +131,10 @@ Verification:
 - Implemented local recent translation history backed by `UserDefaults`.
 - Added tests for DeepSeek translation response decoding and translation history persistence.
 - Verified the local token against the DeepSeek API with a direct non-stream request.
+- Confirmed the initial iPhone, iPad, and macOS UI is now acceptable as the baseline for the next product milestone.
 
 Next:
 
-- Manually smoke test the full macOS UI loop: Settings token status, translation button, result rendering, and history rendering.
-- Smoke test the same loop on iPhone/iPad Simulator when the desired simulator runtime is available.
-- Start Milestone 2 by promoting history entries into saved library items.
+- Start Milestone 2 by promoting history entries into saved memory items.
+- Add favorite/unfavorite controls from translation result and recent history.
+- Replace the Library placeholder with persisted saved items, including delete and note editing.
