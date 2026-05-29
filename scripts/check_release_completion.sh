@@ -185,6 +185,34 @@ validate_candidate_git_commit() {
   fi
 }
 
+live_smoke_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "DeepSeek live protocol smoke" &&
+    trim($3) == "API" &&
+    trim($6) == "PASS" {
+      print trim($7)
+      exit
+    }
+  ' "$EVIDENCE_FILE" |
+    sed -n 's/.*Git commit `\([^`][^`]*\)`.*/\1/p'
+}
+
+validate_live_smoke_git_commit() {
+  local evidence_commit
+
+  evidence_commit="$(live_smoke_git_commit)"
+  if [[ -z "$evidence_commit" ]]; then
+    echo "Missing DeepSeek live protocol smoke Git commit metadata." >&2
+    return 1
+  fi
+
+  validate_candidate_git_commit "$evidence_commit"
+}
+
 required_rows() {
   cat <<'ROWS'
 Readiness script|macOS + iOS generic
@@ -269,6 +297,10 @@ else
   if ! validate_candidate_git_commit "$evidence_commit"; then
     status=1
   fi
+fi
+
+if ! validate_live_smoke_git_commit; then
+  status=1
 fi
 
 if [[ "$status" -ne 0 ]]; then

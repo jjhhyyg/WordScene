@@ -85,7 +85,8 @@ grep -qF 'Translated: 你好，世界。' <<<"$OUTPUT"
 ! grep -qF 'test-token-secret' "$EVIDENCE"
 grep -qF '| Readiness script | macOS + iOS generic | local build host | 1 | PASS | PRESERVED READINESS |' "$EVIDENCE"
 grep -qF '| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at ' "$EVIDENCE"
-grep -qF 'verified JSON Output with the real DeepSeek API, and returned `你好，世界。` without printing the token.' "$EVIDENCE"
+grep -qF "Git commit \`$(git -C "$ROOT" rev-parse --short=12 HEAD)\`." "$EVIDENCE"
+grep -qF 'It verified JSON Output with the real DeepSeek API and returned `你好，世界。` without printing the token.' "$EVIDENCE"
 grep -qF 'PRESERVED CANDIDATE EVIDENCE' "$EVIDENCE"
 if grep -qF 'STALE LIVE ROW' "$EVIDENCE"; then
   echo "stale live evidence row was not replaced" >&2

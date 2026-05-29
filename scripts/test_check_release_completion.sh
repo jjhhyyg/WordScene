@@ -10,6 +10,7 @@ PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 STALE_COMMIT_EVIDENCE="$TMPDIR/stale-commit-evidence.md"
+MISSING_LIVE_COMMIT_EVIDENCE="$TMPDIR/missing-live-commit-evidence.md"
 ANCESTOR_DOCS_ONLY_EVIDENCE="$TMPDIR/ancestor-docs-only-evidence.md"
 ANCESTOR_PRODUCT_CHANGE_EVIDENCE="$TMPDIR/ancestor-product-change-evidence.md"
 NON_ANCESTOR_EVIDENCE="$TMPDIR/non-ancestor-evidence.md"
@@ -23,7 +24,7 @@ cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 | --- | --- | --- | --- | --- | --- |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | all non-manual gates passed |
 | Candidate gate | macOS + iOS | local build host | 1 | PASS | all requested signed candidates built |
-| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live JSON Output smoke passed |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live JSON Output smoke passed. Git commit PLACEHOLDER_COMMIT. |
 
 ## Release Candidate Build Evidence
 
@@ -49,6 +50,9 @@ cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 PASSING_MD
 
 cp "$PASSING_EVIDENCE" "$MISSING_COMMIT_EVIDENCE"
+cp "$PASSING_EVIDENCE" "$MISSING_LIVE_COMMIT_EVIDENCE"
+sed -i '' 's/ Git commit PLACEHOLDER_COMMIT//' "$MISSING_LIVE_COMMIT_EVIDENCE"
+sed -i '' "s/PLACEHOLDER_COMMIT/\`$CURRENT_COMMIT\`/" "$PASSING_EVIDENCE"
 cat >>"$PASSING_EVIDENCE" <<COMMIT_MD
 
 | Field | Value |
@@ -177,6 +181,15 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Missing candidate build Git commit metadata.' /tmp/wordscene-completion-missing-commit.err
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$MISSING_LIVE_COMMIT_EVIDENCE" \
+  >/tmp/wordscene-completion-missing-live-commit.out 2>/tmp/wordscene-completion-missing-live-commit.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Missing DeepSeek live protocol smoke Git commit metadata.' /tmp/wordscene-completion-missing-live-commit.err
 
 cp "$PASSING_EVIDENCE" "$STALE_COMMIT_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_COMMIT_EVIDENCE"

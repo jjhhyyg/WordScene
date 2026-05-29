@@ -208,6 +208,7 @@ record_evidence() {
   local evidence_file="$1"
   local translated_text="$2"
   local timestamp
+  local git_commit
   local escaped_translation
   local notes
   local row
@@ -216,8 +217,9 @@ record_evidence() {
   local preserved_rest
 
   timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  git_commit="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
   escaped_translation="$(printf '%s' "$translated_text" | markdown_cell)"
-  notes="\`scripts/run_live_deepseek_translation_smoke.sh\` passed at $timestamp using the ignored local token file, verified JSON Output with the real DeepSeek API, and returned \`$escaped_translation\` without printing the token."
+  notes="\`scripts/run_live_deepseek_translation_smoke.sh\` passed at $timestamp using the ignored local token file. Git commit \`$git_commit\`. It verified JSON Output with the real DeepSeek API and returned \`$escaped_translation\` without printing the token."
   row="| DeepSeek live protocol smoke | API | local build host | 1 | PASS | $notes |"
 
   mkdir -p "$(dirname "$evidence_file")"
