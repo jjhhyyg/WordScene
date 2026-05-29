@@ -356,6 +356,7 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `c47757fd5232`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `1dbff1ec6233`.
 - Added regression coverage proving normal memory-library and recent-history saves record local data changes, then wired those repository writes through `AppDataController` so loaded Library/Search/Translate views can refresh after save/delete/history updates without relaunch.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `dbbc2590d2ca`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
