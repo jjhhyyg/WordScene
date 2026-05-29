@@ -159,6 +159,7 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertEqual(summary.replacedCount, 0)
         XCTAssertEqual(summary.skippedCount, 1)
         XCTAssertEqual(summary.totalCount, 1)
+        XCTAssertEqual(summary.statusMessage, "未导入新内容，已跳过 1 条重复项。")
         XCTAssertEqual(store.saveCount, 0)
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(store.items, [existingItem])

@@ -62,6 +62,14 @@ struct SettingsMemoryImportSummary: Equatable {
     let replacedCount: Int
     let skippedCount: Int
     let totalCount: Int
+
+    var statusMessage: String {
+        if importedCount == 0 && replacedCount == 0 && skippedCount > 0 {
+            return "未导入新内容，已跳过 \(skippedCount) 条重复项。"
+        }
+
+        return "已导入 \(importedCount) 条，覆盖 \(replacedCount) 条，跳过 \(skippedCount) 条。"
+    }
 }
 
 enum SettingsMemoryImportConflictPolicy: String, CaseIterable, Identifiable {

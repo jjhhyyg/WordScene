@@ -45,6 +45,7 @@ Baseline already completed:
 - Library, Search, and Translate refresh local view state after persistent store remote-change notifications.
 - Settings import records local data changes so already loaded Library/Search/Translate views can refresh after an import.
 - Settings import skips persistence and change notifications when every incoming duplicate is skipped, avoiding fake local changes during keep-existing imports.
+- Settings import reports keep-existing no-op imports as skipped duplicates instead of implying a successful data import.
 - Memory library and recent-history repository writes record local data changes so already loaded Library/Search/Translate views can refresh after normal save/delete/history updates.
 - Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
 - Settings shows the app version, build number, and a smoke-test identifier so manual release evidence can be recorded from inside the app.
@@ -388,6 +389,7 @@ Verification:
 - Tightened Settings import handling so a keep-existing import with only skipped duplicates does not rewrite the store or record a local data change; reran `scripts/verify_release_readiness.sh`.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fa1cc849d7ba`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `33c35ea173de`.
+- Clarified Settings import status messaging so keep-existing imports that only skip duplicates say no new content was imported; reran targeted Settings import/export controller tests and `scripts/verify_release_readiness.sh`.
 
 Next:
 

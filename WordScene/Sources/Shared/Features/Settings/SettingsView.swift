@@ -651,9 +651,7 @@ struct SettingsView: View {
                 from: data,
                 conflictPolicy: importConflictPolicy
             )
-            importExportStatus = .success(
-                "已导入 \(summary.importedCount) 条，覆盖 \(summary.replacedCount) 条，跳过 \(summary.skippedCount) 条。"
-            )
+            importExportStatus = .success(summary.statusMessage)
         } catch {
             importExportStatus = .failed(importExportErrorMessage(for: error))
         }
