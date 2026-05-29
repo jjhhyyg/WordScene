@@ -304,6 +304,8 @@ Verification:
 - Hardened `scripts/run_release_candidate_gate.sh` so signed candidate evidence cannot be generated while the git worktree has uncommitted changes.
 - Hardened `scripts/record_release_smoke_result.sh` so manual smoke rows cannot be recorded unless release candidate evidence exists for the current repository HEAD.
 - Hardened `scripts/record_release_smoke_result.sh` so platform-specific manual smoke rows require matching PASS candidate build evidence before they can be recorded.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness passed, iOS signed Release candidate evidence was refreshed for commit `b5e5741f9aa7`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
+- Reran `scripts/check_release_completion.sh`; candidate Git commit metadata now matches the current commit, and the remaining blockers are macOS signed candidate build plus manual translation/import-export/recovery/iCloud/local-only smoke evidence.
 
 Next:
 
