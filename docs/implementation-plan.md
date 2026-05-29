@@ -287,6 +287,8 @@ Verification:
 - Added `scripts/test_required_reason_api_scan.sh` and wired it into release readiness so production source usage of `UserDefaults` remains covered by the manifest and other required-reason API categories force an explicit manifest review before release.
 - Extended the live DeepSeek smoke script with `--evidence` so successful real API checks replace stale non-manual evidence rows without writing the token, then refreshed the current live protocol evidence.
 - Added Git commit metadata to release candidate build evidence and made the final release completion audit fail when candidate traceability metadata is missing.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS signed Release candidate evidence now includes the source Git commit, while macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
+- Reran `scripts/check_release_completion.sh`; candidate Git commit metadata is now present, and the remaining blockers are macOS signed candidate build plus manual translation/import-export/recovery/iCloud/local-only smoke evidence.
 
 Next:
 
