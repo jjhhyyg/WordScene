@@ -340,9 +340,11 @@ required_candidate_platforms() {
       printf 'iOS\n'
       ;;
     "iCloud create sync|iPhone + macOS" | \
-    "iCloud delete sync|iPhone + macOS" | \
-    "Local-only fallback|macOS/iOS")
+    "iCloud delete sync|iPhone + macOS")
       printf 'macOS\n'
+      printf 'iOS\n'
+      ;;
+    "Local-only fallback|macOS/iOS")
       printf 'iOS\n'
       ;;
   esac

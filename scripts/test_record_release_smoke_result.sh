@@ -313,6 +313,17 @@ IOS_ONLY_MD
 
 grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | iPhone smoke can use the iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
 
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
+  --area "Local-only fallback" \
+  --platform "macOS/iOS" \
+  --device "Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Local-only fallback uses the readiness-covered unsigned Mac build and the signed iOS candidate."
+
+grep -qF '| Local-only fallback | macOS/iOS | Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | Local-only fallback uses the readiness-covered unsigned Mac build and the signed iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
+
 set +e
 "$ROOT/scripts/record_release_smoke_result.sh" \
   --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \

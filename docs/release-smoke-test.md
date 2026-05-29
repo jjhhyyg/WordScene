@@ -188,7 +188,10 @@ project, script, checklist, or release-critical code change and before recording
 smoke results.
 Each manual row must also have PASS candidate build evidence for the platform it
 tests: macOS rows require a macOS candidate, iPhone/iPad rows require an iOS
-candidate, and iCloud/local-only cross-platform rows require both.
+candidate, and iCloud cross-platform rows require both. The local-only fallback
+row may be recorded with PASS iOS candidate evidence plus the readiness-covered
+unsigned macOS Release build, because that scenario intentionally verifies
+unsigned/local-only behavior on Mac.
 Recording the same `Area` and `Platform` again replaces the stale manual row,
 so a retest can move a row from `BLOCKED` or `FAIL` to the current result
 without leaving contradictory evidence behind:
