@@ -53,6 +53,7 @@ Baseline already completed:
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
 - Manual smoke results can be recorded consistently through `scripts/record_release_smoke_result.sh`.
 - Real DeepSeek translation protocol can be smoke-tested without a signed app through `scripts/run_live_deepseek_translation_smoke.sh`.
+- Final release completion evidence can be audited through `scripts/check_release_completion.sh`.
 
 Known gaps:
 
@@ -275,6 +276,7 @@ Verification:
 - Added `scripts/record_release_smoke_result.sh` plus a shell regression test so manual release smoke rows are appended with validated result values and escaped Markdown table cells.
 - Added unsigned macOS and iOS Release compile checks to `scripts/verify_release_readiness.sh` so Release-only conditional compilation is covered before signed candidate smoke testing.
 - Updated the release candidate gate to rerun release readiness and replace stale non-manual gate evidence before recording candidate build evidence or signing blockers.
+- Added `scripts/check_release_completion.sh` plus a shell regression test so the release cannot be called complete until signed candidate builds, manual smoke rows, iCloud create/delete sync, and local-only fallback all have PASS evidence with no BLOCKED/FAIL rows remaining.
 
 Next:
 
@@ -282,4 +284,5 @@ Next:
 - After signing is restored, use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to regenerate release candidate evidence for both platforms.
 - Rerun `scripts/verify_release_readiness.sh` after any release-gate change and before manual smoke testing.
 - Execute `docs/release-smoke-test.md` on a signed release candidate and record evidence.
+- Run `scripts/check_release_completion.sh` after manual smoke evidence is complete.
 - Keep local-only mode fully usable while sync is being prepared.

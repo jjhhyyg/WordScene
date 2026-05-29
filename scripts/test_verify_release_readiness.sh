@@ -57,18 +57,26 @@ set -euo pipefail
 printf 'test_run_live_deepseek_translation_smoke\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_LIVE_TEST
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke"
+cat >"$BIN/scripts-test-check-release-completion" <<'FAKE_COMPLETION_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_check_release_completion\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_COMPLETION_TEST
+
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
   WORDSCENE_SKIP_READINESS_SELF_TEST=1 \
   WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT="$BIN/scripts-test-run-release-candidate-gate" \
   WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT="$BIN/scripts-test-run-live-deepseek-translation-smoke" \
+  WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT="$BIN/scripts-test-check-release-completion" \
   "$ROOT/scripts/verify_release_readiness.sh"
 
 grep -qF 'git diff --check' "$LOG"
 grep -qF 'test_run_release_candidate_gate' "$LOG"
 grep -qF 'test_run_live_deepseek_translation_smoke' "$LOG"
+grep -qF 'test_check_release_completion' "$LOG"
 token_pattern='sk-[A-Za-z0-9]|e2a'
 token_pattern+='988'
 grep -qF "rg -n $token_pattern WordScene docs project.yml .gitignore scripts" "$LOG"

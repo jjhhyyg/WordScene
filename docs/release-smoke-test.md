@@ -23,6 +23,9 @@ and pass/fail notes for each run.
   rerun readiness checks, refresh the non-manual gate evidence, build each
   release candidate, and append build evidence or blocker rows to
   `docs/release-smoke-evidence.md`.
+- Run `scripts/check_release_completion.sh` only after recording all candidate
+  build and manual smoke evidence. It must pass before calling the release
+  complete or the cross-platform product loop genuinely usable.
 - Optionally run `scripts/run_live_deepseek_translation_smoke.sh` before signed
   app smoke testing to verify the current DeepSeek token, JSON Output request,
   and structured prompt payload against the real API. It reads the token from
@@ -191,3 +194,12 @@ scripts/record_release_smoke_result.sh \
 | iCloud create sync | iPhone + macOS |  |  |  |  |
 | iCloud delete sync | iPhone + macOS |  |  |  |  |
 | Local-only fallback | macOS/iOS |  |  |  |  |
+
+After all rows are recorded, run:
+
+```bash
+scripts/check_release_completion.sh
+```
+
+The script fails if any required PASS row is missing or if any BLOCKED/FAIL row
+is still present in `docs/release-smoke-evidence.md`.
