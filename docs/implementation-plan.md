@@ -35,6 +35,7 @@ Baseline already completed:
 - Core Data is configured with the project CloudKit container for the production persistent store.
 - CloudKit sync is entitlement-gated at runtime so unsigned or non-iCloud builds stay local-only instead of crashing.
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
+- Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 
 Known gaps:
 
@@ -124,12 +125,14 @@ Deliverables:
 - Add iCloud entitlements for the shared iOS/macOS targets.
 - Keep the Core Data model compatible with CloudKit validation rules and keep persistent history enabled for local fallback stores.
 - Surface storage bootstrap status and iCloud sync readiness as separate states in Settings.
+- Observe `NSPersistentCloudKitContainer` sync events so recent sync success and errors are visible.
 
 Verification:
 
 - Data migration tests.
 - Store-description tests for CloudKit container options and remote-change history tracking.
 - Runtime sync-mode selection tests for signed CloudKit and unsigned local-only processes.
+- Sync event status tests for waiting, success, and failure states.
 - Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
 
@@ -199,6 +202,9 @@ Verification:
 - Split primary storage status from iCloud sync readiness in `AppDataController`.
 - Updated Settings to show Core Data availability separately from CloudKit configured, local-only, and sync-unavailable states.
 - Added tests for CloudKit-configured, local-only, and unavailable sync status reporting.
+- Added a CloudKit sync event monitor backed by `NSPersistentCloudKitContainer.eventChangedNotification`.
+- Updated Settings to show waiting, recent success, and error states for CloudKit sync events.
+- Added tests for initial sync-event waiting, successful import, and failed export status reporting.
 
 Next:
 

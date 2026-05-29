@@ -76,4 +76,46 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(controller.syncStatus.title, "仅本机存储")
         XCTAssertTrue(controller.syncStatus.message.contains("不会通过 iCloud 同步"))
     }
+
+    func testCloudSyncEventStatusStartsWaitingForSignedCloudKitStores() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let controller = AppDataController(
+            coreDataStoreFactory: { coreDataStore },
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
+
+        XCTAssertEqual(controller.syncEventMonitor.status.title, "等待 iCloud 同步事件")
+        XCTAssertTrue(controller.syncEventMonitor.status.message.contains("不能证明多端已同步"))
+    }
+
+    func testCloudSyncEventStatusRecordsSuccessfulImportEvent() {
+        let monitor = CloudKitSyncEventMonitor(syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"))
+
+        monitor.record(CloudSyncEvent(
+            kind: .importFromCloud,
+            startDate: Date(timeIntervalSince1970: 10),
+            endDate: Date(timeIntervalSince1970: 20),
+            succeeded: true,
+            errorDescription: nil
+        ))
+
+        XCTAssertEqual(monitor.status.title, "最近同步成功")
+        XCTAssertTrue(monitor.status.message.contains("从 iCloud 导入"))
+    }
+
+    func testCloudSyncEventStatusRecordsFailedExportEvent() {
+        let monitor = CloudKitSyncEventMonitor(syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"))
+
+        monitor.record(CloudSyncEvent(
+            kind: .exportToCloud,
+            startDate: Date(timeIntervalSince1970: 10),
+            endDate: Date(timeIntervalSince1970: 20),
+            succeeded: false,
+            errorDescription: "quota exceeded"
+        ))
+
+        XCTAssertEqual(monitor.status.title, "同步出现错误")
+        XCTAssertTrue(monitor.status.message.contains("向 iCloud 上传"))
+        XCTAssertTrue(monitor.status.message.contains("quota exceeded"))
+    }
 }

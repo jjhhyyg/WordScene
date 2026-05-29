@@ -139,6 +139,7 @@ struct SettingsView: View {
             Section("数据存储") {
                 persistenceStatusView
                 syncStatusView
+                SyncEventStatusView(monitor: dataController.syncEventMonitor)
                 recoveryStatusView
 
                 HStack {
@@ -303,6 +304,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 persistenceStatusView
                 syncStatusView
+                SyncEventStatusView(monitor: dataController.syncEventMonitor)
 
                 Divider()
 
@@ -641,6 +643,23 @@ struct SettingsView: View {
     private func isUserCancelled(_ error: Error) -> Bool {
         let nsError = error as NSError
         return nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError
+    }
+}
+
+private struct SyncEventStatusView: View {
+    @ObservedObject var monitor: CloudKitSyncEventMonitor
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(monitor.status.title, systemImage: monitor.status.systemImage)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(monitor.status.tint)
+
+            Text(monitor.status.message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
