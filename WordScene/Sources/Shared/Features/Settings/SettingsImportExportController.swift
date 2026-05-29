@@ -17,7 +17,8 @@ struct SettingsImportExportController {
         return SettingsMemoryExport(
             data: try importExportService.exportData(items: items),
             fileName: importExportService.exportFileName(),
-            itemCount: items.count
+            itemCount: items.count,
+            privacyNotice: Self.exportPrivacyNotice
         )
     }
 
@@ -39,12 +40,15 @@ struct SettingsImportExportController {
             totalCount: result.items.count
         )
     }
+
+    private static let exportPrivacyNotice = "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
 }
 
 struct SettingsMemoryExport: Equatable {
     let data: Data
     let fileName: String
     let itemCount: Int
+    let privacyNotice: String
 }
 
 struct SettingsMemoryImportSummary: Equatable {

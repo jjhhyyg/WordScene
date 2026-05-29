@@ -515,7 +515,7 @@ struct SettingsView: View {
             let export = try importExportController.prepareExport()
             exportDocument = MemoryExportFileDocument(data: export.data)
             exportFileName = export.fileName
-            importExportStatus = .working("准备导出 \(export.itemCount) 条记忆。")
+            importExportStatus = .working("准备导出 \(export.itemCount) 条记忆。\(export.privacyNotice)")
             isExportingMemory = true
         } catch {
             importExportStatus = .failed(importExportErrorMessage(for: error))
@@ -526,7 +526,7 @@ struct SettingsView: View {
     private func handleExportCompletion(_ result: Result<URL, Error>) {
         switch result {
         case .success:
-            importExportStatus = .success("导出文件已生成，请妥善保管。")
+            importExportStatus = .success("导出文件已生成。导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。")
         case .failure(let error):
             importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
         }
@@ -727,7 +727,7 @@ private enum SettingsImportExportStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return "导出文件包含收藏内容，不包含 API Token。"
+            return "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
         case .working(let message), .success(let message), .failed(let message):
             return message
         }

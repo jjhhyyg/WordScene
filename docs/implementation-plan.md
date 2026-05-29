@@ -37,6 +37,7 @@ Baseline already completed:
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
+- Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 
 Known gaps:
@@ -106,12 +107,14 @@ Deliverables:
 - Export all local memory data as `memory-book-export-YYYYMMDD.json`.
 - Import the same JSON format with validation and conflict handling.
 - Keep API token out of export files.
+- Show an explicit privacy notice that exported JSON is not encrypted and must be protected by the user.
 - Wire Settings import/export buttons to native file importer/exporter flows.
 
 Verification:
 
 - Round-trip JSON test.
 - Settings import/export controller tests.
+- Export privacy notice test.
 - Manual export/import test on macOS and iOS.
 
 ## Milestone 5: Sync Readiness
@@ -214,6 +217,8 @@ Verification:
 - Persisted the latest CloudKit sync event snapshot in `UserDefaults` and restored it for Settings diagnostics after relaunch.
 - Added tests proving persisted sync events restore for CloudKit mode without leaking into local-only mode.
 - Added `docs/release-smoke-test.md` as the manual release gate covering translation, language controls, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
+- Added an explicit export privacy notice in Settings and export preparation metadata: exported JSON is unencrypted, contains saved content, and excludes the API token.
+- Added a Settings import/export controller test for the export privacy notice.
 
 Next:
 

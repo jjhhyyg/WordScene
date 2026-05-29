@@ -23,6 +23,8 @@ final class SettingsImportExportControllerTests: XCTestCase {
 
         XCTAssertEqual(export.fileName, "memory-book-export-20270115.json")
         XCTAssertEqual(export.itemCount, 1)
+        XCTAssertTrue(export.privacyNotice.contains("不加密"))
+        XCTAssertTrue(export.privacyNotice.contains("不包含 API Token"))
         XCTAssertEqual(imported.items, [item])
     }
 
