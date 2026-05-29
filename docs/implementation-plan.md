@@ -54,6 +54,7 @@ Baseline already completed:
 - Settings no longer exposes anonymous crash-reporting consent until a real crash-reporting service exists, so the visible privacy surface matches implemented behavior.
 - Project configuration and v2 design docs now match the implemented privacy surface: first release has no crash-diagnostics upload control.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
+- Release candidate gate refuses to generate evidence from a dirty worktree so candidate commit metadata stays reproducible.
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
 - Manual smoke results can be recorded consistently through `scripts/record_release_smoke_result.sh`.
@@ -298,6 +299,7 @@ Verification:
 - Deduplicated recent translation history insertion so repeating the same source/translation/language direction moves the newest record to the top instead of cluttering the history list.
 - Hardened `scripts/record_release_smoke_result.sh` to reject non-canonical manual Area/Platform pairs, preventing typo rows such as `iPadOS` from being recorded but ignored by the completion audit.
 - Hardened `scripts/check_release_completion.sh` so candidate build evidence must match the current repository HEAD, preventing stale signed-build evidence from making a changed tree look releasable.
+- Hardened `scripts/run_release_candidate_gate.sh` so signed candidate evidence cannot be generated while the git worktree has uncommitted changes.
 
 Next:
 

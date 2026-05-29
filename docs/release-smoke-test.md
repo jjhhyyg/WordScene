@@ -24,7 +24,8 @@ and pass/fail notes for each run.
   rerun readiness checks, refresh the non-manual gate evidence, build each
   release candidate, and append build evidence or blocker rows to
   `docs/release-smoke-evidence.md`. Candidate build evidence must include the
-  Git commit used to produce the app bundle.
+  Git commit used to produce the app bundle. The gate requires a clean git
+  worktree so the generated evidence can be reproduced from that commit.
 - Run `scripts/check_release_completion.sh` only after recording all candidate
   build and manual smoke evidence. It must pass before calling the release
   complete or the cross-platform product loop genuinely usable. The candidate

@@ -10,6 +10,9 @@ COLLECT_SCRIPT="$TMPDIR/fake_collect_release_candidate_evidence.sh"
 READINESS_SCRIPT="$TMPDIR/fake_verify_release_readiness.sh"
 EVIDENCE="$TMPDIR/evidence.md"
 LOG="$TMPDIR/commands.log"
+DIRTY_BIN="$TMPDIR/dirty-bin"
+DIRTY_EVIDENCE="$TMPDIR/dirty-evidence.md"
+DIRTY_LOG="$TMPDIR/dirty-commands.log"
 
 cat >"$EVIDENCE" <<'STALE_EVIDENCE'
 ## Non-Manual Release Gate
@@ -106,9 +109,45 @@ FAKE_READINESS
 
 chmod +x "$READINESS_SCRIPT"
 
+mkdir -p "$DIRTY_BIN"
+cat >"$DIRTY_BIN/git" <<'FAKE_GIT'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$*" == *"status --porcelain"* ]]; then
+  printf ' M WordScene/Sources/Shared/App/WordSceneApp.swift\n'
+  exit 0
+fi
+exec /usr/bin/git "$@"
+FAKE_GIT
+chmod +x "$DIRTY_BIN/git"
+
+set +e
+PATH="$DIRTY_BIN:$PATH" \
+DERIVED_DATA_BASE="$TMPDIR/DirtyDerivedData" \
+  WORDSCENE_FAKE_COMMAND_LOG="$DIRTY_LOG" \
+  WORDSCENE_BUILD_CANDIDATES_SCRIPT="$BUILD_SCRIPT" \
+  WORDSCENE_COLLECT_EVIDENCE_SCRIPT="$COLLECT_SCRIPT" \
+  WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT="$READINESS_SCRIPT" \
+  "$ROOT/scripts/run_release_candidate_gate.sh" --platform all --evidence "$DIRTY_EVIDENCE" \
+  >/tmp/wordscene-dirty-gate-test.out 2>/tmp/wordscene-dirty-gate-test.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Release candidate gate requires a clean git worktree.' /tmp/wordscene-dirty-gate-test.err
+if [[ -f "$DIRTY_LOG" ]]; then
+  echo "release candidate gate should not run readiness or builds with a dirty worktree" >&2
+  exit 1
+fi
+if [[ -f "$DIRTY_EVIDENCE" ]]; then
+  echo "release candidate gate should not write evidence with a dirty worktree" >&2
+  exit 1
+fi
+
 set +e
 DERIVED_DATA_BASE="$TMPDIR/DerivedData" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
+  WORDSCENE_SKIP_DIRTY_RELEASE_GATE_CHECK=1 \
   WORDSCENE_BUILD_CANDIDATES_SCRIPT="$BUILD_SCRIPT" \
   WORDSCENE_COLLECT_EVIDENCE_SCRIPT="$COLLECT_SCRIPT" \
   WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT="$READINESS_SCRIPT" \

@@ -53,6 +53,26 @@ case "$PLATFORM" in
     ;;
 esac
 
+assert_clean_worktree() {
+  if [[ "${WORDSCENE_SKIP_DIRTY_RELEASE_GATE_CHECK:-0}" == "1" ]]; then
+    return
+  fi
+
+  local dirty
+  dirty="$(git -C "$ROOT" status --porcelain)"
+  if [[ -n "$dirty" ]]; then
+    cat >&2 <<ERROR
+Release candidate gate requires a clean git worktree.
+Commit or stash local changes before generating release candidate evidence.
+
+$dirty
+ERROR
+    exit 1
+  fi
+}
+
+assert_clean_worktree
+
 platforms=()
 case "$PLATFORM" in
   all)
