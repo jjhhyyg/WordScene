@@ -56,7 +56,7 @@ Baseline already completed:
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
 - Manual smoke results can be recorded consistently through `scripts/record_release_smoke_result.sh`.
-- Real DeepSeek translation protocol can be smoke-tested without a signed app through `scripts/run_live_deepseek_translation_smoke.sh`.
+- Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`.
 
 Known gaps:
@@ -285,6 +285,7 @@ Verification:
 - Removed the no-op anonymous crash-reporting toggle from Settings and added a privacy surface check to release readiness so visible privacy controls do not claim unimplemented telemetry behavior.
 - Updated `docs/project-config.md` and `docs/v2-design.md` to remove stale crash-reporting consent claims and keep release privacy documentation aligned with the implemented product.
 - Added `scripts/test_required_reason_api_scan.sh` and wired it into release readiness so production source usage of `UserDefaults` remains covered by the manifest and other required-reason API categories force an explicit manifest review before release.
+- Extended the live DeepSeek smoke script with `--evidence` so successful real API checks replace stale non-manual evidence rows without writing the token, then refreshed the current live protocol evidence.
 
 Next:
 

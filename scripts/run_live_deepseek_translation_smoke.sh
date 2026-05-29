@@ -8,9 +8,10 @@ MODEL="deepseek-v4-flash"
 SOURCE_LANGUAGE="Auto-detect"
 TARGET_LANGUAGE="Chinese"
 TEXT="hello world"
+EVIDENCE_FILE=""
 
 usage() {
-  echo "Usage: $0 [--token-file <path>] [--base-url <url>] [--model <name>] [--source <name>] [--target <name>] [--text <text>]" >&2
+  echo "Usage: $0 [--token-file <path>] [--base-url <url>] [--model <name>] [--source <name>] [--target <name>] [--text <text>] [--evidence <markdown>]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -63,6 +64,14 @@ while [[ $# -gt 0 ]]; do
       TEXT="$2"
       shift 2
       ;;
+    --evidence)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      EVIDENCE_FILE="$2"
+      shift 2
+      ;;
     *)
       usage
       exit 64
@@ -91,6 +100,7 @@ chmod 700 "$TMPDIR"
 CURL_CONFIG="$TMPDIR/curl.conf"
 REQUEST_BODY="$TMPDIR/request.json"
 RESPONSE_BODY="$TMPDIR/response.json"
+TRANSLATED_TEXT_FILE="$TMPDIR/translated.txt"
 
 umask 077
 cat >"$CURL_CONFIG" <<EOF
@@ -143,11 +153,11 @@ PY
 
 curl --config "$CURL_CONFIG" --data-binary "@$REQUEST_BODY" >"$RESPONSE_BODY"
 
-/usr/bin/python3 - "$RESPONSE_BODY" "$SOURCE_LANGUAGE" "$TARGET_LANGUAGE" <<'PY'
+/usr/bin/python3 - "$RESPONSE_BODY" "$SOURCE_LANGUAGE" "$TARGET_LANGUAGE" "$TRANSLATED_TEXT_FILE" <<'PY'
 import json
 import sys
 
-response_path, source_language, target_language = sys.argv[1:]
+response_path, source_language, target_language, translated_text_path = sys.argv[1:]
 with open(response_path, "r", encoding="utf-8") as handle:
     response = json.load(handle)
 
@@ -180,8 +190,89 @@ translated_text = (parsed_content.get("translated_text") or "").strip()
 if not translated_text:
     raise SystemExit("DeepSeek assistant JSON did not include translated_text.")
 
+with open(translated_text_path, "w", encoding="utf-8") as handle:
+    handle.write(translated_text)
+
 print("PASS: DeepSeek live translation smoke returned translated text.")
 print(f"Source language: {source_language}")
 print(f"Target language: {target_language}")
 print(f"Translated: {translated_text}")
 PY
+
+markdown_cell() {
+  tr '\n' ' ' |
+    sed 's/|/\\|/g; s/[[:space:]][[:space:]]*/ /g; s/^ //; s/ $//'
+}
+
+record_evidence() {
+  local evidence_file="$1"
+  local translated_text="$2"
+  local timestamp
+  local escaped_translation
+  local notes
+  local row
+  local temp_file
+  local preserved_rows
+  local preserved_rest
+
+  timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  escaped_translation="$(printf '%s' "$translated_text" | markdown_cell)"
+  notes="\`scripts/run_live_deepseek_translation_smoke.sh\` passed at $timestamp using the ignored local token file, verified JSON Output with the real DeepSeek API, and returned \`$escaped_translation\` without printing the token."
+  row="| DeepSeek live protocol smoke | API | local build host | 1 | PASS | $notes |"
+
+  mkdir -p "$(dirname "$evidence_file")"
+  temp_file="$(mktemp)"
+  preserved_rows="$(mktemp)"
+  preserved_rest="$(mktemp)"
+
+  if [[ -f "$evidence_file" ]]; then
+    awk '
+      /^## Non-Manual Release Gate$/ {
+        in_section = 1
+        next
+      }
+      in_section == 1 && /^## / {
+        in_section = 0
+      }
+      in_section == 1 &&
+      /^\| / &&
+      $0 !~ /^\| Area \|/ &&
+      $0 !~ /^\| ---/ &&
+      $0 !~ /^\| DeepSeek live protocol smoke \|/ {
+        print
+      }
+    ' "$evidence_file" >"$preserved_rows"
+
+    awk '
+      /^## Non-Manual Release Gate$/ {
+        skip = 1
+        next
+      }
+      /^## / {
+        skip = 0
+      }
+      skip != 1 {
+        print
+      }
+    ' "$evidence_file" >"$preserved_rest"
+  fi
+
+  {
+    printf '## Non-Manual Release Gate\n\n'
+    printf '| Area | Platform | Device / OS | Build | Result | Notes |\n'
+    printf '| --- | --- | --- | --- | --- | --- |\n'
+    cat "$preserved_rows"
+    printf '%s\n' "$row"
+    if [[ -s "$preserved_rest" ]]; then
+      printf '\n'
+      cat "$preserved_rest"
+    fi
+  } >"$temp_file"
+
+  mv "$temp_file" "$evidence_file"
+  rm -f "$preserved_rows" "$preserved_rest"
+}
+
+if [[ -n "$EVIDENCE_FILE" ]]; then
+  record_evidence "$EVIDENCE_FILE" "$(cat "$TRANSLATED_TEXT_FILE")"
+fi
