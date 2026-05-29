@@ -7,6 +7,11 @@ and pass/fail notes for each run.
 ## Preconditions
 
 - Use a signed build with the production bundle identifier.
+- Generate release candidate builds with
+  `scripts/build_release_candidates.sh --allow-provisioning-updates` after Xcode
+  is signed in to the Apple Developer account. If provisioning has already been
+  prepared locally, the flag can be omitted. Use `--platform ios` or
+  `--platform macos` only when recording a platform-specific build blocker.
 - Use the same Apple ID on all devices used for iCloud sync testing.
 - Confirm iCloud Drive and CloudKit are enabled for the Apple ID.
 - Keep the DeepSeek API token local to each device; do not expect it to sync.
@@ -145,6 +150,8 @@ Use this table for each release candidate.
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS |  |  |  |  |
+| Candidate build | iOS |  |  |  |  |
 | Translation loop | macOS |  |  |  |  |
 | Translation loop | iPhone |  |  |  |  |
 | Translation loop | iPad |  |  |  |  |

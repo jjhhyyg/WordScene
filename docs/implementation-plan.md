@@ -48,6 +48,7 @@ Baseline already completed:
 Known gaps:
 
 - CloudKit/iCloud sync is wired at the store configuration and entitlement level, but cross-device sync still needs a signed-device smoke test.
+- macOS signed Release builds currently require a valid Xcode Apple Developer account session and a matching Mac App Development provisioning profile before smoke testing can start.
 - Import/export still needs a manual macOS and iOS smoke test before release.
 - The release smoke checklist exists, but its evidence table has not been filled for a signed release candidate yet.
 
@@ -242,8 +243,12 @@ Verification:
 - Added tests proving manual memory entries trim text, replace duplicates, and reject blank source or translation fields.
 - Added a local data-change notification after successful Settings import so loaded Library, Search, and Translate views can refresh without relaunch.
 - Added tests proving Settings import records a local data change through both the import controller and `AppDataController`.
+- Added an explicit iPad supported-orientation declaration for Release candidate builds.
+- Added `scripts/build_release_candidates.sh` to make macOS and iOS Release candidate build attempts reproducible, including platform-specific reruns.
+- Verified the iOS signed Release build can be produced locally through the release candidate script, with iPad all-orientation metadata present in the built app; macOS signing remains blocked by missing Xcode account/profile state on this machine.
 
 Next:
 
+- Restore a valid Xcode Apple Developer account session and Mac App Development provisioning profile, then rerun `scripts/build_release_candidates.sh --allow-provisioning-updates --platform macos`.
 - Execute `docs/release-smoke-test.md` on a signed release candidate and record evidence.
 - Keep local-only mode fully usable while sync is being prepared.
