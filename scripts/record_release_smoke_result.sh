@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
+
 EVIDENCE_FILE=""
 AREA=""
 PLATFORM=""
@@ -118,6 +121,34 @@ is_supported_manual_pair() {
   esac
 }
 
+candidate_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Git commit" {
+      print trim($3)
+      exit
+    }
+  ' "$EVIDENCE_FILE"
+}
+
+assert_current_candidate_metadata() {
+  local evidence_commit
+
+  evidence_commit="$(candidate_git_commit)"
+  if [[ -z "$evidence_commit" ]]; then
+    echo "Manual smoke evidence requires current release candidate metadata. Run scripts/run_release_candidate_gate.sh first." >&2
+    exit 1
+  fi
+
+  if [[ "${evidence_commit:0:12}" != "$CURRENT_COMMIT" ]]; then
+    echo "Manual smoke evidence requires current release candidate metadata: evidence $evidence_commit, current $CURRENT_COMMIT." >&2
+    exit 1
+  fi
+}
+
 ensure_section() {
   if grep -qF '## Manual Smoke Evidence' "$EVIDENCE_FILE"; then
     return
@@ -157,6 +188,8 @@ Use one of the canonical pairs from docs/release-smoke-test.md:
 ERROR
   exit 64
 fi
+
+assert_current_candidate_metadata
 
 ensure_section
 

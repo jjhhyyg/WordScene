@@ -177,10 +177,12 @@ Prefer recording manual rows with `scripts/record_release_smoke_result.sh` so
 the table format stays consistent. The script only accepts the canonical
 manual `Area` and `Platform` pairs listed in the template below, so typos such
 as `iPadOS` instead of `iOS/iPadOS` are rejected before they create evidence
-rows that the completion audit cannot count. Recording the same `Area` and
-`Platform` again replaces the stale manual row, so a retest can move a row from
-`BLOCKED` or `FAIL` to the current result without leaving contradictory
-evidence behind:
+rows that the completion audit cannot count. It also requires release candidate
+metadata for the current repository HEAD before writing manual rows, so run the
+candidate gate again after any code change and before recording smoke results.
+Recording the same `Area` and `Platform` again replaces the stale manual row,
+so a retest can move a row from `BLOCKED` or `FAIL` to the current result
+without leaving contradictory evidence behind:
 
 ```bash
 scripts/record_release_smoke_result.sh \

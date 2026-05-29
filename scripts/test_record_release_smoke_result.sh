@@ -5,12 +5,26 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 EVIDENCE="$TMPDIR/release-smoke-evidence.md"
+MISSING_CANDIDATE_EVIDENCE="$TMPDIR/missing-candidate-evidence.md"
+STALE_CANDIDATE_EVIDENCE="$TMPDIR/stale-candidate-evidence.md"
 
-cat >"$EVIDENCE" <<'EVIDENCE_MD'
+cat >"$EVIDENCE" <<EVIDENCE_MD
 ## Non-Manual Release Gate
 
 Existing gate evidence.
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | PASS | signed macOS candidate |
+| Candidate build | iOS | local build host | 1 | PASS | signed iOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Git commit | $CURRENT_COMMIT |
 EVIDENCE_MD
 
 "$ROOT/scripts/record_release_smoke_result.sh" \
@@ -82,6 +96,49 @@ set -e
 
 test "$status" -eq 64
 grep -qF 'Unsupported manual smoke area/platform' "$TMPDIR/invalid-platform.err"
+
+cat >"$MISSING_CANDIDATE_EVIDENCE" <<'MISSING_CANDIDATE_MD'
+## Non-Manual Release Gate
+
+Existing gate evidence without candidate metadata.
+MISSING_CANDIDATE_MD
+
+set +e
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$MISSING_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Should require candidate evidence first" >"$TMPDIR/missing-candidate.out" 2>"$TMPDIR/missing-candidate.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires current release candidate metadata.' "$TMPDIR/missing-candidate.err"
+if grep -qF '## Manual Smoke Evidence' "$MISSING_CANDIDATE_EVIDENCE"; then
+  echo "record_release_smoke_result should not write manual rows without candidate metadata" >&2
+  exit 1
+fi
+
+cp "$EVIDENCE" "$STALE_CANDIDATE_EVIDENCE"
+sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_CANDIDATE_EVIDENCE"
+
+set +e
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$STALE_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Should reject stale candidate evidence" >"$TMPDIR/stale-candidate.out" 2>"$TMPDIR/stale-candidate.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF "Manual smoke evidence requires current release candidate metadata: evidence 000000000000, current $CURRENT_COMMIT." "$TMPDIR/stale-candidate.err"
 
 set +e
 "$ROOT/scripts/record_release_smoke_result.sh" \
