@@ -19,4 +19,19 @@ final class LanguageDirectionTests: XCTestCase {
         XCTAssertEqual(swapped.source, .en)
         XCTAssertEqual(swapped.target, .zh)
     }
+
+    func testNormalizingConcreteSameLanguageDirectionChoosesDifferentTarget() {
+        let direction = TranslationLanguageDirection(source: .zh, target: .zh)
+
+        let normalized = direction.normalized()
+
+        XCTAssertEqual(normalized.source, .zh)
+        XCTAssertEqual(normalized.target, .en)
+    }
+
+    func testNormalizingValidDirectionKeepsCurrentTarget() {
+        let direction = TranslationLanguageDirection(source: .en, target: .zh)
+
+        XCTAssertEqual(direction.normalized(), direction)
+    }
 }

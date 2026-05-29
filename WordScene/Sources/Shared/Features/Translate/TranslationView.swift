@@ -47,6 +47,9 @@ struct TranslationView: View {
             loadHistory()
             loadMemoryItems()
         }
+        .onChange(of: sourceLanguage) { _, _ in
+            normalizeLanguageDirection()
+        }
     }
 
     @ViewBuilder
@@ -683,6 +686,12 @@ struct TranslationView: View {
         targetLanguage = swapped.target
     }
 
+    private func normalizeLanguageDirection() {
+        let normalized = currentLanguageDirection.normalized()
+        sourceLanguage = normalized.source
+        targetLanguage = normalized.target
+    }
+
     private var canSwapLanguageDirection: Bool {
         currentLanguageDirection.canSwap
     }
@@ -770,6 +779,9 @@ struct TranslationView: View {
 
             translationState = .translating
             lastTranslatedRecord = nil
+            let normalizedDirection = currentLanguageDirection.normalized()
+            sourceLanguage = normalizedDirection.source
+            targetLanguage = normalizedDirection.target
             let workflow = TranslationWorkflow(
                 credentialStore: credentialStore,
                 translationClient: translationClient,
@@ -777,8 +789,8 @@ struct TranslationView: View {
             )
             let result = try await workflow.translate(
                 text: inputText,
-                source: sourceLanguage,
-                target: targetLanguage,
+                source: normalizedDirection.source,
+                target: normalizedDirection.target,
                 currentHistory: history
             )
 

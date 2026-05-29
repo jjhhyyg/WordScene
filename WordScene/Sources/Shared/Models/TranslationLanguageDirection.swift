@@ -23,6 +23,17 @@ struct TranslationLanguageDirection: Equatable {
         )
     }
 
+    func normalized() -> TranslationLanguageDirection {
+        guard LanguageSelection.targetOptions(excluding: source).contains(target) else {
+            return TranslationLanguageDirection(
+                source: source,
+                target: Self.defaultTarget(excluding: source)
+            )
+        }
+
+        return self
+    }
+
     private static func defaultTarget(excluding source: LanguageSelection) -> LanguageSelection {
         LanguageSelection.targetOptions(excluding: source).first ?? .zh
     }
