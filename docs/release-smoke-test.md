@@ -23,7 +23,8 @@ and pass/fail notes for each run.
 - Use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to
   rerun readiness checks, refresh the non-manual gate evidence, build each
   release candidate, and append build evidence or blocker rows to
-  `docs/release-smoke-evidence.md`.
+  `docs/release-smoke-evidence.md`. Candidate build evidence must include the
+  Git commit used to produce the app bundle.
 - Run `scripts/check_release_completion.sh` only after recording all candidate
   build and manual smoke evidence. It must pass before calling the release
   complete or the cross-platform product loop genuinely usable.
@@ -204,5 +205,6 @@ After all rows are recorded, run:
 scripts/check_release_completion.sh
 ```
 
-The script fails if any required PASS row is missing or if any BLOCKED/FAIL row
-is still present in `docs/release-smoke-evidence.md`.
+The script fails if any required PASS row is missing, if candidate Git commit
+metadata is missing, or if any BLOCKED/FAIL row is still present in
+`docs/release-smoke-evidence.md`.

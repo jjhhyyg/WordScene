@@ -5,8 +5,10 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
+MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 
 cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 ## Non-Manual Release Gate
@@ -39,6 +41,14 @@ cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 | iCloud delete sync | iPhone + macOS | iPhone 17 Pro Max + MacBook Pro | 1 | PASS | deletion synced |
 | Local-only fallback | macOS/iOS | MacBook Pro + iPhone 17 Pro Max | 1 | PASS | local mode stayed usable |
 PASSING_MD
+
+cp "$PASSING_EVIDENCE" "$MISSING_COMMIT_EVIDENCE"
+cat >>"$PASSING_EVIDENCE" <<COMMIT_MD
+
+| Field | Value |
+| --- | --- |
+| Git commit | $CURRENT_COMMIT |
+COMMIT_MD
 
 "$ROOT/scripts/check_release_completion.sh" --evidence "$PASSING_EVIDENCE" \
   >/tmp/wordscene-completion-pass.out 2>/tmp/wordscene-completion-pass.err
@@ -78,3 +88,12 @@ grep -qF 'Blocking evidence still present: Candidate gate / macOS + iOS / BLOCKE
 grep -qF 'Missing PASS evidence: Candidate build / macOS' /tmp/wordscene-completion-fail.err
 grep -qF 'Missing PASS evidence: Translation loop / iPad' /tmp/wordscene-completion-fail.err
 grep -qF 'Missing PASS evidence: iCloud create sync / iPhone + macOS' /tmp/wordscene-completion-fail.err
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$MISSING_COMMIT_EVIDENCE" \
+  >/tmp/wordscene-completion-missing-commit.out 2>/tmp/wordscene-completion-missing-commit.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Missing candidate build Git commit metadata.' /tmp/wordscene-completion-missing-commit.err

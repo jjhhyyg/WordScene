@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLATFORM=""
 APP=""
 ENTITLEMENTS=""
@@ -170,6 +171,7 @@ CLOUDKIT_CONTAINERS="$(entitlement_array_csv 'com.apple.developer.icloud-contain
 ICLOUD_SERVICES="$(entitlement_array_csv 'com.apple.developer.icloud-services')"
 PRIVACY_MANIFEST_SUMMARY="$(privacy_manifest_summary "$PRIVACY_MANIFEST")"
 TIMESTAMP="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+GIT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD 2>/dev/null || printf 'unknown')"
 PLATFORM_LABEL="$([[ "$PLATFORM" == "ios" ]] && printf 'iOS' || printf 'macOS')"
 
 EVIDENCE="$(
@@ -187,6 +189,7 @@ Generated: $TIMESTAMP
 | Bundle ID | $BUNDLE_ID |
 | Version | $VERSION |
 | Build | $BUILD |
+| Git commit | $GIT_COMMIT |
 | iPad orientations | $IPAD_ORIENTATIONS |
 | CloudKit containers | $CLOUDKIT_CONTAINERS |
 | iCloud services | $ICLOUD_SERVICES |

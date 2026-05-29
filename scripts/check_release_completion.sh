@@ -50,6 +50,24 @@ has_pass_row() {
   ' "$EVIDENCE_FILE"
 }
 
+has_candidate_git_commit() {
+  awk -F'|' '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Git commit" {
+      value = trim($3)
+      if (value != "" && value != "unknown") {
+        found = 1
+      }
+    }
+    END {
+      exit(found == 1 ? 0 : 1)
+    }
+  ' "$EVIDENCE_FILE"
+}
+
 required_rows() {
   cat <<'ROWS'
 Readiness script|macOS + iOS generic
@@ -95,6 +113,11 @@ if [[ -n "$blocking_rows" ]]; then
   while IFS= read -r row; do
     echo "Blocking evidence still present: $row" >&2
   done <<<"$blocking_rows"
+  status=1
+fi
+
+if ! has_candidate_git_commit; then
+  echo "Missing candidate build Git commit metadata." >&2
   status=1
 fi
 

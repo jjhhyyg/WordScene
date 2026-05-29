@@ -46,8 +46,10 @@ PRIVACY_MANIFEST
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-services:0 string CloudKit' "$ENTITLEMENTS"
 
 OUTPUT="$("$ROOT/scripts/collect_release_candidate_evidence.sh" --platform ios --app "$APP" --entitlements "$ENTITLEMENTS")"
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 
 grep -qF '| Candidate build | iOS |' <<<"$OUTPUT"
+grep -qF "| Git commit | $CURRENT_COMMIT |" <<<"$OUTPUT"
 grep -qF '| Bundle ID | com.erikssonhou.leximemory |' <<<"$OUTPUT"
 grep -qF '| Version | 1.0.0 |' <<<"$OUTPUT"
 grep -qF '| Build | 1 |' <<<"$OUTPUT"

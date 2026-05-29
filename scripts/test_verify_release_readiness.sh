@@ -16,6 +16,10 @@ printf 'git %s\n' "$*" >>"$WORDSCENE_FAKE_COMMAND_LOG"
 if [[ "$1" == "diff" && "${2:-}" == "--check" ]]; then
   exit 0
 fi
+if [[ "$1" == "-C" && "${3:-}" == "rev-parse" && "${4:-}" == "--short=12" && "${5:-}" == "HEAD" ]]; then
+  printf 'abc123def456\n'
+  exit 0
+fi
 echo "unexpected git invocation: $*" >&2
 exit 70
 FAKE_GIT
