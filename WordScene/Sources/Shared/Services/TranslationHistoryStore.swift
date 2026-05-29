@@ -1,6 +1,6 @@
 import Foundation
 
-struct TranslationHistoryStore {
+struct TranslationHistoryStore: TranslationHistoryDataStore {
     private static let schemaVersion = 1
 
     private let defaults: UserDefaults
@@ -47,6 +47,10 @@ struct TranslationHistoryStore {
         }
 
         defaults.set(data, forKey: key)
+    }
+
+    func clear() {
+        defaults.removeObject(forKey: key)
     }
 
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {

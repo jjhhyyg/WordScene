@@ -8,7 +8,7 @@ struct SearchView: View {
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
     private let memoryStore = MemoryLibraryRepository()
-    private let historyStore = TranslationHistoryStore()
+    private let historyStore = TranslationHistoryRepository()
     private let searchIndex = MemorySearchIndex()
 
     private var trimmedQuery: String {

@@ -154,10 +154,13 @@ Verification:
 - Added `MemoryLibraryRepository` as the Core Data-backed memory library facade.
 - Wired Translate, Library, Search, and Settings import/export memory access to the Core Data repository.
 - Added legacy `UserDefaults` migration into Core Data, with migration source cleanup to prevent deleted items from resurfacing.
+- Added a Core Data-backed `TranslationHistoryRepository` and `TranslationHistoryRecord` entity for recent translation history.
+- Wired Translate and Search recent history access to the Core Data-backed repository.
+- Added legacy recent-history migration from `UserDefaults` into Core Data, with old data cleared only after a successful Core Data write.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Move recent translation history from `UserDefaults` to Core Data or a Core Data-backed history repository.
+- Introduce a shared app data controller for a single owned Core Data stack before enabling CloudKit.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.

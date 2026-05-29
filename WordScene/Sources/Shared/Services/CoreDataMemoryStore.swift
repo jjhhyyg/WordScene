@@ -9,6 +9,7 @@ struct CoreDataDeletionTombstone: Equatable {
 struct CoreDataMemoryStore {
     private static let modelName = "WordSceneModel"
     private static let translationItemEntityName = "TranslationItem"
+    private static let historyRecordEntityName = "TranslationHistoryRecord"
     private static let tombstoneEntityName = "DeletionTombstone"
     private static let schemaVersion = 1
 
@@ -119,6 +120,35 @@ struct CoreDataMemoryStore {
         }
     }
 
+    func replaceHistoryRecords(_ records: [TranslationRecord]) throws {
+        let context = container.viewContext
+        let request = NSFetchRequest<NSManagedObject>(entityName: Self.historyRecordEntityName)
+        for object in try context.fetch(request) {
+            context.delete(object)
+        }
+
+        for record in records {
+            let object = try Self.insertObject(
+                entityName: Self.historyRecordEntityName,
+                in: context
+            )
+            Self.setValues(for: record, on: object)
+        }
+
+        try saveIfNeeded(context)
+    }
+
+    func loadHistoryRecords() throws -> [TranslationRecord] {
+        let context = container.viewContext
+        let request = NSFetchRequest<NSManagedObject>(entityName: Self.historyRecordEntityName)
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "createdAt", ascending: false),
+            NSSortDescriptor(key: "sourceText", ascending: true)
+        ]
+
+        return try context.fetch(request).map(Self.makeTranslationRecord)
+    }
+
     private func fetchTranslationItem(id: UUID, in context: NSManagedObjectContext) throws -> NSManagedObject? {
         let request = NSFetchRequest<NSManagedObject>(entityName: Self.translationItemEntityName)
         request.fetchLimit = 1
@@ -159,6 +189,27 @@ struct CoreDataMemoryStore {
             note: object.value(forKey: "note") as? String ?? "",
             createdAt: object.value(forKey: "createdAt") as? Date ?? .distantPast,
             updatedAt: object.value(forKey: "updatedAt") as? Date ?? .distantPast
+        )
+    }
+
+    private static func setValues(for record: TranslationRecord, on object: NSManagedObject) {
+        object.setValue(record.id, forKey: "id")
+        object.setValue(record.sourceText, forKey: "sourceText")
+        object.setValue(record.translatedText, forKey: "translatedText")
+        object.setValue(record.sourceLanguage.rawValue, forKey: "sourceLanguage")
+        object.setValue(record.targetLanguage.rawValue, forKey: "targetLanguage")
+        object.setValue(record.createdAt, forKey: "createdAt")
+        object.setValue(schemaVersion, forKey: "schemaVersion")
+    }
+
+    private static func makeTranslationRecord(from object: NSManagedObject) -> TranslationRecord {
+        TranslationRecord(
+            id: object.value(forKey: "id") as? UUID ?? UUID(),
+            sourceText: object.value(forKey: "sourceText") as? String ?? "",
+            translatedText: object.value(forKey: "translatedText") as? String ?? "",
+            sourceLanguage: LanguageSelection(rawValue: object.value(forKey: "sourceLanguage") as? String ?? "") ?? .auto,
+            targetLanguage: LanguageSelection(rawValue: object.value(forKey: "targetLanguage") as? String ?? "") ?? .zh,
+            createdAt: object.value(forKey: "createdAt") as? Date ?? .distantPast
         )
     }
 
@@ -215,7 +266,20 @@ struct CoreDataMemoryStore {
             attribute("deletedAt", type: .dateAttributeType)
         ]
 
-        model.entities = [translationItem, tombstone]
+        let historyRecord = NSEntityDescription()
+        historyRecord.name = historyRecordEntityName
+        historyRecord.managedObjectClassName = NSStringFromClass(NSManagedObject.self)
+        historyRecord.properties = [
+            attribute("id", type: .UUIDAttributeType),
+            attribute("sourceText", type: .stringAttributeType),
+            attribute("translatedText", type: .stringAttributeType),
+            attribute("sourceLanguage", type: .stringAttributeType),
+            attribute("targetLanguage", type: .stringAttributeType),
+            attribute("createdAt", type: .dateAttributeType),
+            attribute("schemaVersion", type: .integer64AttributeType, defaultValue: schemaVersion)
+        ]
+
+        model.entities = [translationItem, historyRecord, tombstone]
         return model
     }
 
