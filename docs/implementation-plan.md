@@ -29,6 +29,7 @@ Baseline already completed:
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
+- Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
@@ -78,6 +79,7 @@ Target status: completed.
 Deliverables:
 
 - Promote a translation history item into a saved library item.
+- Manually create a saved library item without requiring a network translation request.
 - Add favorite/unfavorite.
 - Store source text, translated text, source language, target language, timestamps, and notes.
 - Library page lists saved items with empty/loading/content states.
@@ -85,6 +87,7 @@ Deliverables:
 Verification:
 
 - Unit tests for persistence encode/decode and update/delete behavior.
+- Unit tests for manual item trimming, duplicate replacement, and blank entry rejection.
 - Manual smoke test across app relaunch.
 
 ## Milestone 3: Search
@@ -232,6 +235,8 @@ Verification:
 - Cleaned URLProtocol-backed networking tests to avoid Swift 6 data-race diagnostics on clean builds.
 - Added network availability monitoring in Settings so offline, constrained, and available states are explicit while local storage remains usable.
 - Added tests proving offline network status messaging preserves local library/search/delete availability.
+- Added a manual Library entry flow so source/translation pairs can be saved locally without calling DeepSeek.
+- Added tests proving manual memory entries trim text, replace duplicates, and reject blank source or translation fields.
 
 Next:
 

@@ -93,6 +93,48 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(second.first?.sourceText, "hello")
     }
 
+    func testAddingManualItemTrimsAndDeduplicatesSavedMemory() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let manualItem = MemoryItem(
+            sourceText: " hello ",
+            translatedText: " 你好 ",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: " greeting "
+        )
+        let existingItem = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "old"
+        )
+
+        let items = store.adding(manualItem, to: [existingItem])
+
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items.first?.sourceText, "hello")
+        XCTAssertEqual(items.first?.translatedText, "你好")
+        XCTAssertEqual(items.first?.note, "greeting")
+    }
+
+    func testAddingManualItemRejectsBlankSourceOrTranslation() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let existingItem = MemoryItem(sourceText: "cat", translatedText: "猫", sourceLanguage: .en, targetLanguage: .zh)
+
+        let withoutSource = store.adding(
+            MemoryItem(sourceText: " ", translatedText: "你好", sourceLanguage: .en, targetLanguage: .zh),
+            to: [existingItem]
+        )
+        let withoutTranslation = store.adding(
+            MemoryItem(sourceText: "hello", translatedText: "\n", sourceLanguage: .en, targetLanguage: .zh),
+            to: [existingItem]
+        )
+
+        XCTAssertEqual(withoutSource, [existingItem])
+        XCTAssertEqual(withoutTranslation, [existingItem])
+    }
+
     func testRemovesMatchingTranslation() {
         let store = MemoryLibraryStore(defaults: UserDefaults.standard)
         let record = TranslationRecord(

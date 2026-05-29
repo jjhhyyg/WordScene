@@ -27,14 +27,18 @@ Run on macOS, iPhone, and iPad.
 6. Verify the result panel leaves the loading state and shows translated text.
 7. Favorite the result.
 8. Verify the item appears in Library.
-9. Search for `hello`, `你好`, and the Chinese pinyin form if applicable.
-10. Relaunch the app and verify history, favorite state, and saved token status.
+9. Manually add one Library item without translating.
+10. Search for `hello`, `你好`, the manually added text, and the Chinese pinyin
+    form if applicable.
+11. Relaunch the app and verify history, favorite state, manual item, and saved
+    token status.
 
 Expected result:
 
 - Translation works after token setup.
 - Missing-token, loading, success, and failure states remain readable.
 - Favorites and recent history survive relaunch.
+- Manual Library items can be created without a network translation request.
 - The same workflow is usable on all three platforms without layout overlap.
 
 ## Language Controls
@@ -124,7 +128,7 @@ Run on one Mac unsigned build and one iOS device with network disabled.
 2. Verify local-only mode is explicit when CloudKit entitlement or network state
    prevents sync.
 3. Verify Settings shows the current network availability state.
-4. Create, favorite, search, and delete a local item.
+4. Manually create, search, and delete a local item from Library.
 5. Relaunch and verify local data remains usable.
 6. Re-enable network and verify the app does not crash or silently discard local
    work.

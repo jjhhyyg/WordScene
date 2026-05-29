@@ -73,6 +73,21 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
         return Array(([newItem] + withoutDuplicate).prefix(maximumCount))
     }
 
+    func adding(_ item: MemoryItem, to items: [MemoryItem]) -> [MemoryItem] {
+        var newItem = item
+        newItem.sourceText = item.sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
+        newItem.translatedText = item.translatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        newItem.note = item.note.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !newItem.sourceText.isEmpty, !newItem.translatedText.isEmpty else {
+            return items
+        }
+
+        let newItemKey = MemoryMatchKey(item: newItem)
+        let withoutDuplicate = items.filter { MemoryMatchKey(item: $0) != newItemKey }
+        return Array(([newItem] + withoutDuplicate).prefix(maximumCount))
+    }
+
     func removing(_ record: TranslationRecord, from items: [MemoryItem]) -> [MemoryItem] {
         let recordKey = MemoryMatchKey(record: record)
         return items.filter { MemoryMatchKey(item: $0) != recordKey }

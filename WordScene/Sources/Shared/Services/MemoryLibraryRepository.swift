@@ -72,6 +72,10 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
         legacyStore.adding(record, to: items, note: note)
     }
 
+    func adding(_ item: MemoryItem, to items: [MemoryItem]) -> [MemoryItem] {
+        legacyStore.adding(item, to: items)
+    }
+
     func removing(_ record: TranslationRecord, from items: [MemoryItem]) -> [MemoryItem] {
         legacyStore.removing(record, from: items)
     }

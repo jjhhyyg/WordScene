@@ -4,6 +4,7 @@ struct LibraryView: View {
     @State private var items: [MemoryItem] = []
     @State private var hasLoaded = false
     @State private var persistenceErrorMessage: String?
+    @State private var isShowingManualAdd = false
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -24,11 +25,21 @@ struct LibraryView: View {
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if items.isEmpty {
-                ContentUnavailableView(
-                    "还没有收藏",
-                    systemImage: "bookmark",
-                    description: Text("翻译后点收藏，将单词、短语或句子保存为可学习条目。")
-                )
+                VStack(spacing: 16) {
+                    ContentUnavailableView(
+                        "还没有收藏",
+                        systemImage: "bookmark",
+                        description: Text("翻译后点收藏，或手动新增一条本机记忆。")
+                    )
+
+                    Button {
+                        isShowingManualAdd = true
+                    } label: {
+                        Label("手动新增", systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!canAddManualItem)
+                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
@@ -75,6 +86,19 @@ struct LibraryView: View {
         }
         .background(pageBackground.ignoresSafeArea())
         .navigationTitle("收藏")
+        .toolbar {
+            Button {
+                isShowingManualAdd = true
+            } label: {
+                Label("手动新增", systemImage: "plus")
+            }
+            .disabled(!canAddManualItem)
+        }
+        .sheet(isPresented: $isShowingManualAdd) {
+            ManualMemoryItemSheet { draft in
+                addManualItem(draft)
+            }
+        }
         .onAppear {
             loadItems()
         }
@@ -105,6 +129,10 @@ struct LibraryView: View {
         #else
         return Color(.systemGroupedBackground)
         #endif
+    }
+
+    private var canAddManualItem: Bool {
+        hasLoaded && !(persistenceErrorMessage != nil && items.isEmpty)
     }
 
     private func loadItems() {
@@ -138,6 +166,119 @@ struct LibraryView: View {
         } catch {
             persistenceErrorMessage = "收藏删除失败：\(error.localizedDescription)"
         }
+    }
+
+    private func addManualItem(_ draft: ManualMemoryItemDraft) -> Bool {
+        let now = Date()
+        let item = MemoryItem(
+            sourceText: draft.sourceText,
+            translatedText: draft.translatedText,
+            sourceLanguage: draft.sourceLanguage,
+            targetLanguage: draft.targetLanguage,
+            note: draft.note,
+            createdAt: now,
+            updatedAt: now
+        )
+        let updatedItems = store.adding(item, to: items)
+        guard updatedItems != items else {
+            return false
+        }
+
+        do {
+            try store.saveOrThrow(updatedItems)
+            items = updatedItems
+            persistenceErrorMessage = nil
+            return true
+        } catch {
+            persistenceErrorMessage = "手动新增失败：\(error.localizedDescription)"
+            return false
+        }
+    }
+}
+
+private struct ManualMemoryItemDraft {
+    var sourceText = ""
+    var translatedText = ""
+    var sourceLanguage: LanguageSelection = .en
+    var targetLanguage: LanguageSelection = .zh
+    var note = ""
+
+    var canSave: Bool {
+        !sourceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !translatedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+private struct ManualMemoryItemSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft = ManualMemoryItemDraft()
+
+    let onSave: (ManualMemoryItemDraft) -> Bool
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("语言") {
+                    Picker("源语言", selection: $draft.sourceLanguage) {
+                        ForEach(concreteLanguageOptions) { language in
+                            Text(language.title).tag(language)
+                        }
+                    }
+
+                    Picker("目标语言", selection: $draft.targetLanguage) {
+                        ForEach(LanguageSelection.targetOptions(excluding: draft.sourceLanguage)) { language in
+                            Text(language.title).tag(language)
+                        }
+                    }
+                }
+
+                Section("原文") {
+                    TextEditor(text: $draft.sourceText)
+                        .frame(minHeight: 96)
+                        .accessibilityLabel("原文")
+                }
+
+                Section("译文") {
+                    TextEditor(text: $draft.translatedText)
+                        .frame(minHeight: 96)
+                        .accessibilityLabel("译文")
+                }
+
+                Section("备注") {
+                    TextField("可选", text: $draft.note)
+                }
+            }
+            .navigationTitle("手动新增")
+            #if os(macOS)
+            .frame(minWidth: 420, minHeight: 520)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        if onSave(draft) {
+                            dismiss()
+                        }
+                    }
+                    .disabled(!draft.canSave)
+                }
+            }
+            .onChange(of: draft.sourceLanguage) { _, newSource in
+                let targetOptions = LanguageSelection.targetOptions(excluding: newSource)
+                if !targetOptions.contains(draft.targetLanguage) {
+                    draft.targetLanguage = targetOptions.first ?? .zh
+                }
+            }
+        }
+    }
+
+    private var concreteLanguageOptions: [LanguageSelection] {
+        LanguageSelection.sourceOptions.filter { $0 != .auto }
     }
 }
 
