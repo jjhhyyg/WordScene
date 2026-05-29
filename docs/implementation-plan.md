@@ -320,6 +320,9 @@ Verification:
 - Reran `scripts/verify_release_readiness.sh`; non-manual gates still pass after the workflow extraction.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS signed Release candidate evidence was refreshed for commit `423946c46861`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
 - Tightened the ignored local DeepSeek token file to owner-only permissions and reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; the real API JSON Output path still passes without printing the token.
+- Hardened live DeepSeek smoke evidence so it records Git commit metadata, and updated release completion auditing to reject live API smoke evidence that is missing or stale for release-critical changes.
+- Reran `scripts/verify_release_readiness.sh`; script self-tests, token leak scan, macOS tests, iOS build, and unsigned Release compiles still pass after the release audit hardening.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all` and `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; iOS candidate and live API smoke evidence now point at commit `370a31ab6316`, while macOS signing remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
