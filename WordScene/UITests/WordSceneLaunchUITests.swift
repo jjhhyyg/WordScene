@@ -35,6 +35,22 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
     }
 
+    func testLanguageControlsEnableSwapOnlyForConcreteSource() throws {
+        XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
+
+        let swapButton = app.buttons["translation.swapDirection"].firstMatch
+        XCTAssertTrue(swapButton.waitForExistence(timeout: 4))
+        XCTAssertFalse(swapButton.isEnabled)
+
+        chooseMenuValue(pickerIdentifier: "translation.sourceLanguage.picker", value: "英文")
+
+        XCTAssertTrue(swapButton.waitForEnabled(timeout: 4))
+        swapButton.tap()
+        XCTAssertTrue(swapButton.waitForEnabled(timeout: 4))
+        swapButton.tap()
+        XCTAssertTrue(swapButton.waitForEnabled(timeout: 4))
+    }
+
     func testPrimaryTabsReachExpectedInitialSurfaces() throws {
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
 
@@ -63,6 +79,16 @@ final class WordSceneLaunchUITests: XCTestCase {
         let button = app.buttons[title].firstMatch
         XCTAssertTrue(button.waitForExistence(timeout: 4), "Missing navigation item: \(title)")
         button.tap()
+    }
+
+    private func chooseMenuValue(pickerIdentifier: String, value: String) {
+        let picker = app.buttons[pickerIdentifier].firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 4), "Missing picker: \(pickerIdentifier)")
+        picker.tap()
+
+        let option = app.buttons[value].firstMatch
+        XCTAssertTrue(option.waitForExistence(timeout: 4), "Missing menu option: \(value)")
+        option.tap()
     }
 }
 

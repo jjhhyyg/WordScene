@@ -665,6 +665,7 @@ struct TranslationView: View {
             .lineLimit(1)
             .frame(maxWidth: maxWidth ?? (usesTwoColumnLayout ? 220 : .infinity), alignment: .leading)
             .accessibilityLabel(title)
+            .accessibilityIdentifier(languagePickerIdentifier(for: title))
         }
         .frame(minWidth: usesTwoColumnLayout ? min(maxWidth ?? 220, 150) : 0)
     }
@@ -683,6 +684,18 @@ struct TranslationView: View {
         .controlSize(.large)
         .font(.headline)
         .accessibilityLabel(title)
+        .accessibilityIdentifier(languagePickerIdentifier(for: title))
+    }
+
+    private func languagePickerIdentifier(for title: String) -> String {
+        switch title {
+        case "源语言":
+            return "translation.sourceLanguage.picker"
+        case "目标语言":
+            return "translation.targetLanguage.picker"
+        default:
+            return "translation.language.picker"
+        }
     }
 
     private func swapLanguageDirection() {
