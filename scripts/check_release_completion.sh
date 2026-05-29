@@ -30,6 +30,38 @@ if [[ ! -f "$EVIDENCE_FILE" ]]; then
   exit 1
 fi
 
+section_exists() {
+  local section="$1"
+
+  grep -qFx "## $section" "$EVIDENCE_FILE"
+}
+
+has_standard_area_table() {
+  local section="$1"
+
+  awk -v expected_heading="## $section" '
+    $0 == expected_heading {
+      in_section = 1
+      previous = ""
+      next
+    }
+    in_section == 1 && /^## / {
+      in_section = 0
+    }
+    in_section == 1 &&
+    previous == "| Area | Platform | Device / OS | Build | Result | Notes |" &&
+    $0 == "| --- | --- | --- | --- | --- | --- |" {
+      found = 1
+    }
+    in_section == 1 {
+      previous = $0
+    }
+    END {
+      exit(found == 1 ? 0 : 1)
+    }
+  ' "$EVIDENCE_FILE"
+}
+
 pass_row_count() {
   local area="$1"
   local platform="$2"
@@ -89,6 +121,30 @@ ROWS
 }
 
 status=0
+
+required_table_sections=(
+  "Non-Manual Release Gate"
+  "Release Candidate Build Evidence"
+)
+
+optional_table_sections=(
+  "Release Candidate Build Blocker"
+  "Manual Smoke Evidence"
+)
+
+for section in "${required_table_sections[@]}"; do
+  if ! has_standard_area_table "$section"; then
+    echo "Malformed evidence table: $section" >&2
+    status=1
+  fi
+done
+
+for section in "${optional_table_sections[@]}"; do
+  if section_exists "$section" && ! has_standard_area_table "$section"; then
+    echo "Malformed evidence table: $section" >&2
+    status=1
+  fi
+done
 
 while IFS='|' read -r area platform; do
   pass_count="$(pass_row_count "$area" "$platform")"

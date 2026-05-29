@@ -208,5 +208,6 @@ scripts/check_release_completion.sh
 ```
 
 The script fails if any required row does not have exactly one PASS entry, if
-candidate Git commit metadata is missing, or if any BLOCKED/FAIL row is still
-present in `docs/release-smoke-evidence.md`.
+the evidence table structure is malformed, if candidate Git commit metadata is
+missing, or if any BLOCKED/FAIL row is still present in
+`docs/release-smoke-evidence.md`.

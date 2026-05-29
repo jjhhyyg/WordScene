@@ -291,6 +291,7 @@ Verification:
 - Reran `scripts/check_release_completion.sh`; candidate Git commit metadata is now present, and the remaining blockers are macOS signed candidate build plus manual translation/import-export/recovery/iCloud/local-only smoke evidence.
 - Hardened `scripts/record_release_smoke_result.sh` so rerunning a manual smoke row for the same area/platform replaces stale evidence instead of leaving contradictory PASS/FAIL/BLOCKED rows in the release evidence file.
 - Hardened `scripts/check_release_completion.sh` so each required release row must have exactly one PASS entry, preventing duplicate stale PASS rows from making completion evidence look cleaner than it is.
+- Hardened `scripts/check_release_completion.sh` to validate standard evidence table headers for release gate, candidate build, blocker, and manual smoke sections before treating rows as auditable release evidence.
 
 Next:
 

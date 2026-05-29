@@ -10,6 +10,7 @@ PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
 DUPLICATE_PASS_EVIDENCE="$TMPDIR/duplicate-pass-evidence.md"
+MALFORMED_TABLE_EVIDENCE="$TMPDIR/malformed-table-evidence.md"
 
 cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 ## Non-Manual Release Gate
@@ -68,6 +69,26 @@ set -e
 
 test "$status" -eq 1
 grep -qF 'Duplicate PASS evidence: Translation loop / macOS (2 rows)' /tmp/wordscene-completion-duplicate-pass.err
+
+awk '
+  /^## Manual Smoke Evidence$/ {
+    print
+    getline
+    print
+    getline
+    next
+  }
+  { print }
+' "$PASSING_EVIDENCE" >"$MALFORMED_TABLE_EVIDENCE"
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$MALFORMED_TABLE_EVIDENCE" \
+  >/tmp/wordscene-completion-malformed-table.out 2>/tmp/wordscene-completion-malformed-table.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Malformed evidence table: Manual Smoke Evidence' /tmp/wordscene-completion-malformed-table.err
 
 cat >"$INCOMPLETE_EVIDENCE" <<'INCOMPLETE_MD'
 ## Non-Manual Release Gate
