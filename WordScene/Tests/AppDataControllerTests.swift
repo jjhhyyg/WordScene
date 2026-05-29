@@ -42,6 +42,43 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [historyRecord])
     }
 
+    func testLocalRecoveryResetDoesNotRemoveCurrentCoreDataLibraryOrHistory() throws {
+        let suiteName = "AppDataControllerTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        defaults.set(Data("legacy memory".utf8), forKey: "memoryLibrary")
+        defaults.set(Data("legacy history".utf8), forKey: "translationHistory")
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let controller = AppDataController(
+            coreDataStore: coreDataStore,
+            localDocumentRecovery: LocalPersistenceRecoveryController(defaults: defaults)
+        )
+        let memoryItem = MemoryItem(
+            sourceText: "current",
+            translatedText: "当前",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+        let historyRecord = TranslationRecord(
+            sourceText: "recent",
+            translatedText: "最近",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+
+        try controller.memoryLibrary.saveOrThrow([memoryItem])
+        try controller.translationHistory.saveOrThrow([historyRecord])
+        let resetCount = controller.localDocumentRecovery.resetLocalDocuments()
+
+        XCTAssertEqual(resetCount, 2)
+        XCTAssertNil(defaults.data(forKey: "memoryLibrary"))
+        XCTAssertNil(defaults.data(forKey: "translationHistory"))
+        XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [memoryItem])
+        XCTAssertEqual(try controller.translationHistory.loadOrThrow(), [historyRecord])
+    }
+
     func testReportsPrimaryPersistenceWhenCoreDataLoads() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(

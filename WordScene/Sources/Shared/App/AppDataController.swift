@@ -23,7 +23,8 @@ struct AppDataController {
         networkStatusMonitor: AppNetworkStatusMonitor? = nil,
         startsNetworkMonitoring: Bool = false,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
-        legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
+        legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore(),
+        localDocumentRecovery: LocalPersistenceRecoveryController = LocalPersistenceRecoveryController()
     ) {
         self.networkStatusMonitor = networkStatusMonitor ?? AppNetworkStatusMonitor(
             startsMonitoring: startsNetworkMonitoring
@@ -64,7 +65,7 @@ struct AppDataController {
                 dataChangeMonitor.recordLocalChange()
             }
         )
-        localDocumentRecovery = LocalPersistenceRecoveryController()
+        self.localDocumentRecovery = localDocumentRecovery
     }
 
     init(
@@ -74,7 +75,8 @@ struct AppDataController {
         networkStatusMonitor: AppNetworkStatusMonitor? = nil,
         startsNetworkMonitoring: Bool = false,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
-        legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
+        legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore(),
+        localDocumentRecovery: LocalPersistenceRecoveryController = LocalPersistenceRecoveryController()
     ) {
         self.init(
             coreDataStoreFactory: { coreDataStore },
@@ -84,7 +86,8 @@ struct AppDataController {
             networkStatusMonitor: networkStatusMonitor,
             startsNetworkMonitoring: startsNetworkMonitoring,
             legacyMemoryStore: legacyMemoryStore,
-            legacyHistoryStore: legacyHistoryStore
+            legacyHistoryStore: legacyHistoryStore,
+            localDocumentRecovery: localDocumentRecovery
         )
     }
 
