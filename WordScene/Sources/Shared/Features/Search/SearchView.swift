@@ -85,6 +85,9 @@ struct SearchView: View {
         .onAppear {
             loadSearchData()
         }
+        .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
+            loadSearchData()
+        }
     }
 
     private var pageMaxWidth: CGFloat {

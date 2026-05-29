@@ -78,6 +78,9 @@ struct LibraryView: View {
         .onAppear {
             loadItems()
         }
+        .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
+            loadItems()
+        }
     }
 
     private var gridColumns: [GridItem] {

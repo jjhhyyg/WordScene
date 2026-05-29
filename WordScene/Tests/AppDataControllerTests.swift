@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 @testable import WordScene
 
@@ -178,5 +179,20 @@ final class AppDataControllerTests: XCTestCase {
 
         XCTAssertEqual(monitor.status.title, "没有同步事件")
         XCTAssertTrue(monitor.status.message.contains("仅本机存储"))
+    }
+
+    func testDataChangeMonitorPublishesPersistentStoreRemoteChanges() {
+        let notificationCenter = NotificationCenter()
+        let monitor = AppDataChangeMonitor(notificationCenter: notificationCenter)
+        let expectation = expectation(description: "revision changes after remote store notification")
+        let cancellable = monitor.$revision.dropFirst().sink { revision in
+            XCTAssertEqual(revision, 1)
+            expectation.fulfill()
+        }
+
+        notificationCenter.post(name: .NSPersistentStoreRemoteChange, object: nil)
+
+        wait(for: [expectation], timeout: 1)
+        withExtendedLifetime(cancellable) {}
     }
 }

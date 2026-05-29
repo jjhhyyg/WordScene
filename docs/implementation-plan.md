@@ -38,6 +38,7 @@ Baseline already completed:
 - Settings separates primary storage status from iCloud sync readiness so local-only mode is visible.
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
+- Library, Search, and Translate refresh local view state after persistent store remote-change notifications.
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 
@@ -135,6 +136,7 @@ Deliverables:
 - Surface storage bootstrap status and iCloud sync readiness as separate states in Settings.
 - Observe `NSPersistentCloudKitContainer` sync events so recent sync success and errors are visible.
 - Persist the latest CloudKit sync event locally so relaunch does not reset diagnostics to an unhelpful waiting state.
+- Refresh translation, library, and search screens after persistent store remote-change notifications so synced items can appear without relaunch.
 
 Verification:
 
@@ -223,6 +225,8 @@ Verification:
 - Added a Settings import/export controller test for the export privacy notice.
 - Rejected DeepSeek balance responses with `is_available=false` during token testing so authenticated but unusable accounts are not saved as valid.
 - Added a DeepSeek balance client test for the authenticated-but-unavailable token path and surfaced a specific Settings error message.
+- Added an app data change monitor for persistent store remote-change notifications and wired Translate, Library, and Search to reload local state when synced Core Data changes arrive.
+- Cleaned URLProtocol-backed networking tests to avoid Swift 6 data-race diagnostics on clean builds.
 
 Next:
 

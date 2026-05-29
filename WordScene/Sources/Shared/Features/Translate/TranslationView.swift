@@ -43,6 +43,10 @@ struct TranslationView: View {
             loadHistory()
             loadMemoryItems()
         }
+        .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
+            loadHistory()
+            loadMemoryItems()
+        }
     }
 
     @ViewBuilder

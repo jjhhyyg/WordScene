@@ -65,7 +65,7 @@ private extension URLSessionConfiguration {
 }
 
 private final class DeepSeekBalanceURLProtocol: URLProtocol, @unchecked Sendable {
-    nonisolated(unsafe) static var handler: ((URLRequest) async throws -> (HTTPURLResponse, Data))?
+    nonisolated(unsafe) static var handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
 
     override class func canInit(with request: URLRequest) -> Bool {
         true
@@ -76,18 +76,16 @@ private final class DeepSeekBalanceURLProtocol: URLProtocol, @unchecked Sendable
     }
 
     override func startLoading() {
-        Task {
-            do {
-                guard let handler = Self.handler else {
-                    throw DeepSeekBalanceError.invalidResponse
-                }
-                let (response, data) = try await handler(request)
-                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-                client?.urlProtocol(self, didLoad: data)
-                client?.urlProtocolDidFinishLoading(self)
-            } catch {
-                client?.urlProtocol(self, didFailWithError: error)
+        do {
+            guard let handler = Self.handler else {
+                throw DeepSeekBalanceError.invalidResponse
             }
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
         }
     }
 

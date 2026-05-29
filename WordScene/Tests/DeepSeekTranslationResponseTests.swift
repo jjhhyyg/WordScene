@@ -30,7 +30,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         let session = URLSession(configuration: configuration)
         let requestCapture = RequestCapture()
         CapturingURLProtocol.handler = { request in
-            await requestCapture.store(request)
+            requestCapture.store(request)
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
@@ -69,7 +69,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
             credential: TranslationProviderCredential(apiToken: "test-token")
         )
 
-        let capturedRequestValue = await requestCapture.recordedRequest()
+        let capturedRequestValue = requestCapture.recordedRequest()
         let capturedRequest = try XCTUnwrap(capturedRequestValue)
         XCTAssertEqual(result.translatedText, "你好")
         XCTAssertEqual(capturedRequest.url?.absoluteString, "https://example.test/v1/chat/completions")
@@ -139,20 +139,25 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
     }
 }
 
-private actor RequestCapture {
+private final class RequestCapture: @unchecked Sendable {
+    private let lock = NSLock()
     private var request: URLRequest?
 
     func store(_ request: URLRequest) {
+        lock.lock()
+        defer { lock.unlock() }
         self.request = request
     }
 
     func recordedRequest() -> URLRequest? {
-        request
+        lock.lock()
+        defer { lock.unlock() }
+        return request
     }
 }
 
 private final class CapturingURLProtocol: URLProtocol, @unchecked Sendable {
-    nonisolated(unsafe) static var handler: ((URLRequest) async throws -> (HTTPURLResponse, Data))?
+    nonisolated(unsafe) static var handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
 
     override class func canInit(with request: URLRequest) -> Bool {
         true
@@ -163,18 +168,16 @@ private final class CapturingURLProtocol: URLProtocol, @unchecked Sendable {
     }
 
     override func startLoading() {
-        Task {
-            do {
-                guard let handler = Self.handler else {
-                    throw DeepSeekTranslationError.invalidResponse
-                }
-                let (response, data) = try await handler(request)
-                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-                client?.urlProtocol(self, didLoad: data)
-                client?.urlProtocolDidFinishLoading(self)
-            } catch {
-                client?.urlProtocol(self, didFailWithError: error)
+        do {
+            guard let handler = Self.handler else {
+                throw DeepSeekTranslationError.invalidResponse
             }
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
         }
     }
 

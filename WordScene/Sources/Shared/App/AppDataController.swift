@@ -11,11 +11,13 @@ struct AppDataController {
     let persistenceStatus: AppPersistenceStatus
     let syncStatus: AppSyncStatus
     let syncEventMonitor: CloudKitSyncEventMonitor
+    let dataChangeMonitor: AppDataChangeMonitor
 
     init(
         coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
         syncMode: CoreDataSyncMode = .defaultForCurrentProcess(),
         syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
+        dataChangeNotificationCenter: NotificationCenter = .default,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
@@ -28,6 +30,7 @@ struct AppDataController {
                 syncStatus: syncStatus,
                 eventStore: syncEventStore
             )
+            dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
         } catch {
             let reason = Self.failureReason(for: error)
             coreDataStore = nil
@@ -37,6 +40,7 @@ struct AppDataController {
                 syncStatus: syncStatus,
                 eventStore: syncEventStore
             )
+            dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
         }
 
         memoryLibrary = MemoryLibraryRepository(
@@ -54,6 +58,7 @@ struct AppDataController {
     init(
         coreDataStore: CoreDataMemoryStore,
         syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
+        dataChangeNotificationCenter: NotificationCenter = .default,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
@@ -61,6 +66,7 @@ struct AppDataController {
             coreDataStoreFactory: { coreDataStore },
             syncMode: .localOnly,
             syncEventStore: syncEventStore,
+            dataChangeNotificationCenter: dataChangeNotificationCenter,
             legacyMemoryStore: legacyMemoryStore,
             legacyHistoryStore: legacyHistoryStore
         )
@@ -392,6 +398,34 @@ final class CloudKitSyncEventMonitor: ObservableObject, @unchecked Sendable {
         @unknown default:
             return .setup
         }
+    }
+}
+
+final class AppDataChangeMonitor: ObservableObject, @unchecked Sendable {
+    @Published private(set) var revision = 0
+
+    private var observer: NSObjectProtocol?
+    private let notificationCenter: NotificationCenter
+
+    init(notificationCenter: NotificationCenter = .default) {
+        self.notificationCenter = notificationCenter
+        observer = notificationCenter.addObserver(
+            forName: .NSPersistentStoreRemoteChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.recordExternalChange()
+        }
+    }
+
+    deinit {
+        if let observer {
+            notificationCenter.removeObserver(observer)
+        }
+    }
+
+    func recordExternalChange() {
+        revision &+= 1
     }
 }
 
