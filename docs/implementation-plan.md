@@ -318,6 +318,7 @@ Verification:
 - Extracted the Translate screen's business action into `TranslationWorkflow` so the token-read -> provider-call -> `TranslationRecord` -> recent-history persistence path is directly testable outside SwiftUI layout code.
 - Added `TranslationWorkflowTests` covering successful translation history persistence, missing-token failure before provider invocation, and successful translation with a non-blocking history-save warning.
 - Reran `scripts/verify_release_readiness.sh`; non-manual gates still pass after the workflow extraction.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS signed Release candidate evidence was refreshed for commit `423946c46861`, and macOS remains blocked by missing Xcode account session plus missing Mac App Development provisioning profile.
 
 Next:
 
