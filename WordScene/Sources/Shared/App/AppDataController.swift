@@ -82,17 +82,20 @@ struct AppDataController {
 
         memoryLibrary = MemoryLibraryRepository(
             coreDataStore: coreDataStore,
-            legacyStore: legacyMemoryStore
-        )
-        translationHistory = TranslationHistoryRepository(
-            coreDataStore: coreDataStore,
-            legacyStore: legacyHistoryStore
-        )
-        settingsImportExport = SettingsImportExportController(
-            memoryStore: memoryLibrary,
+            legacyStore: legacyMemoryStore,
             changeRecorder: { [dataChangeMonitor] in
                 dataChangeMonitor.recordLocalChange()
             }
+        )
+        translationHistory = TranslationHistoryRepository(
+            coreDataStore: coreDataStore,
+            legacyStore: legacyHistoryStore,
+            changeRecorder: { [dataChangeMonitor] in
+                dataChangeMonitor.recordLocalChange()
+            }
+        )
+        settingsImportExport = SettingsImportExportController(
+            memoryStore: memoryLibrary
         )
         self.localDocumentRecovery = localDocumentRecovery
     }

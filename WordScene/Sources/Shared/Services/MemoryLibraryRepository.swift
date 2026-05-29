@@ -11,15 +11,18 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
     private let coreDataStore: (any CoreDataMemoryDataStore)?
     private let legacyStore: MemoryLibraryStore
     private let maximumCount: Int
+    private let changeRecorder: () -> Void
 
     init(
         coreDataStore: (any CoreDataMemoryDataStore)? = try? CoreDataMemoryStore(),
         legacyStore: MemoryLibraryStore = MemoryLibraryStore(),
-        maximumCount: Int = 500
+        maximumCount: Int = 500,
+        changeRecorder: @escaping () -> Void = {}
     ) {
         self.coreDataStore = coreDataStore
         self.legacyStore = legacyStore
         self.maximumCount = maximumCount
+        self.changeRecorder = changeRecorder
     }
 
     func load() -> [MemoryItem] {
@@ -40,12 +43,14 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
             try saveOrThrow(items)
         } catch {
             legacyStore.save(items)
+            changeRecorder()
         }
     }
 
     func saveOrThrow(_ items: [MemoryItem]) throws {
         guard let coreDataStore else {
             legacyStore.save(items)
+            changeRecorder()
             return
         }
 
@@ -62,6 +67,7 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
         for item in replacementItems {
             try coreDataStore.upsert(item)
         }
+        changeRecorder()
     }
 
     func item(matching record: TranslationRecord, in items: [MemoryItem]) -> MemoryItem? {

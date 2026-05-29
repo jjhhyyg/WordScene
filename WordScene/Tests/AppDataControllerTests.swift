@@ -281,6 +281,38 @@ final class AppDataControllerTests: XCTestCase {
         withExtendedLifetime(cancellable) {}
     }
 
+    func testLibrarySaveRecordsLocalDataChange() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true, syncMode: .localOnly)
+        let controller = AppDataController(coreDataStore: coreDataStore)
+        let expectation = expectation(description: "library save records local data change")
+        let cancellable = controller.dataChangeMonitor.$revision.dropFirst().sink { revision in
+            XCTAssertEqual(revision, 1)
+            expectation.fulfill()
+        }
+        let item = MemoryItem(sourceText: "saved", translatedText: "已保存", sourceLanguage: .en, targetLanguage: .zh)
+
+        try controller.memoryLibrary.saveOrThrow([item])
+
+        wait(for: [expectation], timeout: 1)
+        withExtendedLifetime(cancellable) {}
+    }
+
+    func testTranslationHistorySaveRecordsLocalDataChange() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true, syncMode: .localOnly)
+        let controller = AppDataController(coreDataStore: coreDataStore)
+        let expectation = expectation(description: "translation history save records local data change")
+        let cancellable = controller.dataChangeMonitor.$revision.dropFirst().sink { revision in
+            XCTAssertEqual(revision, 1)
+            expectation.fulfill()
+        }
+        let record = TranslationRecord(sourceText: "history", translatedText: "历史", sourceLanguage: .en, targetLanguage: .zh)
+
+        try controller.translationHistory.saveOrThrow([record])
+
+        wait(for: [expectation], timeout: 1)
+        withExtendedLifetime(cancellable) {}
+    }
+
     func testNetworkStatusExplainsOfflineLocalAvailability() {
         let status = AppNetworkStatus.unavailable
 

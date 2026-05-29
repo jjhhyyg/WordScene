@@ -12,15 +12,18 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     private let coreDataStore: (any CoreDataTranslationHistoryDataStore)?
     private let legacyStore: TranslationHistoryStore
     private let maximumCount: Int
+    private let changeRecorder: () -> Void
 
     init(
         coreDataStore: (any CoreDataTranslationHistoryDataStore)? = try? CoreDataMemoryStore(),
         legacyStore: TranslationHistoryStore = TranslationHistoryStore(),
-        maximumCount: Int = 50
+        maximumCount: Int = 50,
+        changeRecorder: @escaping () -> Void = {}
     ) {
         self.coreDataStore = coreDataStore
         self.legacyStore = legacyStore
         self.maximumCount = maximumCount
+        self.changeRecorder = changeRecorder
     }
 
     func load() -> [TranslationRecord] {
@@ -41,17 +44,20 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
             try saveOrThrow(records)
         } catch {
             legacyStore.save(records)
+            changeRecorder()
         }
     }
 
     func saveOrThrow(_ records: [TranslationRecord]) throws {
         guard let coreDataStore else {
             legacyStore.save(records)
+            changeRecorder()
             return
         }
 
         try migrateLegacyRecordsIfNeeded(into: coreDataStore)
         try coreDataStore.replaceHistoryRecords(Array(records.prefix(maximumCount)))
+        changeRecorder()
     }
 
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {
