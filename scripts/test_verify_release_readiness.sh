@@ -67,6 +67,12 @@ set -euo pipefail
 printf 'test_check_release_completion\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_COMPLETION_TEST
 
+cat >"$BIN/scripts-test-manual-smoke-readiness" <<'FAKE_MANUAL_SMOKE_READINESS_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_manual_smoke_readiness\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_MANUAL_SMOKE_READINESS_TEST
+
 cat >"$BIN/scripts-test-privacy-manifest" <<'FAKE_PRIVACY_MANIFEST_TEST'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -85,7 +91,7 @@ set -euo pipefail
 printf 'test_required_reason_api_scan\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_REQUIRED_REASON_API_SCAN
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion" "$BIN/scripts-test-privacy-manifest" "$BIN/scripts-test-privacy-surface" "$BIN/scripts-test-required-reason-api-scan"
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion" "$BIN/scripts-test-manual-smoke-readiness" "$BIN/scripts-test-privacy-manifest" "$BIN/scripts-test-privacy-surface" "$BIN/scripts-test-required-reason-api-scan"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
@@ -93,6 +99,7 @@ PATH="$BIN:$PATH" \
   WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT="$BIN/scripts-test-run-release-candidate-gate" \
   WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT="$BIN/scripts-test-run-live-deepseek-translation-smoke" \
   WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT="$BIN/scripts-test-check-release-completion" \
+  WORDSCENE_TEST_MANUAL_SMOKE_READINESS_SCRIPT="$BIN/scripts-test-manual-smoke-readiness" \
   WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT="$BIN/scripts-test-privacy-manifest" \
   WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT="$BIN/scripts-test-privacy-surface" \
   WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT="$BIN/scripts-test-required-reason-api-scan" \
@@ -102,6 +109,7 @@ grep -qF 'git diff --check' "$LOG"
 grep -qF 'test_run_release_candidate_gate' "$LOG"
 grep -qF 'test_run_live_deepseek_translation_smoke' "$LOG"
 grep -qF 'test_check_release_completion' "$LOG"
+grep -qF 'test_manual_smoke_readiness' "$LOG"
 grep -qF 'test_privacy_manifest' "$LOG"
 grep -qF 'test_privacy_surface' "$LOG"
 grep -qF 'test_required_reason_api_scan' "$LOG"
