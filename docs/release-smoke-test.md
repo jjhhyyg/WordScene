@@ -162,6 +162,19 @@ Expected result:
 
 Use this table for each release candidate. Build metadata and blocker evidence
 for the current candidate is recorded in `docs/release-smoke-evidence.md`.
+Prefer recording manual rows with `scripts/record_release_smoke_result.sh` so
+the table format stays consistent:
+
+```bash
+scripts/record_release_smoke_result.sh \
+  --evidence docs/release-smoke-evidence.md \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro / macOS 26.5" \
+  --build "1" \
+  --result "PASS" \
+  --notes "Saved token, translated hello world, history survived relaunch."
+```
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
