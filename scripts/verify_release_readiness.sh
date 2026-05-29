@@ -10,6 +10,7 @@ PRIVACY_SURFACE_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT:-scripts/te
 REQUIRED_REASON_API_SCAN_SCRIPT="${WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT:-scripts/test_required_reason_api_scan.sh}"
 MANUAL_SMOKE_READINESS_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_READINESS_SCRIPT:-scripts/test_manual_smoke_readiness.sh}"
 RELEASE_NEXT_ACTIONS_TEST_SCRIPT="${WORDSCENE_TEST_RELEASE_NEXT_ACTIONS_SCRIPT:-scripts/test_release_next_actions.sh}"
+IOS_TEST_DESTINATION="${WORDSCENE_IOS_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5}"
 
 run() {
   printf '\n==> %s\n' "$*"
@@ -102,6 +103,13 @@ run xcodebuild test \
   -scheme WordSceneMac \
   -destination 'platform=macOS' \
   -derivedDataPath /tmp/WordSceneVerifyMac \
+  CODE_SIGNING_ALLOWED=NO
+
+run xcodebuild test \
+  -project WordScene.xcodeproj \
+  -scheme WordScene \
+  -destination "$IOS_TEST_DESTINATION" \
+  -derivedDataPath /tmp/WordSceneVerifyIOSTests \
   CODE_SIGNING_ALLOWED=NO
 
 run xcodebuild build \

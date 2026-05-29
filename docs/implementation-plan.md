@@ -52,7 +52,7 @@ Baseline already completed:
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`, including the Git commit used for candidate traceability.
-- Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`, including unsigned Release compiles for macOS and iOS.
+- Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`, including macOS unit tests, iOS simulator unit tests, and unsigned Release compiles for macOS and iOS.
 - App Store privacy manifest coverage exists for app-local `UserDefaults` usage through `WordScene/Resources/PrivacyInfo.xcprivacy`.
 - Release readiness scans production source for Apple required-reason API categories so future API additions cannot silently drift from `PrivacyInfo.xcprivacy`.
 - Settings no longer exposes anonymous crash-reporting consent until a real crash-reporting service exists, so the visible privacy surface matches implemented behavior.
@@ -392,6 +392,8 @@ Verification:
 - Clarified Settings import status messaging so keep-existing imports that only skip duplicates say no new content was imported; reran targeted Settings import/export controller tests and `scripts/verify_release_readiness.sh`.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1b32ffc6cfa9`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `74fb40dde8aa`.
+- Added iOS simulator unit tests to `scripts/verify_release_readiness.sh`, fixed the iOS test bundle's Core Data import, and made simulator hosts default to local-only storage instead of bootstrapping CloudKit without signed iCloud entitlements.
+- Reran iOS simulator tests on iPhone 17 Pro Max / iOS 26.5, targeted macOS Core Data tests, `scripts/test_verify_release_readiness.sh`, and `scripts/verify_release_readiness.sh`; the non-manual gate now covers 88 iOS simulator tests.
 
 Next:
 

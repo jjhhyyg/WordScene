@@ -126,6 +126,7 @@ token_pattern+='988'
 grep -qF "rg -n $token_pattern WordScene docs project.yml .gitignore scripts" "$LOG"
 grep -qF 'rg -n LastUpgradeCheck = 1430|LastUpgradeVersion = "1430" WordScene.xcodeproj/project.pbxproj WordScene.xcodeproj/xcshareddata/xcschemes/WordScene.xcscheme WordScene.xcodeproj/xcshareddata/xcschemes/WordSceneMac.xcscheme' "$LOG"
 grep -qF "xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination platform=macOS -derivedDataPath /tmp/WordSceneVerifyMac CODE_SIGNING_ALLOWED=NO" "$LOG"
+grep -qF "xcodebuild test -project WordScene.xcodeproj -scheme WordScene -destination platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5 -derivedDataPath /tmp/WordSceneVerifyIOSTests CODE_SIGNING_ALLOWED=NO" "$LOG"
 grep -qF "xcodebuild build -project WordScene.xcodeproj -scheme WordScene -destination generic/platform=iOS -derivedDataPath /tmp/WordSceneVerifyIOS CODE_SIGNING_ALLOWED=NO" "$LOG"
 grep -qF "xcodebuild build -project WordScene.xcodeproj -scheme WordSceneMac -configuration Release -destination platform=macOS -derivedDataPath /tmp/WordSceneVerifyReleaseMac CODE_SIGNING_ALLOWED=NO" "$LOG"
 grep -qF "xcodebuild build -project WordScene.xcodeproj -scheme WordScene -configuration Release -destination generic/platform=iOS -derivedDataPath /tmp/WordSceneVerifyReleaseIOS CODE_SIGNING_ALLOWED=NO" "$LOG"

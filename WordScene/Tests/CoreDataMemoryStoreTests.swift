@@ -1,3 +1,4 @@
+import CoreData
 import XCTest
 @testable import WordScene
 
@@ -7,6 +8,12 @@ final class CoreDataMemoryStoreTests: XCTestCase {
 
         XCTAssertEqual(syncMode, .localOnly)
     }
+
+    #if targetEnvironment(simulator)
+    func testDefaultSyncModeUsesLocalOnlyForSimulatorTestHosts() {
+        XCTAssertEqual(CoreDataSyncMode.defaultForCurrentProcess(), .localOnly)
+    }
+    #endif
 
     func testDefaultSyncModeUsesCloudKitWhenEntitlementsMatchContainer() {
         let syncMode = CoreDataSyncMode.defaultForCurrentProcess { entitlement in

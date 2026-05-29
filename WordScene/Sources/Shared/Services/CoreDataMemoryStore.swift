@@ -56,8 +56,14 @@ private enum ProcessEntitlementReader {
 
         return SecTaskCopyValueForEntitlement(task, key as CFString, nil)
 #else
-        // iOS does not expose SecTask entitlement reads to app code. The app's
-        // CloudKit capability is defined by the target entitlements instead.
+        #if targetEnvironment(simulator)
+        // Simulator test hosts often run without signed iCloud entitlements;
+        // keep them local-only instead of bootstrapping a CloudKit store that
+        // the process cannot actually use.
+        return nil
+        #else
+        // iOS devices do not expose SecTask entitlement reads to app code. The
+        // app's CloudKit capability is defined by the signed target entitlements.
         switch key {
         case "com.apple.developer.icloud-services":
             return ["CloudKit"]
@@ -66,6 +72,7 @@ private enum ProcessEntitlementReader {
         default:
             return nil
         }
+        #endif
 #endif
     }
 }
