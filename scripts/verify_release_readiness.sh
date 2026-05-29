@@ -6,6 +6,7 @@ RUN_CANDIDATE_GATE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT:-scri
 RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT:-scripts/test_run_live_deepseek_translation_smoke.sh}"
 CHECK_RELEASE_COMPLETION_TEST_SCRIPT="${WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT:-scripts/test_check_release_completion.sh}"
 PRIVACY_MANIFEST_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT:-scripts/test_privacy_manifest.sh}"
+PRIVACY_SURFACE_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT:-scripts/test_privacy_surface.sh}"
 
 run() {
   printf '\n==> %s\n' "$*"
@@ -55,6 +56,7 @@ run bash -n \
   scripts/check_release_completion.sh \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
+  scripts/test_privacy_surface.sh \
   scripts/run_release_candidate_gate.sh \
   scripts/test_run_release_candidate_gate.sh \
   scripts/test_verify_release_readiness.sh \
@@ -65,6 +67,7 @@ run scripts/test_diagnose_release_signing.sh
 run scripts/test_record_release_smoke_result.sh
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
+run "$PRIVACY_SURFACE_TEST_SCRIPT"
 run "$RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT"
 run "$RUN_CANDIDATE_GATE_TEST_SCRIPT"
 if [[ "${WORDSCENE_SKIP_READINESS_SELF_TEST:-0}" != "1" ]]; then

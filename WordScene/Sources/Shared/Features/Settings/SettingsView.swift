@@ -6,7 +6,6 @@ import AppKit
 #endif
 
 struct SettingsView: View {
-    @AppStorage("allowsAnonymousCrashReports") private var allowsAnonymousCrashReports = false
     #if DEBUG
     @AppStorage(DebugRawAPIResponseSettings.isEnabledKey) private var storesRawAPIResponses = false
     #endif
@@ -131,10 +130,7 @@ struct SettingsView: View {
             }
 
             Section("隐私") {
-                Toggle("匿名崩溃日志", isOn: $allowsAnonymousCrashReports)
-                    .accessibilityLabel("允许发送匿名崩溃日志")
-
-                Text("默认关闭，不包含 Token、原文、译文或导出文件。敏感内容仅保存在本机设置和系统凭据存储中。")
+                Text("敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
@@ -294,17 +290,6 @@ struct SettingsView: View {
     private var privacyCard: some View {
         SettingsCard(title: "隐私", systemImage: "hand.raised") {
             VStack(alignment: .leading, spacing: 14) {
-                Toggle(isOn: $allowsAnonymousCrashReports) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("匿名崩溃日志")
-                        Text("默认关闭，不包含 Token、原文、译文或导出文件。")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .toggleStyle(.switch)
-                .accessibilityLabel("允许发送匿名崩溃日志")
-
                 #if DEBUG
                 Toggle(isOn: $storesRawAPIResponses) {
                     VStack(alignment: .leading, spacing: 3) {

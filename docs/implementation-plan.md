@@ -49,6 +49,7 @@ Baseline already completed:
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`, including unsigned Release compiles for macOS and iOS.
 - App Store privacy manifest coverage exists for app-local `UserDefaults` usage through `WordScene/Resources/PrivacyInfo.xcprivacy`.
+- Settings no longer exposes anonymous crash-reporting consent until a real crash-reporting service exists, so the visible privacy surface matches implemented behavior.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
@@ -279,6 +280,7 @@ Verification:
 - Updated the release candidate gate to rerun release readiness and replace stale non-manual gate evidence before recording candidate build evidence or signing blockers.
 - Added `scripts/check_release_completion.sh` plus a shell regression test so the release cannot be called complete until signed candidate builds, manual smoke rows, iCloud create/delete sync, and local-only fallback all have PASS evidence with no BLOCKED/FAIL rows remaining.
 - Added `WordScene/Resources/PrivacyInfo.xcprivacy` with a `UserDefaults` required-reason declaration and wired a privacy manifest check into release readiness.
+- Removed the no-op anonymous crash-reporting toggle from Settings and added a privacy surface check to release readiness so visible privacy controls do not claim unimplemented telemetry behavior.
 
 Next:
 
