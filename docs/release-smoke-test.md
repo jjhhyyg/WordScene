@@ -20,7 +20,8 @@ and pass/fail notes for each run.
   leak scanning, XcodeGen version-marker scanning, macOS tests, iOS generic
   build, and unsigned macOS/iOS Release compiles.
 - Use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to
-  build each release candidate and append build evidence or blocker rows to
+  rerun readiness checks, refresh the non-manual gate evidence, build each
+  release candidate, and append build evidence or blocker rows to
   `docs/release-smoke-evidence.md`.
 - Optionally run `scripts/run_live_deepseek_translation_smoke.sh` before signed
   app smoke testing to verify the current DeepSeek token, JSON Output request,

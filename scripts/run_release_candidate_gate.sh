@@ -10,6 +10,7 @@ export DERIVED_DATA_BASE="${DERIVED_DATA_BASE:-/tmp/WordSceneReleaseCandidates}"
 BUILD_CANDIDATES_SCRIPT="${WORDSCENE_BUILD_CANDIDATES_SCRIPT:-$ROOT/scripts/build_release_candidates.sh}"
 COLLECT_EVIDENCE_SCRIPT="${WORDSCENE_COLLECT_EVIDENCE_SCRIPT:-$ROOT/scripts/collect_release_candidate_evidence.sh}"
 DIAGNOSE_SIGNING_SCRIPT="${WORDSCENE_DIAGNOSE_SIGNING_SCRIPT:-$ROOT/scripts/diagnose_release_signing.sh}"
+VERIFY_READINESS_SCRIPT="${WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT:-$ROOT/scripts/verify_release_readiness.sh}"
 
 usage() {
   echo "Usage: $0 [--allow-provisioning-updates] [--platform all|macos|ios] [--evidence <markdown>]" >&2
@@ -66,10 +67,34 @@ mkdir -p "$(dirname "$EVIDENCE_FILE")" "$DERIVED_DATA_BASE/logs"
 
 prepare_evidence_file() {
   local temp_file
+  local preserved_rows
+  local preserved_rest
+
   temp_file="$(mktemp)"
+  preserved_rows="$(mktemp)"
+  preserved_rest="$(mktemp)"
 
   if [[ -f "$EVIDENCE_FILE" ]]; then
     awk '
+      /^## Non-Manual Release Gate$/ {
+        in_section = 1
+        next
+      }
+      in_section == 1 && /^## / {
+        in_section = 0
+      }
+      in_section == 1 &&
+      /^\| / &&
+      $0 !~ /^\| Area \|/ &&
+      $0 !~ /^\| ---/ &&
+      $0 !~ /^\| Readiness script \|/ &&
+      $0 !~ /^\| Candidate gate \|/ {
+        print
+      }
+    ' "$EVIDENCE_FILE" >"$preserved_rows"
+
+    awk '
+      /^## Non-Manual Release Gate$/ ||
       /^## Release Candidate Build Evidence$/ ||
       /^## Release Candidate Build Blocker$/ ||
       /^## Current Build Blockers$/ {
@@ -82,16 +107,121 @@ prepare_evidence_file() {
       skip != 1 {
         print
       }
-    ' "$EVIDENCE_FILE" >"$temp_file"
+    ' "$EVIDENCE_FILE" >"$preserved_rest"
   fi
 
+  {
+    printf '## Non-Manual Release Gate\n\n'
+    printf '| Area | Platform | Device / OS | Build | Result | Notes |\n'
+    printf '| --- | --- | --- | --- | --- | --- |\n'
+    cat "$preserved_rows"
+    if [[ -s "$preserved_rest" ]]; then
+      printf '\n'
+      cat "$preserved_rest"
+    fi
+  } >"$temp_file"
+
   mv "$temp_file" "$EVIDENCE_FILE"
+  rm -f "$preserved_rows" "$preserved_rest"
 }
 
-prepare_evidence_file
+append_non_manual_gate_row() {
+  local area="$1"
+  local platform="$2"
+  local result="$3"
+  local notes="$4"
+  local row
+  local temp_file
+  local preserved_rows
+  local preserved_rest
+
+  row="| $area | $platform | local build host | 1 | $result | $notes |"
+  temp_file="$(mktemp)"
+  preserved_rows="$(mktemp)"
+  preserved_rest="$(mktemp)"
+
+  if [[ -f "$EVIDENCE_FILE" ]]; then
+    awk '
+      /^## Non-Manual Release Gate$/ {
+        in_section = 1
+        next
+      }
+      in_section == 1 && /^## / {
+        in_section = 0
+      }
+      in_section == 1 &&
+      /^\| / &&
+      $0 !~ /^\| Area \|/ &&
+      $0 !~ /^\| ---/ {
+        print
+      }
+    ' "$EVIDENCE_FILE" >"$preserved_rows"
+
+    awk '
+      /^## Non-Manual Release Gate$/ {
+        skip = 1
+        next
+      }
+      /^## / {
+        skip = 0
+      }
+      skip != 1 {
+        print
+      }
+    ' "$EVIDENCE_FILE" >"$preserved_rest"
+  fi
+
+  {
+    printf '## Non-Manual Release Gate\n\n'
+    printf '| Area | Platform | Device / OS | Build | Result | Notes |\n'
+    printf '| --- | --- | --- | --- | --- | --- |\n'
+    cat "$preserved_rows"
+    printf '%s\n' "$row"
+    if [[ -s "$preserved_rest" ]]; then
+      printf '\n'
+      cat "$preserved_rest"
+    fi
+  } >"$temp_file"
+
+  mv "$temp_file" "$EVIDENCE_FILE"
+  rm -f "$preserved_rows" "$preserved_rest"
+}
+
+run_readiness() {
+  local log_file="$DERIVED_DATA_BASE/logs/release-readiness.log"
+  local notes
+
+  printf '\n==> Running release readiness checks\n'
+  local status=0
+  if "$VERIFY_READINESS_SCRIPT" >"$log_file" 2>&1; then
+    status=0
+  else
+    status=$?
+  fi
+
+  if [[ "$status" -ne 0 ]]; then
+    cat "$log_file" >&2
+    notes="scripts/verify_release_readiness.sh failed before release candidate builds; see $log_file"
+    prepare_evidence_file
+    append_non_manual_gate_row "Readiness script" "macOS + iOS generic" "BLOCKED" "$notes"
+    return "$status"
+  fi
+
+  notes="scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles."
+  prepare_evidence_file
+  append_non_manual_gate_row "Readiness script" "macOS + iOS generic" "PASS" "$notes"
+}
 
 platform_label() {
   case "$1" in
+    ios) printf 'iOS' ;;
+    macos) printf 'macOS' ;;
+  esac
+}
+
+gate_platform_label() {
+  case "$PLATFORM" in
+    all) printf 'macOS + iOS' ;;
     ios) printf 'iOS' ;;
     macos) printf 'macOS' ;;
   esac
@@ -172,6 +302,8 @@ build_platform() {
     --output "$EVIDENCE_FILE"
 }
 
+run_readiness
+
 overall_status=0
 for platform in "${platforms[@]}"; do
   set +e
@@ -185,7 +317,18 @@ for platform in "${platforms[@]}"; do
 done
 
 if [[ "$overall_status" -ne 0 ]]; then
+  append_non_manual_gate_row \
+    "Candidate gate" \
+    "$(gate_platform_label)" \
+    "BLOCKED" \
+    "scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform."
   exit "$overall_status"
 fi
+
+append_non_manual_gate_row \
+  "Candidate gate" \
+  "$(gate_platform_label)" \
+  "PASS" \
+  "scripts/run_release_candidate_gate.sh recorded release readiness and signed release candidate evidence for all requested platforms."
 
 printf '\nRelease candidate gate completed. Evidence: %s\n' "$EVIDENCE_FILE"

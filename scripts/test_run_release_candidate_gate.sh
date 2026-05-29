@@ -7,13 +7,22 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 BUILD_SCRIPT="$TMPDIR/fake_build_release_candidates.sh"
 COLLECT_SCRIPT="$TMPDIR/fake_collect_release_candidate_evidence.sh"
+READINESS_SCRIPT="$TMPDIR/fake_verify_release_readiness.sh"
 EVIDENCE="$TMPDIR/evidence.md"
 LOG="$TMPDIR/commands.log"
 
 cat >"$EVIDENCE" <<'STALE_EVIDENCE'
 ## Non-Manual Release Gate
 
-PRESERVED READINESS EVIDENCE
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | STALE READINESS EVIDENCE |
+| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | STALE CANDIDATE GATE EVIDENCE |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | PRESERVED LIVE EVIDENCE |
+
+## Manual Smoke Evidence
+
+PRESERVED MANUAL EVIDENCE
 
 ## Release Candidate Build Evidence
 
@@ -89,20 +98,38 @@ FAKE_COLLECT
 
 chmod +x "$BUILD_SCRIPT" "$COLLECT_SCRIPT"
 
+cat >"$READINESS_SCRIPT" <<'FAKE_READINESS'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'readiness\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_READINESS
+
+chmod +x "$READINESS_SCRIPT"
+
 set +e
 DERIVED_DATA_BASE="$TMPDIR/DerivedData" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
   WORDSCENE_BUILD_CANDIDATES_SCRIPT="$BUILD_SCRIPT" \
   WORDSCENE_COLLECT_EVIDENCE_SCRIPT="$COLLECT_SCRIPT" \
+  WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT="$READINESS_SCRIPT" \
   "$ROOT/scripts/run_release_candidate_gate.sh" --platform all --evidence "$EVIDENCE" \
   >/tmp/wordscene-gate-test.out 2>/tmp/wordscene-gate-test.err
 status=$?
 set -e
 
 test "$status" -eq 65
+grep -qF 'readiness' "$LOG"
 grep -qF 'build macos' "$LOG"
 grep -qF 'build ios' "$LOG"
 grep -qF 'collect ios' "$LOG"
+if grep -qF 'STALE READINESS EVIDENCE' "$EVIDENCE"; then
+  echo "release candidate gate should replace stale readiness evidence after rerunning readiness checks" >&2
+  exit 1
+fi
+if grep -qF 'STALE CANDIDATE GATE EVIDENCE' "$EVIDENCE"; then
+  echo "release candidate gate should replace stale candidate gate evidence after rerunning candidate builds" >&2
+  exit 1
+fi
 if grep -qF 'STALE RELEASE EVIDENCE' "$EVIDENCE"; then
   echo "release candidate gate should replace stale evidence instead of appending to it" >&2
   exit 1
@@ -111,7 +138,11 @@ if grep -qF 'STALE BUILD BLOCKER' "$EVIDENCE"; then
   echo "release candidate gate should replace stale build blockers instead of preserving them" >&2
   exit 1
 fi
-grep -qF 'PRESERVED READINESS EVIDENCE' "$EVIDENCE"
+grep -qF 'PRESERVED MANUAL EVIDENCE' "$EVIDENCE"
+grep -qF 'PRESERVED LIVE EVIDENCE' "$EVIDENCE"
+grep -qF '## Non-Manual Release Gate' "$EVIDENCE"
+grep -qF '| Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |' "$EVIDENCE"
+grep -qF '| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform. |' "$EVIDENCE"
 grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$EVIDENCE"
 grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED |' "$EVIDENCE"
 grep -qF 'Signing diagnosis / macOS / BLOCKED' "$EVIDENCE"

@@ -274,6 +274,7 @@ Verification:
 - Reran `scripts/verify_release_readiness.sh`; the signing diagnosis tests are now part of the non-manual gate and the macOS 72-test suite plus iOS generic build still pass.
 - Added `scripts/record_release_smoke_result.sh` plus a shell regression test so manual release smoke rows are appended with validated result values and escaped Markdown table cells.
 - Added unsigned macOS and iOS Release compile checks to `scripts/verify_release_readiness.sh` so Release-only conditional compilation is covered before signed candidate smoke testing.
+- Updated the release candidate gate to rerun release readiness and replace stale non-manual gate evidence before recording candidate build evidence or signing blockers.
 
 Next:
 
