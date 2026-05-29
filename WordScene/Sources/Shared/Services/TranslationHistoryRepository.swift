@@ -29,7 +29,7 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
 
     func loadOrThrow() throws -> [TranslationRecord] {
         guard let coreDataStore else {
-            return legacyStore.load()
+            return try legacyStore.loadOrThrow()
         }
 
         try migrateLegacyRecordsIfNeeded(into: coreDataStore)
@@ -59,7 +59,7 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     }
 
     private func migrateLegacyRecordsIfNeeded(into coreDataStore: any CoreDataTranslationHistoryDataStore) throws {
-        let legacyRecords = legacyStore.load()
+        let legacyRecords = try legacyStore.loadOrThrow()
         guard !legacyRecords.isEmpty else {
             return
         }

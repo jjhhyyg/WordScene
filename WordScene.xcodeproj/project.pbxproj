@@ -54,6 +54,7 @@
 		78A03AF21F3FA00B9E737465 /* MemorySearchIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */; };
 		7AB1A9BC5FAC51F0C6A22E06 /* MemoryLibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD8C4290705F81BA86674BC /* MemoryLibraryStoreTests.swift */; };
 		7AEBF304A5DF92C4DC087CF7 /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */; };
+		832EEB97AC7EE88AB5CD7247 /* LocalPersistenceStoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */; };
 		882949E983224EB9D2AF5600 /* WordSceneLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */; };
 		91566169B9D98817B5F67F57 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0810899951479D6FBD559709 /* SearchView.swift */; };
 		919982FFBFBCDFAB048AB6CB /* MemorySearchIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */; };
@@ -76,6 +77,7 @@
 		C765D91811294F1FF8736585 /* CoreDataMemoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A549AC5C802B87B3E2F4F7 /* CoreDataMemoryStoreTests.swift */; };
 		CD66F6383CF9B9FEF278BC0E /* DeepSeekBalanceResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D292D4CF8CBF1E54EC0932D9 /* DeepSeekBalanceResponseTests.swift */; };
 		CF7EB547CD1BC2DBBDFE2522 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 930A284E1EE951193AB252A3 /* SettingsView.swift */; };
+		D1F2AFD6AA8B965DAABB9995 /* LocalPersistenceStoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */; };
 		D245667910DAF40BCE19A0D5 /* MemorySearchIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */; };
 		D8FEA8870625A4556E0A93CF /* TranslationLanguageDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */; };
 		E09554AFBB7DD4768B82DC15 /* AppSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B8777AC3DD498942C3FA17 /* AppSection.swift */; };
@@ -126,6 +128,7 @@
 		45ED2EB20F79032F10EF2C34 /* LanguageSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelection.swift; sourceTree = "<group>"; };
 		4D4A7FB7FCC5F7BD59669735 /* TranslationHistoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryRepository.swift; sourceTree = "<group>"; };
 		4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageDirection.swift; sourceTree = "<group>"; };
+		52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceStoreError.swift; sourceTree = "<group>"; };
 		62E99C711EE951EFB367F4B5 /* WordSceneMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WordSceneMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		685B7AD82D463A45F145A2B4 /* MemoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryItem.swift; sourceTree = "<group>"; };
@@ -202,6 +205,7 @@
 				2B861A782D48915285586521 /* DeepSeekCredential.swift */,
 				9C12FD3785C7C960302258E6 /* DeepSeekTranslationClient.swift */,
 				65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */,
+				52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */,
 				FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */,
 				A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */,
 				C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */,
@@ -515,6 +519,7 @@
 				E5E0E767AB87050F9F6D44CF /* KeychainCredentialStore.swift in Sources */,
 				92D0C51F92C3D103A797888E /* LanguageSelection.swift in Sources */,
 				F8D301CB66598C87B2FE6BE4 /* LibraryView.swift in Sources */,
+				D1F2AFD6AA8B965DAABB9995 /* LocalPersistenceStoreError.swift in Sources */,
 				39C00451F4E5C6C7CB6C1CCF /* MemoryImportExportService.swift in Sources */,
 				94A3C66F428D89952D709864 /* MemoryItem.swift in Sources */,
 				A1FF6F8390ABACCCFC42D618 /* MemoryLibraryRepository.swift in Sources */,
@@ -548,6 +553,7 @@
 				476694B4B3CE19D8A409F518 /* KeychainCredentialStore.swift in Sources */,
 				5EEC62C69EB60B2B59C05667 /* LanguageSelection.swift in Sources */,
 				02D6EB6FE471B72C253E694B /* LibraryView.swift in Sources */,
+				832EEB97AC7EE88AB5CD7247 /* LocalPersistenceStoreError.swift in Sources */,
 				3C1DEF743818571127CE27FB /* MemoryImportExportService.swift in Sources */,
 				08E0FC5C646757C700EA296E /* MemoryItem.swift in Sources */,
 				4B092C560E36716FA36BB078 /* MemoryLibraryRepository.swift in Sources */,

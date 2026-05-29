@@ -18,6 +18,10 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
     }
 
     func load() -> [MemoryItem] {
+        (try? loadOrThrow()) ?? []
+    }
+
+    func loadOrThrow() throws -> [MemoryItem] {
         guard let data = defaults.data(forKey: key) else {
             return []
         }
@@ -33,11 +37,7 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
             return trimmedItems
         }
 
-        return []
-    }
-
-    func loadOrThrow() throws -> [MemoryItem] {
-        load()
+        throw LocalPersistenceStoreError.unreadableDocument(key: key)
     }
 
     func save(_ items: [MemoryItem]) {

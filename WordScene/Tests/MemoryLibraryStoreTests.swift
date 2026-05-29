@@ -60,6 +60,23 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual((migratedObject["items"] as? [[String: Any]])?.first?["sourceText"] as? String, "legacy")
     }
 
+    func testLoadOrThrowRejectsUnreadableDocumentWithoutClearingData() throws {
+        let suiteName = "MemoryLibraryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = MemoryLibraryStore(defaults: defaults)
+        let corruptData = Data("{not json".utf8)
+        defaults.set(corruptData, forKey: "memoryLibrary")
+
+        XCTAssertThrowsError(try store.loadOrThrow()) { error in
+            XCTAssertEqual(error as? LocalPersistenceStoreError, .unreadableDocument(key: "memoryLibrary"))
+        }
+        XCTAssertEqual(defaults.data(forKey: "memoryLibrary"), corruptData)
+    }
+
     func testAddingSameTranslationDoesNotCreateDuplicate() {
         let store = MemoryLibraryStore(defaults: UserDefaults.standard)
         let record = TranslationRecord(

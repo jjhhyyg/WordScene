@@ -28,7 +28,7 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
 
     func loadOrThrow() throws -> [MemoryItem] {
         guard let coreDataStore else {
-            return legacyStore.load()
+            return try legacyStore.loadOrThrow()
         }
 
         try migrateLegacyItemsIfNeeded(into: coreDataStore)
@@ -85,7 +85,7 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
     }
 
     private func migrateLegacyItemsIfNeeded(into coreDataStore: any CoreDataMemoryDataStore) throws {
-        let legacyItems = legacyStore.load()
+        let legacyItems = try legacyStore.loadOrThrow()
         guard !legacyItems.isEmpty else {
             return
         }

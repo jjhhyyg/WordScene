@@ -18,6 +18,10 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
     }
 
     func load() -> [TranslationRecord] {
+        (try? loadOrThrow()) ?? []
+    }
+
+    func loadOrThrow() throws -> [TranslationRecord] {
         guard let data = defaults.data(forKey: key) else {
             return []
         }
@@ -33,11 +37,7 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
             return trimmedRecords
         }
 
-        return []
-    }
-
-    func loadOrThrow() throws -> [TranslationRecord] {
-        load()
+        throw LocalPersistenceStoreError.unreadableDocument(key: key)
     }
 
     func save(_ records: [TranslationRecord]) {

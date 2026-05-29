@@ -167,10 +167,12 @@ Verification:
 - Wired Library, Translate, Search, and Settings import/export memory access to the explicit error path.
 - Added throwing translation-history repository APIs so Core Data recent-history read/write failures can be surfaced instead of silently falling back.
 - Wired Translate and Search recent-history access to the explicit error path, with non-blocking warnings when translation succeeds but history persistence fails.
+- Added explicit `UserDefaults` document decode errors for local memory and recent-history stores.
+- Added tests proving corrupt local documents throw through `loadOrThrow()` and are preserved for recovery instead of being cleared or treated as empty.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Audit remaining `UserDefaults` encode/decode paths and decide whether corrupt local documents should surface as warnings or reset to empty.
+- Add an in-app recovery affordance for corrupt local documents, such as export raw backup then reset local cache.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.

@@ -57,4 +57,21 @@ final class TranslationHistoryStoreTests: XCTestCase {
         XCTAssertEqual(migratedObject["schema_version"] as? Int, 1)
         XCTAssertEqual((migratedObject["records"] as? [[String: Any]])?.first?["sourceText"] as? String, "legacy")
     }
+
+    func testLoadOrThrowRejectsUnreadableDocumentWithoutClearingData() throws {
+        let suiteName = "TranslationHistoryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = TranslationHistoryStore(defaults: defaults)
+        let corruptData = Data("{not json".utf8)
+        defaults.set(corruptData, forKey: "translationHistory")
+
+        XCTAssertThrowsError(try store.loadOrThrow()) { error in
+            XCTAssertEqual(error as? LocalPersistenceStoreError, .unreadableDocument(key: "translationHistory"))
+        }
+        XCTAssertEqual(defaults.data(forKey: "translationHistory"), corruptData)
+    }
 }
