@@ -5,6 +5,7 @@ struct SearchView: View {
     @State private var memoryItems: [MemoryItem] = []
     @State private var history: [TranslationRecord] = []
     @State private var hasLoaded = false
+    @State private var persistenceErrorMessage: String?
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -31,6 +32,13 @@ struct SearchView: View {
             if !hasLoaded {
                 ProgressView("正在加载搜索索引...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let persistenceErrorMessage {
+                ContentUnavailableView(
+                    "无法加载搜索索引",
+                    systemImage: "externaldrive.badge.exclamationmark",
+                    description: Text(persistenceErrorMessage)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if trimmedQuery.isEmpty {
                 ContentUnavailableView(
                     "搜索收藏",
@@ -96,8 +104,15 @@ struct SearchView: View {
     }
 
     private func loadSearchData() {
-        memoryItems = memoryStore.load()
-        history = historyStore.load()
+        do {
+            memoryItems = try memoryStore.loadOrThrow()
+            history = historyStore.load()
+            persistenceErrorMessage = nil
+        } catch {
+            memoryItems = []
+            history = []
+            persistenceErrorMessage = "收藏数据读取失败：\(error.localizedDescription)"
+        }
         hasLoaded = true
     }
 }

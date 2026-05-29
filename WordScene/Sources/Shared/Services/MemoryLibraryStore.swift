@@ -36,6 +36,10 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
         return []
     }
 
+    func loadOrThrow() throws -> [MemoryItem] {
+        load()
+    }
+
     func save(_ items: [MemoryItem]) {
         let trimmedItems = Array(items.prefix(maximumCount))
         let document = MemoryLibraryDocument(
@@ -47,6 +51,10 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
         }
 
         defaults.set(data, forKey: key)
+    }
+
+    func saveOrThrow(_ items: [MemoryItem]) throws {
+        save(items)
     }
 
     func clear() {

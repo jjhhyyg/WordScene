@@ -3,6 +3,7 @@ import SwiftUI
 struct LibraryView: View {
     @State private var items: [MemoryItem] = []
     @State private var hasLoaded = false
+    @State private var persistenceErrorMessage: String?
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -15,6 +16,13 @@ struct LibraryView: View {
             if !hasLoaded {
                 ProgressView("正在加载收藏...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let persistenceErrorMessage, items.isEmpty {
+                ContentUnavailableView(
+                    "无法读取收藏",
+                    systemImage: "externaldrive.badge.exclamationmark",
+                    description: Text(persistenceErrorMessage)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if items.isEmpty {
                 ContentUnavailableView(
                     "还没有收藏",
@@ -25,6 +33,15 @@ struct LibraryView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
+                        if let persistenceErrorMessage {
+                            Label(persistenceErrorMessage, systemImage: "exclamationmark.triangle")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+
                         HStack(alignment: .firstTextBaseline) {
                             Text("已收藏 \(items.count) 条")
                                 .font(.headline)
@@ -88,18 +105,36 @@ struct LibraryView: View {
     }
 
     private func loadItems() {
-        items = store.load()
+        do {
+            items = try store.loadOrThrow()
+            persistenceErrorMessage = nil
+        } catch {
+            items = []
+            persistenceErrorMessage = "收藏数据读取失败：\(error.localizedDescription)"
+        }
         hasLoaded = true
     }
 
     private func saveNote(for id: UUID, note: String) {
-        items = store.updatingNote(for: id, note: note, in: items)
-        store.save(items)
+        let updatedItems = store.updatingNote(for: id, note: note, in: items)
+        do {
+            try store.saveOrThrow(updatedItems)
+            items = updatedItems
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = "备注保存失败：\(error.localizedDescription)"
+        }
     }
 
     private func deleteItem(id: UUID) {
-        items = store.removing(id: id, from: items)
-        store.save(items)
+        let updatedItems = store.removing(id: id, from: items)
+        do {
+            try store.saveOrThrow(updatedItems)
+            items = updatedItems
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = "收藏删除失败：\(error.localizedDescription)"
+        }
     }
 }
 

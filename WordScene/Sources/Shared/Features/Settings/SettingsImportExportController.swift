@@ -13,7 +13,7 @@ struct SettingsImportExportController {
     }
 
     func prepareExport() throws -> SettingsMemoryExport {
-        let items = memoryStore.load()
+        let items = try memoryStore.loadOrThrow()
         return SettingsMemoryExport(
             data: try importExportService.exportData(items: items),
             fileName: importExportService.exportFileName(),
@@ -27,10 +27,10 @@ struct SettingsImportExportController {
     ) throws -> SettingsMemoryImportSummary {
         let result = try importExportService.importItems(
             from: data,
-            existingItems: memoryStore.load(),
+            existingItems: try memoryStore.loadOrThrow(),
             conflictStrategy: conflictStrategy
         )
-        memoryStore.save(result.items)
+        try memoryStore.saveOrThrow(result.items)
 
         return SettingsMemoryImportSummary(
             importedCount: result.importedCount,

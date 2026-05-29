@@ -710,18 +710,29 @@ struct TranslationView: View {
 
     @MainActor
     private func loadMemoryItems() {
-        memoryItems = memoryStore.load()
+        do {
+            memoryItems = try memoryStore.loadOrThrow()
+        } catch {
+            memoryItems = []
+            translationState = .failed("收藏数据读取失败：\(error.localizedDescription)")
+        }
     }
 
     @MainActor
     private func toggleMemory(for record: TranslationRecord) {
+        let updatedItems: [MemoryItem]
         if isSavedToMemory(record) {
-            memoryItems = memoryStore.removing(record, from: memoryItems)
+            updatedItems = memoryStore.removing(record, from: memoryItems)
         } else {
-            memoryItems = memoryStore.adding(record, to: memoryItems)
+            updatedItems = memoryStore.adding(record, to: memoryItems)
         }
 
-        memoryStore.save(memoryItems)
+        do {
+            try memoryStore.saveOrThrow(updatedItems)
+            memoryItems = updatedItems
+        } catch {
+            translationState = .failed("收藏保存失败：\(error.localizedDescription)")
+        }
     }
 
     @MainActor

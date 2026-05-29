@@ -163,10 +163,12 @@ Verification:
 - Added explicit app persistence status for Core Data bootstrap success/failure.
 - Surfaced the persistence status in Settings so legacy fallback mode is visible instead of silent.
 - Added tests proving Core Data bootstrap failures are reported through `AppDataController`.
+- Added throwing memory-library repository APIs so Core Data read/write failures can be surfaced instead of silently falling back.
+- Wired Library, Translate, Search, and Settings import/export memory access to the explicit error path.
 
 Next:
 
 - Manually smoke test import/export on macOS and iOS.
-- Replace repository-level `try?` Core Data read/write fallbacks with explicit `Result` or throwing paths.
+- Apply the same explicit error path to recent translation history reads and writes.
 - Enable `NSPersistentCloudKitContainer` only after local Core Data migration and delete behavior are proven.
 - Keep local-only mode fully usable while sync is being prepared.

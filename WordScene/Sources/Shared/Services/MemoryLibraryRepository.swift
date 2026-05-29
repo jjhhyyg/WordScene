@@ -3,15 +3,17 @@ import Foundation
 protocol MemoryLibraryDataStore {
     func load() -> [MemoryItem]
     func save(_ items: [MemoryItem])
+    func loadOrThrow() throws -> [MemoryItem]
+    func saveOrThrow(_ items: [MemoryItem]) throws
 }
 
 struct MemoryLibraryRepository: MemoryLibraryDataStore {
-    private let coreDataStore: CoreDataMemoryStore?
+    private let coreDataStore: (any CoreDataMemoryDataStore)?
     private let legacyStore: MemoryLibraryStore
     private let maximumCount: Int
 
     init(
-        coreDataStore: CoreDataMemoryStore? = try? CoreDataMemoryStore(),
+        coreDataStore: (any CoreDataMemoryDataStore)? = try? CoreDataMemoryStore(),
         legacyStore: MemoryLibraryStore = MemoryLibraryStore(),
         maximumCount: Int = 500
     ) {
@@ -21,32 +23,44 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
     }
 
     func load() -> [MemoryItem] {
+        (try? loadOrThrow()) ?? legacyStore.load()
+    }
+
+    func loadOrThrow() throws -> [MemoryItem] {
         guard let coreDataStore else {
             return legacyStore.load()
         }
 
-        migrateLegacyItemsIfNeeded(into: coreDataStore)
-        return loadActiveItems(from: coreDataStore)
+        try migrateLegacyItemsIfNeeded(into: coreDataStore)
+        return try loadActiveItems(from: coreDataStore)
     }
 
     func save(_ items: [MemoryItem]) {
+        do {
+            try saveOrThrow(items)
+        } catch {
+            legacyStore.save(items)
+        }
+    }
+
+    func saveOrThrow(_ items: [MemoryItem]) throws {
         guard let coreDataStore else {
             legacyStore.save(items)
             return
         }
 
-        migrateLegacyItemsIfNeeded(into: coreDataStore)
+        try migrateLegacyItemsIfNeeded(into: coreDataStore)
 
         let replacementItems = Array(items.prefix(maximumCount))
         let replacementIDs = Set(replacementItems.map(\.id))
-        let currentItems = loadActiveItems(from: coreDataStore)
+        let currentItems = try loadActiveItems(from: coreDataStore)
 
         for currentItem in currentItems where !replacementIDs.contains(currentItem.id) {
-            try? coreDataStore.softDelete(id: currentItem.id)
+            try coreDataStore.softDelete(id: currentItem.id)
         }
 
         for item in replacementItems {
-            try? coreDataStore.upsert(item)
+            try coreDataStore.upsert(item)
         }
     }
 
@@ -70,23 +84,20 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
         legacyStore.updatingNote(for: id, note: note, in: items)
     }
 
-    private func migrateLegacyItemsIfNeeded(into coreDataStore: CoreDataMemoryStore) {
+    private func migrateLegacyItemsIfNeeded(into coreDataStore: any CoreDataMemoryDataStore) throws {
         let legacyItems = legacyStore.load()
         guard !legacyItems.isEmpty else {
             return
         }
 
         for item in legacyItems.prefix(maximumCount) {
-            try? coreDataStore.upsert(item)
+            try coreDataStore.upsert(item)
         }
         legacyStore.clear()
     }
 
-    private func loadActiveItems(from coreDataStore: CoreDataMemoryStore) -> [MemoryItem] {
-        guard let items = try? coreDataStore.loadActiveItems() else {
-            return legacyStore.load()
-        }
-
+    private func loadActiveItems(from coreDataStore: any CoreDataMemoryDataStore) throws -> [MemoryItem] {
+        let items = try coreDataStore.loadActiveItems()
         return Array(items.prefix(maximumCount))
     }
 }
