@@ -23,8 +23,11 @@
 		2820F677E928FD959E601CC4 /* DeepSeekTranslationResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */; };
 		3417254A726A1308C0B0DD66 /* WordSceneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */; };
 		3592CEE5F9506FF06612E915 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BAF2CB4697677551219CBB /* RootView.swift */; };
+		39C00451F4E5C6C7CB6C1CCF /* MemoryImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */; };
 		3B8CE754475ECBFAFF85413B /* LanguageDirectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9620FC5598FBD6CA7CB9106B /* LanguageDirectionTests.swift */; };
+		3C1DEF743818571127CE27FB /* MemoryImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */; };
 		40D429323A1B11DBAE9BFE66 /* TranslationHistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE85772F6048138E153C124 /* TranslationHistoryStoreTests.swift */; };
+		43AB84FD291E44A04B68B638 /* MemoryImportExportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */; };
 		45C320DAFD453EB3027BE263 /* MemoryLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */; };
 		46CCF4A9897F51A4CD0E21EA /* DeepSeekTranslationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C12FD3785C7C960302258E6 /* DeepSeekTranslationClient.swift */; };
 		476694B4B3CE19D8A409F518 /* KeychainCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */; };
@@ -47,6 +50,7 @@
 		96456CE04F829F9F661C839E /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */; };
 		99789BE74D4F9380AE1099C6 /* PinyinTransliteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */; };
 		9F26440D8AF5ACF3CDC08D1C /* WordSceneLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */; };
+		A3763EB90C333BAE13DD6151 /* MemoryImportExportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */; };
 		A9460D82F6024D2375A935A2 /* DeepSeekBalanceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F3D453013B5CDB55D10CE9 /* DeepSeekBalanceClient.swift */; };
 		AC19431356023625286C7D0B /* TranslationRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */; };
 		B1617BC8C90214DE4CF412C6 /* DeepSeekBalanceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F3D453013B5CDB55D10CE9 /* DeepSeekBalanceClient.swift */; };
@@ -102,6 +106,7 @@
 		65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		685B7AD82D463A45F145A2B4 /* MemoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryItem.swift; sourceTree = "<group>"; };
 		69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySearchIndex.swift; sourceTree = "<group>"; };
+		71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportServiceTests.swift; sourceTree = "<group>"; };
 		721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		7E1C69A659E9CCA80A97DDED /* WordScene.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WordScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySearchIndexTests.swift; sourceTree = "<group>"; };
@@ -118,6 +123,7 @@
 		E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = WordSceneLogo.png; sourceTree = "<group>"; };
 		F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneApp.swift; sourceTree = "<group>"; };
 		F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationRecord.swift; sourceTree = "<group>"; };
+		FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -164,6 +170,7 @@
 				2B861A782D48915285586521 /* DeepSeekCredential.swift */,
 				9C12FD3785C7C960302258E6 /* DeepSeekTranslationClient.swift */,
 				65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */,
+				FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */,
 				C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */,
 				69FBC42076CDC44F3F5BD3F6 /* MemorySearchIndex.swift */,
 				E86CD1C4073069E019639A99 /* PinyinTransliterator.swift */,
@@ -236,6 +243,7 @@
 				D292D4CF8CBF1E54EC0932D9 /* DeepSeekBalanceResponseTests.swift */,
 				33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */,
 				9620FC5598FBD6CA7CB9106B /* LanguageDirectionTests.swift */,
+				71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */,
 				3DD8C4290705F81BA86674BC /* MemoryLibraryStoreTests.swift */,
 				87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */,
 				359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */,
@@ -420,6 +428,7 @@
 				063E7182FAD89E83C949B943 /* DeepSeekBalanceResponseTests.swift in Sources */,
 				0B302040AA11E344D195DAC1 /* DeepSeekTranslationResponseTests.swift in Sources */,
 				079B623B7B372FF0D90B0607 /* LanguageDirectionTests.swift in Sources */,
+				43AB84FD291E44A04B68B638 /* MemoryImportExportServiceTests.swift in Sources */,
 				7AB1A9BC5FAC51F0C6A22E06 /* MemoryLibraryStoreTests.swift in Sources */,
 				EF9C91796A1D3361577B3BD1 /* MemorySearchIndexTests.swift in Sources */,
 				99789BE74D4F9380AE1099C6 /* PinyinTransliteratorTests.swift in Sources */,
@@ -434,6 +443,7 @@
 				CD66F6383CF9B9FEF278BC0E /* DeepSeekBalanceResponseTests.swift in Sources */,
 				2820F677E928FD959E601CC4 /* DeepSeekTranslationResponseTests.swift in Sources */,
 				3B8CE754475ECBFAFF85413B /* LanguageDirectionTests.swift in Sources */,
+				A3763EB90C333BAE13DD6151 /* MemoryImportExportServiceTests.swift in Sources */,
 				51A7D2152AAEDC76A7575CA1 /* MemoryLibraryStoreTests.swift in Sources */,
 				78A03AF21F3FA00B9E737465 /* MemorySearchIndexTests.swift in Sources */,
 				F294FCD453CF07E7643B19C8 /* PinyinTransliteratorTests.swift in Sources */,
@@ -453,6 +463,7 @@
 				E5E0E767AB87050F9F6D44CF /* KeychainCredentialStore.swift in Sources */,
 				92D0C51F92C3D103A797888E /* LanguageSelection.swift in Sources */,
 				F8D301CB66598C87B2FE6BE4 /* LibraryView.swift in Sources */,
+				39C00451F4E5C6C7CB6C1CCF /* MemoryImportExportService.swift in Sources */,
 				94A3C66F428D89952D709864 /* MemoryItem.swift in Sources */,
 				F7A5C8B44172D6B4E104ED37 /* MemoryLibraryStore.swift in Sources */,
 				919982FFBFBCDFAB048AB6CB /* MemorySearchIndex.swift in Sources */,
@@ -480,6 +491,7 @@
 				476694B4B3CE19D8A409F518 /* KeychainCredentialStore.swift in Sources */,
 				5EEC62C69EB60B2B59C05667 /* LanguageSelection.swift in Sources */,
 				02D6EB6FE471B72C253E694B /* LibraryView.swift in Sources */,
+				3C1DEF743818571127CE27FB /* MemoryImportExportService.swift in Sources */,
 				08E0FC5C646757C700EA296E /* MemoryItem.swift in Sources */,
 				45C320DAFD453EB3027BE263 /* MemoryLibraryStore.swift in Sources */,
 				D245667910DAF40BCE19A0D5 /* MemorySearchIndex.swift in Sources */,
