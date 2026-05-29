@@ -1,8 +1,9 @@
 import CoreData
+import Network
 import SwiftUI
 
 struct AppDataController {
-    nonisolated(unsafe) static let live = AppDataController()
+    nonisolated(unsafe) static let live = AppDataController(startsNetworkMonitoring: true)
 
     let memoryLibrary: MemoryLibraryRepository
     let translationHistory: TranslationHistoryRepository
@@ -12,15 +13,21 @@ struct AppDataController {
     let syncStatus: AppSyncStatus
     let syncEventMonitor: CloudKitSyncEventMonitor
     let dataChangeMonitor: AppDataChangeMonitor
+    let networkStatusMonitor: AppNetworkStatusMonitor
 
     init(
         coreDataStoreFactory: (() throws -> CoreDataMemoryStore)? = nil,
         syncMode: CoreDataSyncMode = .defaultForCurrentProcess(),
         syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
         dataChangeNotificationCenter: NotificationCenter = .default,
+        networkStatusMonitor: AppNetworkStatusMonitor? = nil,
+        startsNetworkMonitoring: Bool = false,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
+        self.networkStatusMonitor = networkStatusMonitor ?? AppNetworkStatusMonitor(
+            startsMonitoring: startsNetworkMonitoring
+        )
         let coreDataStore: CoreDataMemoryStore?
         do {
             coreDataStore = try (coreDataStoreFactory ?? { try CoreDataMemoryStore(syncMode: syncMode) })()
@@ -59,6 +66,8 @@ struct AppDataController {
         coreDataStore: CoreDataMemoryStore,
         syncEventStore: CloudKitSyncEventStore = CloudKitSyncEventStore(),
         dataChangeNotificationCenter: NotificationCenter = .default,
+        networkStatusMonitor: AppNetworkStatusMonitor? = nil,
+        startsNetworkMonitoring: Bool = false,
         legacyMemoryStore: MemoryLibraryStore = MemoryLibraryStore(),
         legacyHistoryStore: TranslationHistoryStore = TranslationHistoryStore()
     ) {
@@ -67,6 +76,8 @@ struct AppDataController {
             syncMode: .localOnly,
             syncEventStore: syncEventStore,
             dataChangeNotificationCenter: dataChangeNotificationCenter,
+            networkStatusMonitor: networkStatusMonitor,
+            startsNetworkMonitoring: startsNetworkMonitoring,
             legacyMemoryStore: legacyMemoryStore,
             legacyHistoryStore: legacyHistoryStore
         )
@@ -172,6 +183,62 @@ enum AppSyncStatus: Equatable {
             return .orange
         case .unavailable:
             return .red
+        }
+    }
+}
+
+enum AppNetworkStatus: Equatable {
+    case checking
+    case available(isExpensive: Bool, isConstrained: Bool)
+    case unavailable
+
+    var title: String {
+        switch self {
+        case .checking:
+            return "网络状态检测中"
+        case .available:
+            return "网络可用"
+        case .unavailable:
+            return "网络不可用"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .checking:
+            return "正在检测网络状态。本机收藏和搜索仍可使用。"
+        case .available(let isExpensive, let isConstrained):
+            if isConstrained {
+                return "当前处于低数据模式，同步和翻译可能由系统延后。本机收藏和搜索不受影响。"
+            }
+            if isExpensive {
+                return "当前可能使用蜂窝或热点网络，同步和翻译可能产生流量。本机收藏和搜索不受影响。"
+            }
+            return "网络可用于翻译请求和 iCloud 同步。本机数据仍会先写入本地存储。"
+        case .unavailable:
+            return "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .checking:
+            return "network"
+        case .available:
+            return "wifi"
+        case .unavailable:
+            return "wifi.slash"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .checking:
+            return .secondary
+        case .available:
+            return .secondary
+        case .unavailable:
+            return .orange
         }
     }
 }
@@ -426,6 +493,64 @@ final class AppDataChangeMonitor: ObservableObject, @unchecked Sendable {
 
     func recordExternalChange() {
         revision &+= 1
+    }
+}
+
+final class AppNetworkStatusMonitor: ObservableObject, @unchecked Sendable {
+    @Published private(set) var status: AppNetworkStatus
+
+    private let monitor: NWPathMonitor?
+    private let queue = DispatchQueue(label: "com.erikssonhou.wordscene.network-status")
+
+    init(
+        initialStatus: AppNetworkStatus = .checking,
+        startsMonitoring: Bool = false
+    ) {
+        status = initialStatus
+
+        guard startsMonitoring else {
+            monitor = nil
+            return
+        }
+
+        let monitor = NWPathMonitor()
+        self.monitor = monitor
+        monitor.pathUpdateHandler = { [weak self] path in
+            self?.record(path)
+        }
+        monitor.start(queue: queue)
+    }
+
+    deinit {
+        monitor?.cancel()
+    }
+
+    func record(_ path: NWPath) {
+        record(
+            pathStatus: path.status,
+            isExpensive: path.isExpensive,
+            isConstrained: path.isConstrained
+        )
+    }
+
+    func record(
+        pathStatus: NWPath.Status,
+        isExpensive: Bool = false,
+        isConstrained: Bool = false
+    ) {
+        let nextStatus: AppNetworkStatus
+        switch pathStatus {
+        case .satisfied:
+            nextStatus = .available(isExpensive: isExpensive, isConstrained: isConstrained)
+        case .unsatisfied, .requiresConnection:
+            nextStatus = .unavailable
+        @unknown default:
+            nextStatus = .checking
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.status = nextStatus
+        }
     }
 }
 

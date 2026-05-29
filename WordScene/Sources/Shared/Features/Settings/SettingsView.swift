@@ -139,6 +139,7 @@ struct SettingsView: View {
             Section("数据存储") {
                 persistenceStatusView
                 syncStatusView
+                NetworkStatusView(monitor: dataController.networkStatusMonitor)
                 SyncEventStatusView(monitor: dataController.syncEventMonitor)
                 recoveryStatusView
 
@@ -304,6 +305,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 persistenceStatusView
                 syncStatusView
+                NetworkStatusView(monitor: dataController.networkStatusMonitor)
                 SyncEventStatusView(monitor: dataController.syncEventMonitor)
 
                 Divider()
@@ -650,6 +652,23 @@ struct SettingsView: View {
 
 private struct SyncEventStatusView: View {
     @ObservedObject var monitor: CloudKitSyncEventMonitor
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(monitor.status.title, systemImage: monitor.status.systemImage)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(monitor.status.tint)
+
+            Text(monitor.status.message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct NetworkStatusView: View {
+    @ObservedObject var monitor: AppNetworkStatusMonitor
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

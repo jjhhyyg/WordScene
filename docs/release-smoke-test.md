@@ -123,9 +123,10 @@ Run on one Mac unsigned build and one iOS device with network disabled.
 1. Launch the app.
 2. Verify local-only mode is explicit when CloudKit entitlement or network state
    prevents sync.
-3. Create, favorite, search, and delete a local item.
-4. Relaunch and verify local data remains usable.
-5. Re-enable network and verify the app does not crash or silently discard local
+3. Verify Settings shows the current network availability state.
+4. Create, favorite, search, and delete a local item.
+5. Relaunch and verify local data remains usable.
+6. Re-enable network and verify the app does not crash or silently discard local
    work.
 
 Expected result:

@@ -39,6 +39,7 @@ Baseline already completed:
 - Settings observes Core Data CloudKit event notifications and surfaces waiting, success, and error states.
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
 - Library, Search, and Translate refresh local view state after persistent store remote-change notifications.
+- Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 
@@ -137,6 +138,7 @@ Deliverables:
 - Observe `NSPersistentCloudKitContainer` sync events so recent sync success and errors are visible.
 - Persist the latest CloudKit sync event locally so relaunch does not reset diagnostics to an unhelpful waiting state.
 - Refresh translation, library, and search screens after persistent store remote-change notifications so synced items can appear without relaunch.
+- Surface offline, constrained, and available network states in Settings without blocking local library/search usage.
 
 Verification:
 
@@ -145,6 +147,7 @@ Verification:
 - Runtime sync-mode selection tests for signed CloudKit and unsigned local-only processes.
 - Sync event status tests for waiting, success, and failure states.
 - Sync event persistence tests across monitor recreation and local-only mode.
+- Network status tests for offline local-availability messaging.
 - Model validation tests for CloudKit-compatible attributes.
 - Cross-device manual sync test after CloudKit entitlements and container are confirmed.
 - Completed release smoke evidence in `docs/release-smoke-test.md` for the target release candidate.
@@ -227,6 +230,8 @@ Verification:
 - Added a DeepSeek balance client test for the authenticated-but-unavailable token path and surfaced a specific Settings error message.
 - Added an app data change monitor for persistent store remote-change notifications and wired Translate, Library, and Search to reload local state when synced Core Data changes arrive.
 - Cleaned URLProtocol-backed networking tests to avoid Swift 6 data-race diagnostics on clean builds.
+- Added network availability monitoring in Settings so offline, constrained, and available states are explicit while local storage remains usable.
+- Added tests proving offline network status messaging preserves local library/search/delete availability.
 
 Next:
 

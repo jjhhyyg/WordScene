@@ -1,4 +1,5 @@
 import Combine
+import Network
 import XCTest
 @testable import WordScene
 
@@ -191,6 +192,27 @@ final class AppDataControllerTests: XCTestCase {
         }
 
         notificationCenter.post(name: .NSPersistentStoreRemoteChange, object: nil)
+
+        wait(for: [expectation], timeout: 1)
+        withExtendedLifetime(cancellable) {}
+    }
+
+    func testNetworkStatusExplainsOfflineLocalAvailability() {
+        let status = AppNetworkStatus.unavailable
+
+        XCTAssertEqual(status.title, "网络不可用")
+        XCTAssertTrue(status.message.contains("本机收藏、搜索和删除仍可使用"))
+    }
+
+    func testNetworkStatusMonitorPublishesOfflineChanges() {
+        let monitor = AppNetworkStatusMonitor(startsMonitoring: false)
+        let expectation = expectation(description: "network monitor publishes offline status")
+        let cancellable = monitor.$status.dropFirst().sink { status in
+            XCTAssertEqual(status, .unavailable)
+            expectation.fulfill()
+        }
+
+        monitor.record(pathStatus: .unsatisfied)
 
         wait(for: [expectation], timeout: 1)
         withExtendedLifetime(cancellable) {}
