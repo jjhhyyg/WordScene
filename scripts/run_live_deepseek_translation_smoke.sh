@@ -84,6 +84,31 @@ if [[ ! -f "$TOKEN_FILE" ]]; then
   exit 66
 fi
 
+worktree_status() {
+  if [[ -n "${WORDSCENE_LIVE_SMOKE_WORKTREE_STATUS+x}" ]]; then
+    printf '%s\n' "$WORDSCENE_LIVE_SMOKE_WORKTREE_STATUS"
+    return
+  fi
+
+  git -C "$ROOT" status --porcelain --untracked-files=normal
+}
+
+assert_clean_worktree_for_evidence() {
+  local status
+
+  if [[ -z "$EVIDENCE_FILE" ]]; then
+    return
+  fi
+
+  status="$(worktree_status)"
+  if [[ -n "$status" ]]; then
+    echo "DeepSeek live smoke evidence requires a clean git worktree. Commit or stash changes before recording evidence." >&2
+    exit 1
+  fi
+}
+
+assert_clean_worktree_for_evidence
+
 TOKEN="$(tr -d '\r\n[:space:]' <"$TOKEN_FILE")"
 if [[ -z "$TOKEN" ]]; then
   echo "DeepSeek token file is empty: $TOKEN_FILE" >&2

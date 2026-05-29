@@ -8,7 +8,10 @@ trap 'rm -rf "$TMPDIR"' EXIT
 BIN="$TMPDIR/bin"
 TOKEN_FILE="$TMPDIR/deepseek-token"
 LOG="$TMPDIR/curl.log"
+DIRTY_LOG="$TMPDIR/dirty-curl.log"
 EVIDENCE="$TMPDIR/release-smoke-evidence.md"
+DIRTY_EVIDENCE="$TMPDIR/dirty-release-smoke-evidence.md"
+ORIGINAL_DIRTY_EVIDENCE="$TMPDIR/original-dirty-release-smoke-evidence.md"
 mkdir -p "$BIN"
 printf 'test-token-secret\n' >"$TOKEN_FILE"
 cat >"$EVIDENCE" <<'MARKDOWN'
@@ -23,6 +26,8 @@ cat >"$EVIDENCE" <<'MARKDOWN'
 
 PRESERVED CANDIDATE EVIDENCE
 MARKDOWN
+cp "$EVIDENCE" "$DIRTY_EVIDENCE"
+cp "$DIRTY_EVIDENCE" "$ORIGINAL_DIRTY_EVIDENCE"
 
 cat >"$BIN/curl" <<'FAKE_CURL'
 #!/usr/bin/env bash
@@ -73,6 +78,7 @@ chmod +x "$BIN/curl"
 OUTPUT="$(
   PATH="$BIN:$PATH" \
     WORDSCENE_FAKE_CURL_LOG="$LOG" \
+    WORDSCENE_LIVE_SMOKE_WORKTREE_STATUS="" \
     "$ROOT/scripts/run_live_deepseek_translation_smoke.sh" \
       --token-file "$TOKEN_FILE" \
       --text "hello world" \
@@ -92,3 +98,19 @@ if grep -qF 'STALE LIVE ROW' "$EVIDENCE"; then
   echo "stale live evidence row was not replaced" >&2
   exit 1
 fi
+
+set +e
+PATH="$BIN:$PATH" \
+  WORDSCENE_FAKE_CURL_LOG="$DIRTY_LOG" \
+  WORDSCENE_LIVE_SMOKE_WORKTREE_STATUS=' M WordScene/Sources/Shared/Features/Translate/TranslationView.swift' \
+  "$ROOT/scripts/run_live_deepseek_translation_smoke.sh" \
+    --token-file "$TOKEN_FILE" \
+    --text "hello world" \
+    --evidence "$DIRTY_EVIDENCE" >"$TMPDIR/dirty.out" 2>"$TMPDIR/dirty.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'DeepSeek live smoke evidence requires a clean git worktree.' "$TMPDIR/dirty.err"
+! test -s "$DIRTY_LOG"
+cmp "$ORIGINAL_DIRTY_EVIDENCE" "$DIRTY_EVIDENCE" >/dev/null
