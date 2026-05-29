@@ -49,6 +49,7 @@ Baseline already completed:
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`, including unsigned Release compiles for macOS and iOS.
 - App Store privacy manifest coverage exists for app-local `UserDefaults` usage through `WordScene/Resources/PrivacyInfo.xcprivacy`.
+- Release readiness scans production source for Apple required-reason API categories so future API additions cannot silently drift from `PrivacyInfo.xcprivacy`.
 - Settings no longer exposes anonymous crash-reporting consent until a real crash-reporting service exists, so the visible privacy surface matches implemented behavior.
 - Project configuration and v2 design docs now match the implemented privacy surface: first release has no crash-diagnostics upload control.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
@@ -283,6 +284,7 @@ Verification:
 - Added `WordScene/Resources/PrivacyInfo.xcprivacy` with a `UserDefaults` required-reason declaration and wired a privacy manifest check into release readiness.
 - Removed the no-op anonymous crash-reporting toggle from Settings and added a privacy surface check to release readiness so visible privacy controls do not claim unimplemented telemetry behavior.
 - Updated `docs/project-config.md` and `docs/v2-design.md` to remove stale crash-reporting consent claims and keep release privacy documentation aligned with the implemented product.
+- Added `scripts/test_required_reason_api_scan.sh` and wired it into release readiness so production source usage of `UserDefaults` remains covered by the manifest and other required-reason API categories force an explicit manifest review before release.
 
 Next:
 

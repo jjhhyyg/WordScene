@@ -7,6 +7,7 @@ RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_LIVE_DEEPS
 CHECK_RELEASE_COMPLETION_TEST_SCRIPT="${WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT:-scripts/test_check_release_completion.sh}"
 PRIVACY_MANIFEST_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT:-scripts/test_privacy_manifest.sh}"
 PRIVACY_SURFACE_TEST_SCRIPT="${WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT:-scripts/test_privacy_surface.sh}"
+REQUIRED_REASON_API_SCAN_SCRIPT="${WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT:-scripts/test_required_reason_api_scan.sh}"
 
 run() {
   printf '\n==> %s\n' "$*"
@@ -57,6 +58,7 @@ run bash -n \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
   scripts/test_privacy_surface.sh \
+  scripts/test_required_reason_api_scan.sh \
   scripts/run_release_candidate_gate.sh \
   scripts/test_run_release_candidate_gate.sh \
   scripts/test_verify_release_readiness.sh \
@@ -68,6 +70,7 @@ run scripts/test_record_release_smoke_result.sh
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
 run "$PRIVACY_SURFACE_TEST_SCRIPT"
+run "$REQUIRED_REASON_API_SCAN_SCRIPT"
 run "$RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT"
 run "$RUN_CANDIDATE_GATE_TEST_SCRIPT"
 if [[ "${WORDSCENE_SKIP_READINESS_SELF_TEST:-0}" != "1" ]]; then
