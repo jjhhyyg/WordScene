@@ -25,6 +25,7 @@ Baseline already completed:
 - DeepSeek balance response decoder and tests.
 - DeepSeek token save/delete/test flow in Settings.
 - DeepSeek chat-completions translation loop in Translate.
+- Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
@@ -47,6 +48,7 @@ Deliverables:
 
 - Settings page loads, saves, deletes, and validates the DeepSeek token through Keychain.
 - Translate page reads the saved token and calls DeepSeek.
+- Code-level translation calls go through a provider abstraction instead of hard-coding DeepSeek directly into UI logic.
 - Translation request supports auto source language and concrete target language.
 - Swap remains disabled when source is auto-detect.
 - Result panel shows translating, translated text, missing-token, and failure states.
@@ -140,6 +142,7 @@ Verification:
 - Added a local ignored DeepSeek token file under `.local/`.
 - Implemented Keychain-backed DeepSeek token save/delete/test controls in Settings.
 - Implemented the DeepSeek chat-completions translation client with `deepseek-v4-flash` and non-thinking mode.
+- Refactored the translation client behind a `TranslationProvider` abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Implemented translation loading/success/error states in Translate.
 - Implemented local recent translation history backed by `UserDefaults`.
 - Added tests for DeepSeek translation response decoding and translation history persistence.
@@ -187,6 +190,7 @@ Verification:
 - Kept persistent history and remote-change notifications enabled for local fallback stores to avoid reopening an existing history-tracked SQLite store in read-only mode.
 - Made programmatic Core Data attributes CloudKit-compatible by allowing optional fields at the store layer while retaining domain-model defaults when reading.
 - Added tests for entitlement-based sync-mode selection, local fallback history tracking, and CloudKit model compatibility.
+- Added provider tests proving the OpenAI-compatible adapter builds the expected Chat Completions request and that the DeepSeek translation client delegates through the provider boundary.
 
 Next:
 
