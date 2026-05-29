@@ -34,8 +34,10 @@ struct SettingsImportExportController {
             existingItems: try memoryStore.loadOrThrow(),
             conflictStrategy: conflictPolicy.conflictStrategy
         )
-        try memoryStore.saveOrThrow(result.items)
-        changeRecorder()
+        if result.importedCount > 0 || result.replacedCount > 0 {
+            try memoryStore.saveOrThrow(result.items)
+            changeRecorder()
+        }
 
         return SettingsMemoryImportSummary(
             importedCount: result.importedCount,

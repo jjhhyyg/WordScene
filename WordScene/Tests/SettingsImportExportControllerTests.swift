@@ -125,4 +125,69 @@ final class SettingsImportExportControllerTests: XCTestCase {
 
         XCTAssertEqual(changeCount, 1)
     }
+
+    func testImportMemoryDoesNotSaveOrRecordChangeWhenAllIncomingItemsAreSkipped() throws {
+        let existingItem = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "keep me"
+        )
+        let duplicateItem = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "incoming"
+        )
+        let store = SpyMemoryLibraryDataStore(items: [existingItem])
+        let service = MemoryImportExportService()
+        var changeCount = 0
+        let controller = SettingsImportExportController(
+            memoryStore: store,
+            importExportService: service,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let data = try service.exportData(items: [duplicateItem])
+
+        let summary = try controller.importMemory(from: data, conflictPolicy: .keepExisting)
+
+        XCTAssertEqual(summary.importedCount, 0)
+        XCTAssertEqual(summary.replacedCount, 0)
+        XCTAssertEqual(summary.skippedCount, 1)
+        XCTAssertEqual(summary.totalCount, 1)
+        XCTAssertEqual(store.saveCount, 0)
+        XCTAssertEqual(changeCount, 0)
+        XCTAssertEqual(store.items, [existingItem])
+    }
+}
+
+private final class SpyMemoryLibraryDataStore: MemoryLibraryDataStore {
+    var items: [MemoryItem]
+    private(set) var saveCount = 0
+
+    init(items: [MemoryItem]) {
+        self.items = items
+    }
+
+    func load() -> [MemoryItem] {
+        items
+    }
+
+    func save(_ items: [MemoryItem]) {
+        saveCount += 1
+        self.items = items
+    }
+
+    func loadOrThrow() throws -> [MemoryItem] {
+        items
+    }
+
+    func saveOrThrow(_ items: [MemoryItem]) throws {
+        saveCount += 1
+        self.items = items
+    }
 }

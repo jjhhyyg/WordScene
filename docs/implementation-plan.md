@@ -44,6 +44,7 @@ Baseline already completed:
 - The latest CloudKit sync event is persisted locally so Settings can restore recent sync diagnostics after relaunch.
 - Library, Search, and Translate refresh local view state after persistent store remote-change notifications.
 - Settings import records local data changes so already loaded Library/Search/Translate views can refresh after an import.
+- Settings import skips persistence and change notifications when every incoming duplicate is skipped, avoiding fake local changes during keep-existing imports.
 - Memory library and recent-history repository writes record local data changes so already loaded Library/Search/Translate views can refresh after normal save/delete/history updates.
 - Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
 - Settings shows the app version, build number, and a smoke-test identifier so manual release evidence can be recorded from inside the app.
@@ -384,6 +385,7 @@ Verification:
 - Added `scripts/release_next_actions.sh` plus regression coverage so the next release action list can be generated from current evidence instead of being inferred manually from readiness and completion failures.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `c2a863bbade2`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `3b8578794fae`.
+- Tightened Settings import handling so a keep-existing import with only skipped duplicates does not rewrite the store or record a local data change; reran `scripts/verify_release_readiness.sh`.
 
 Next:
 
