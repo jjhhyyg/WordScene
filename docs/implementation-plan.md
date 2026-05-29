@@ -75,13 +75,15 @@ Baseline already completed:
 - Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
 - Manual smoke readiness now applies candidate and DeepSeek live-smoke freshness checks before printing READY rows or recording command templates.
 - Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
+- UI tests now launch with an isolated in-memory data stack and per-run `UserDefaults` suite, so existing simulator or developer app data cannot make initial Library/Search/Settings assertions flaky.
 
 Known gaps:
 
 - CloudKit/iCloud sync is wired at the store configuration and entitlement level, but cross-device sync still needs a signed-device smoke test.
 - macOS signed Release builds currently require a valid Xcode Apple Developer account session and a matching Mac App Development provisioning profile before smoke testing can start.
-- Import/export still needs a manual macOS and iOS smoke test before release.
-- The release smoke checklist exists, but its evidence table has not been filled for a signed release candidate yet.
+- iPhone/iPad translation, iOS/iPadOS import/export, iOS/iPadOS local recovery, and macOS/iOS local-only fallback smoke rows are READY to run, but still require real manual execution on the signed candidate or the documented unsigned Mac fallback path before PASS evidence can be recorded.
+- macOS translation, macOS import/export, macOS local recovery, and iCloud create/delete sync smoke rows are still WAITING on a PASS macOS signed candidate.
+- The release smoke checklist exists, but the manual evidence table has not been filled for the current release candidate yet.
 
 ## Milestone 1: Real Translation Loop
 
@@ -398,12 +400,16 @@ Verification:
 - Added iOS `remote-notification` background mode for CloudKit push notifications and a readiness check that verifies both `project.yml` and the generated Xcode project keep that setting.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; readiness now records iOS simulator tests and CloudKit background-mode validation, iOS candidate evidence points at commit `de1894ef8e57`, and macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `a04e8d9d3d4f`.
+- Added UI-test launch isolation so `-WordSceneUITest` starts from an in-memory Core Data store and a per-run `UserDefaults` suite instead of the developer or simulator app container.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordScene -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5' -derivedDataPath /tmp/WordSceneUITestIsolation CODE_SIGNING_ALLOWED=NO`; 89 unit tests and 2 UI tests passed.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b894a1f10876`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `f6985d0dfdaf` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Reran `scripts/release_next_actions.sh`; the current READY rows are `Translation loop / iPhone`, `Translation loop / iPad`, `Import/export / iOS/iPadOS`, `Local recovery / iOS/iPadOS`, and `Local-only fallback / macOS/iOS`; all macOS and iCloud rows that require a signed Mac candidate remain WAITING.
 
 Next:
 
-- Restore a valid Xcode Apple Developer account session and Mac App Development provisioning profile, then rerun `scripts/build_release_candidates.sh --allow-provisioning-updates --platform macos`.
-- After signing is restored, use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to regenerate release candidate evidence for both platforms.
-- Rerun `scripts/verify_release_readiness.sh` after any release-gate change and before manual smoke testing.
-- Execute `docs/release-smoke-test.md` on a signed release candidate and record evidence.
-- Run `scripts/check_release_completion.sh` after manual smoke evidence is complete.
+- Restore a valid Xcode Apple Developer account session and Mac App Development provisioning profile for team `JU68L3U235`, then rerun `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`.
+- Run the five READY smoke rows listed by `scripts/manual_smoke_readiness.sh --commands --summary`; do not record PASS rows from simulator-only checks because the release checklist requires a signed candidate or the documented unsigned Mac fallback.
+- After macOS signing is restored, run the macOS translation/import-export/recovery rows and the iCloud create/delete sync rows from `docs/release-smoke-test.md`.
+- Run `scripts/check_release_completion.sh` only after all required manual rows and both signed candidate builds have exactly one PASS row and no BLOCKED/FAIL rows remain.
 - Keep local-only mode fully usable while sync is being prepared.
