@@ -63,7 +63,13 @@ set -euo pipefail
 printf 'test_check_release_completion\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_COMPLETION_TEST
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion"
+cat >"$BIN/scripts-test-privacy-manifest" <<'FAKE_PRIVACY_MANIFEST_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_privacy_manifest\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_PRIVACY_MANIFEST_TEST
+
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion" "$BIN/scripts-test-privacy-manifest"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
@@ -71,12 +77,14 @@ PATH="$BIN:$PATH" \
   WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT="$BIN/scripts-test-run-release-candidate-gate" \
   WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT="$BIN/scripts-test-run-live-deepseek-translation-smoke" \
   WORDSCENE_TEST_CHECK_RELEASE_COMPLETION_SCRIPT="$BIN/scripts-test-check-release-completion" \
+  WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT="$BIN/scripts-test-privacy-manifest" \
   "$ROOT/scripts/verify_release_readiness.sh"
 
 grep -qF 'git diff --check' "$LOG"
 grep -qF 'test_run_release_candidate_gate' "$LOG"
 grep -qF 'test_run_live_deepseek_translation_smoke' "$LOG"
 grep -qF 'test_check_release_completion' "$LOG"
+grep -qF 'test_privacy_manifest' "$LOG"
 token_pattern='sk-[A-Za-z0-9]|e2a'
 token_pattern+='988'
 grep -qF "rg -n $token_pattern WordScene docs project.yml .gitignore scripts" "$LOG"

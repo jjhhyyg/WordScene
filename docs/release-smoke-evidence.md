@@ -3,7 +3,7 @@
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
 | DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-29T18:13:40Z using the ignored local token file, verified JSON Output with the real DeepSeek API, and returned `你好世界` without printing the token. |
-| Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |
 | Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform. |
 
 ## Release Candidate Build Blocker
@@ -14,7 +14,7 @@
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-29T18:40:02Z
+Generated: 2026-05-29T18:55:07Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -28,3 +28,4 @@ Generated: 2026-05-29T18:40:02Z
 | iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |
 | CloudKit containers | iCloud.com.erikssonhou.leximemory |
 | iCloud services | CloudKit |
+| Privacy manifest | UserDefaults: CA92.1 |

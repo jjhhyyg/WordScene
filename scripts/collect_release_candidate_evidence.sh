@@ -65,8 +65,10 @@ if [[ ! -d "$APP" ]]; then
 fi
 
 INFO_PLIST="$APP/Info.plist"
+PRIVACY_MANIFEST="$APP/PrivacyInfo.xcprivacy"
 if [[ "$PLATFORM" == "macos" ]]; then
   INFO_PLIST="$APP/Contents/Info.plist"
+  PRIVACY_MANIFEST="$APP/Contents/Resources/PrivacyInfo.xcprivacy"
 fi
 
 if [[ ! -f "$INFO_PLIST" ]]; then
@@ -135,12 +137,38 @@ entitlement_array_csv() {
   plist_array_csv "$ENTITLEMENTS" "$key" "missing"
 }
 
+privacy_manifest_summary() {
+  local manifest="$1"
+  if [[ ! -f "$manifest" ]]; then
+    printf 'missing\n'
+    return
+  fi
+
+  local api_type
+  local reasons
+  api_type="$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPIType' "$manifest" 2>/dev/null || true)"
+  reasons="$(plist_array_csv "$manifest" 'NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPITypeReasons' 'missing')"
+
+  case "$api_type" in
+    NSPrivacyAccessedAPICategoryUserDefaults)
+      printf 'UserDefaults: %s\n' "$reasons"
+      ;;
+    "")
+      printf 'missing\n'
+      ;;
+    *)
+      printf '%s: %s\n' "$api_type" "$reasons"
+      ;;
+  esac
+}
+
 BUNDLE_ID="$(plist_value "$INFO_PLIST" CFBundleIdentifier missing)"
 VERSION="$(plist_value "$INFO_PLIST" CFBundleShortVersionString missing)"
 BUILD="$(plist_value "$INFO_PLIST" CFBundleVersion missing)"
 IPAD_ORIENTATIONS="$(plist_array_csv "$INFO_PLIST" 'UISupportedInterfaceOrientations~ipad' 'missing')"
 CLOUDKIT_CONTAINERS="$(entitlement_array_csv 'com.apple.developer.icloud-container-identifiers')"
 ICLOUD_SERVICES="$(entitlement_array_csv 'com.apple.developer.icloud-services')"
+PRIVACY_MANIFEST_SUMMARY="$(privacy_manifest_summary "$PRIVACY_MANIFEST")"
 TIMESTAMP="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 PLATFORM_LABEL="$([[ "$PLATFORM" == "ios" ]] && printf 'iOS' || printf 'macOS')"
 
@@ -162,6 +190,7 @@ Generated: $TIMESTAMP
 | iPad orientations | $IPAD_ORIENTATIONS |
 | CloudKit containers | $CLOUDKIT_CONTAINERS |
 | iCloud services | $ICLOUD_SERVICES |
+| Privacy manifest | $PRIVACY_MANIFEST_SUMMARY |
 EOF
 )"
 

@@ -48,6 +48,7 @@ Baseline already completed:
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`, including unsigned Release compiles for macOS and iOS.
+- App Store privacy manifest coverage exists for app-local `UserDefaults` usage through `WordScene/Resources/PrivacyInfo.xcprivacy`.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
@@ -277,6 +278,7 @@ Verification:
 - Added unsigned macOS and iOS Release compile checks to `scripts/verify_release_readiness.sh` so Release-only conditional compilation is covered before signed candidate smoke testing.
 - Updated the release candidate gate to rerun release readiness and replace stale non-manual gate evidence before recording candidate build evidence or signing blockers.
 - Added `scripts/check_release_completion.sh` plus a shell regression test so the release cannot be called complete until signed candidate builds, manual smoke rows, iCloud create/delete sync, and local-only fallback all have PASS evidence with no BLOCKED/FAIL rows remaining.
+- Added `WordScene/Resources/PrivacyInfo.xcprivacy` with a `UserDefaults` required-reason declaration and wired a privacy manifest check into release readiness.
 
 Next:
 

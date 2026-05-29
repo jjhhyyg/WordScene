@@ -141,7 +141,7 @@ fi
 grep -qF 'PRESERVED MANUAL EVIDENCE' "$EVIDENCE"
 grep -qF 'PRESERVED LIVE EVIDENCE' "$EVIDENCE"
 grep -qF '## Non-Manual Release Gate' "$EVIDENCE"
-grep -qF '| Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |' "$EVIDENCE"
+grep -qF '| Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, XcodeGen version-marker scan, macOS tests, iOS generic build, and unsigned macOS/iOS Release compiles. |' "$EVIDENCE"
 grep -qF '| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform. |' "$EVIDENCE"
 grep -qF '| Candidate build | ios | local build host | 1 | PASS |' "$EVIDENCE"
 grep -qF '| Candidate build | macOS | local build host | 1 | BLOCKED |' "$EVIDENCE"

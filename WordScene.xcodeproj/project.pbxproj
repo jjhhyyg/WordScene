@@ -29,6 +29,7 @@
 		261538CC6268D556FF32E9AA /* TranslationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372CB65BBB01171BE108F83E /* TranslationView.swift */; };
 		266ACE20C07FC4780D9E87C6 /* TranslationHistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE85772F6048138E153C124 /* TranslationHistoryStoreTests.swift */; };
 		2820F677E928FD959E601CC4 /* DeepSeekTranslationResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */; };
+		2BB75C7F3580296B3F664533 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */; };
 		3417254A726A1308C0B0DD66 /* WordSceneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */; };
 		3592CEE5F9506FF06612E915 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BAF2CB4697677551219CBB /* RootView.swift */; };
 		39C00451F4E5C6C7CB6C1CCF /* MemoryImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */; };
@@ -77,6 +78,7 @@
 		B496C9CBBEAC38EA4F3E8E33 /* TranslationRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */; };
 		B932D7127D7C1EF2DD043CD3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 90DB37BC6A6D92D6B7DEF9BF /* Assets.xcassets */; };
 		B96FA72ACC684B146879D2A3 /* TranslationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372CB65BBB01171BE108F83E /* TranslationView.swift */; };
+		BC504BA40DF313394019842F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */; };
 		BDFAED11B6771D1197923B93 /* AppDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00EA37578F51C218C5DBC3 /* AppDataController.swift */; };
 		C65D6718A9324DEC7B39CDDA /* LocalPersistenceRecoveryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F61FD2185A224582098C586 /* LocalPersistenceRecoveryControllerTests.swift */; };
 		C765D91811294F1FF8736585 /* CoreDataMemoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A549AC5C802B87B3E2F4F7 /* CoreDataMemoryStoreTests.swift */; };
@@ -154,6 +156,7 @@
 		9C12FD3785C7C960302258E6 /* DeepSeekTranslationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekTranslationClient.swift; sourceTree = "<group>"; };
 		A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryRepository.swift; sourceTree = "<group>"; };
 		A326C54DE9B73BA7405FCB32 /* SettingsImportExportControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImportExportControllerTests.swift; sourceTree = "<group>"; };
+		BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C040CEEF155F11CC214D80B6 /* MemoryLibraryRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryRepositoryTests.swift; sourceTree = "<group>"; };
 		C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryStore.swift; sourceTree = "<group>"; };
 		C3B8777AC3DD498942C3FA17 /* AppSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSection.swift; sourceTree = "<group>"; };
@@ -173,6 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				90DB37BC6A6D92D6B7DEF9BF /* Assets.xcassets */,
+				BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */,
 				AE08FE29942FCE024F26EBBA /* Brand */,
 			);
 			name = Resources;
@@ -461,6 +465,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				061E4D2504C5784EE78F29A0 /* Assets.xcassets in Resources */,
+				2BB75C7F3580296B3F664533 /* PrivacyInfo.xcprivacy in Resources */,
 				9F26440D8AF5ACF3CDC08D1C /* WordSceneLogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -470,6 +475,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B932D7127D7C1EF2DD043CD3 /* Assets.xcassets in Resources */,
+				BC504BA40DF313394019842F /* PrivacyInfo.xcprivacy in Resources */,
 				882949E983224EB9D2AF5600 /* WordSceneLogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

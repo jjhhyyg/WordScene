@@ -19,6 +19,26 @@ mkdir -p "$APP"
 /usr/libexec/PlistBuddy -c 'Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft' "$APP/Info.plist"
 /usr/libexec/PlistBuddy -c 'Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight' "$APP/Info.plist"
 
+cat >"$APP/PrivacyInfo.xcprivacy" <<'PRIVACY_MANIFEST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
+PRIVACY_MANIFEST
+
 /usr/libexec/PlistBuddy -c 'Clear dict' "$ENTITLEMENTS" >/dev/null 2>&1 || true
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-container-identifiers array' "$ENTITLEMENTS"
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-container-identifiers:0 string iCloud.com.erikssonhou.leximemory' "$ENTITLEMENTS"
@@ -34,3 +54,4 @@ grep -qF '| Build | 1 |' <<<"$OUTPUT"
 grep -qF '| iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |' <<<"$OUTPUT"
 grep -qF '| CloudKit containers | iCloud.com.erikssonhou.leximemory |' <<<"$OUTPUT"
 grep -qF '| iCloud services | CloudKit |' <<<"$OUTPUT"
+grep -qF '| Privacy manifest | UserDefaults: CA92.1 |' <<<"$OUTPUT"

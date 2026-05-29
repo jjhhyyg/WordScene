@@ -1,6 +1,7 @@
 name: WordScene
 options:
   bundleIdPrefix: com.erikssonhou
+  xcodeVersion: "26.5"
   deploymentTarget:
     iOS: "18.0"
     macOS: "15.0"
