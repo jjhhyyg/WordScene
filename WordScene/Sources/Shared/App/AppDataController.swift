@@ -30,8 +30,11 @@ struct AppDataController {
             startsMonitoring: startsNetworkMonitoring
         )
         let coreDataStore: CoreDataMemoryStore?
+        let makePrimaryCoreDataStore = coreDataStoreFactory ?? {
+            try CoreDataMemoryStore(syncMode: syncMode)
+        }
         do {
-            coreDataStore = try (coreDataStoreFactory ?? { try CoreDataMemoryStore(syncMode: syncMode) })()
+            coreDataStore = try makePrimaryCoreDataStore()
             persistenceStatus = .coreDataAvailable(syncMode: syncMode)
             syncStatus = AppSyncStatus(syncMode: syncMode)
             syncEventMonitor = CloudKitSyncEventMonitor(
@@ -40,15 +43,41 @@ struct AppDataController {
             )
             dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
         } catch {
-            let reason = Self.failureReason(for: error)
-            coreDataStore = nil
-            persistenceStatus = .legacyFallback(reason: reason)
-            syncStatus = .unavailable(reason: reason)
-            syncEventMonitor = CloudKitSyncEventMonitor(
-                syncStatus: syncStatus,
-                eventStore: syncEventStore
-            )
-            dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
+            if case .cloudKit = syncMode {
+                let makeLocalCoreDataStore = coreDataStoreFactory ?? {
+                    try CoreDataMemoryStore(syncMode: .localOnly)
+                }
+                do {
+                    coreDataStore = try makeLocalCoreDataStore()
+                    persistenceStatus = .coreDataAvailable(syncMode: .localOnly)
+                    syncStatus = .localOnly
+                    syncEventMonitor = CloudKitSyncEventMonitor(
+                        syncStatus: syncStatus,
+                        eventStore: syncEventStore
+                    )
+                    dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
+                } catch {
+                    let reason = Self.failureReason(for: error)
+                    coreDataStore = nil
+                    persistenceStatus = .legacyFallback(reason: reason)
+                    syncStatus = .unavailable(reason: reason)
+                    syncEventMonitor = CloudKitSyncEventMonitor(
+                        syncStatus: syncStatus,
+                        eventStore: syncEventStore
+                    )
+                    dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
+                }
+            } else {
+                let reason = Self.failureReason(for: error)
+                coreDataStore = nil
+                persistenceStatus = .legacyFallback(reason: reason)
+                syncStatus = .unavailable(reason: reason)
+                syncEventMonitor = CloudKitSyncEventMonitor(
+                    syncStatus: syncStatus,
+                    eventStore: syncEventStore
+                )
+                dataChangeMonitor = AppDataChangeMonitor(notificationCenter: dataChangeNotificationCenter)
+            }
         }
 
         memoryLibrary = MemoryLibraryRepository(

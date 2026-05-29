@@ -345,6 +345,8 @@ Verification:
 - Added regression coverage for same-language direction normalization and reran `scripts/verify_release_readiness.sh`; release script tests, token leak scan, 81 macOS tests, iOS build, and unsigned Release compiles still pass after the language control fix.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `a9cb05318888`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `632fc6004711`.
+- Added a Core Data local-only retry path when CloudKit-mode store bootstrap fails, so signed or entitlement/account-problem builds keep the primary local store usable before falling back to legacy JSON storage.
+- Added regression coverage proving a CloudKit bootstrap failure retries Core Data local-only and still supports local library writes.
 
 Next:
 

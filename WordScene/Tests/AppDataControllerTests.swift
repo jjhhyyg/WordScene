@@ -112,6 +112,34 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(controller.syncStatus.title, "同步不可用")
     }
 
+    func testCloudKitBootstrapFailureRetriesCoreDataLocalOnlyBeforeLegacyFallback() throws {
+        var bootstrapAttempts = 0
+        let localStore = try CoreDataMemoryStore(inMemory: true)
+        let controller = AppDataController(
+            coreDataStoreFactory: {
+                bootstrapAttempts += 1
+                if bootstrapAttempts == 1 {
+                    throw StoreBootstrapError.unavailable
+                }
+                return localStore
+            },
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
+        let item = MemoryItem(
+            sourceText: "offline",
+            translatedText: "离线",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+
+        try controller.memoryLibrary.saveOrThrow([item])
+
+        XCTAssertEqual(bootstrapAttempts, 2)
+        XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable(syncMode: .localOnly))
+        XCTAssertEqual(controller.syncStatus, .localOnly)
+        XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [item])
+    }
+
     func testReportsLocalOnlySyncStatusWhenCloudKitIsNotAvailable() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(
