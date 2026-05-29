@@ -90,4 +90,20 @@ run xcodebuild build \
   -derivedDataPath /tmp/WordSceneVerifyIOS \
   CODE_SIGNING_ALLOWED=NO
 
+run xcodebuild build \
+  -project WordScene.xcodeproj \
+  -scheme WordSceneMac \
+  -configuration Release \
+  -destination 'platform=macOS' \
+  -derivedDataPath /tmp/WordSceneVerifyReleaseMac \
+  CODE_SIGNING_ALLOWED=NO
+
+run xcodebuild build \
+  -project WordScene.xcodeproj \
+  -scheme WordScene \
+  -configuration Release \
+  -destination 'generic/platform=iOS' \
+  -derivedDataPath /tmp/WordSceneVerifyReleaseIOS \
+  CODE_SIGNING_ALLOWED=NO
+
 printf '\nRelease readiness checks passed for non-manual gates.\n'
