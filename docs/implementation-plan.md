@@ -62,6 +62,7 @@ Baseline already completed:
 - Release candidate gate refuses to generate evidence from a dirty worktree so candidate commit metadata stays reproducible.
 - macOS signing recovery steps are documented in `docs/release-signing-runbook.md`.
 - Release signing failures can be classified through `scripts/diagnose_release_signing.sh`.
+- Release signing diagnosis defaults to the latest release-candidate log under `/tmp/WordSceneReleaseCandidates/logs`, so the current blocker can be classified without copying the log path.
 - Manual smoke results can be recorded consistently through `scripts/record_release_smoke_result.sh`.
 - Manual smoke recording rejects non-canonical Area/Platform pairs so typos cannot create evidence rows ignored by release completion.
 - Manual smoke recording requires current release candidate Git metadata before writing evidence rows.
@@ -405,6 +406,10 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b894a1f10876`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `f6985d0dfdaf` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Reran `scripts/release_next_actions.sh`; the current READY rows are `Translation loop / iPhone`, `Translation loop / iPad`, `Import/export / iOS/iPadOS`, `Local recovery / iOS/iPadOS`, and `Local-only fallback / macOS/iOS`; all macOS and iCloud rows that require a signed Mac candidate remain WAITING.
+- Updated `scripts/diagnose_release_signing.sh` so `--platform macos` defaults to `/tmp/WordSceneReleaseCandidates/logs/macos-release-candidate.log`, added regression coverage, and clarified the default-log behavior in `docs/release-signing-runbook.md`.
+- Reran `scripts/verify_release_readiness.sh`; script self-tests, token leak scan, 88 macOS tests, 89 iOS unit tests, 2 iOS UI tests, iOS generic build, and unsigned macOS/iOS Release builds passed.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `f381a0eaf4ae`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `5af837195bd9` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
