@@ -27,7 +27,7 @@
 - 使用独立本地搜索索引做全文检索。
 - 支持删除后的多端同步删除。
 - 支持 JSON 导入导出，用于用户主动备份和恢复。
-- Release build 保留匿名崩溃日志能力，并另写隐私说明；第一版预留用户选择接口。
+- 第一版不接入崩溃诊断上传，也不显示相关开关；未来接入前必须先补齐隐私说明和用户控制。
 - iOS 26 及以上默认采用系统 Liquid Glass/液态玻璃视觉能力。
 - iOS、iPadOS、macOS 共享核心能力，但界面按平台优化。
 
@@ -188,7 +188,7 @@ iOS 重点是快速输入、快速翻译、快速收藏、快速搜索。
 - DeepSeek API Token 单独一节。
 - DeepSeek 模型固定显示为 `deepseek-v4-flash`，base URL 固定显示为 `https://api.deepseek.com`，不可编辑。
 - API 连通性测试单独一行，调用 `GET https://api.deepseek.com/user/balance`，根据 `is_available` 判断 Token 是否可用于 API 调用。
-- 导入导出、安全设置、匿名崩溃日志设置分组展示。
+- 导入导出和安全设置分组展示。
 - Debug build 可显示 RawAPIResponse 调试开关；Release build 不显示也不保存原始响应。
 
 ### 4.4 iPadOS 界面
@@ -330,10 +330,10 @@ SyncStateService
   - 暴露 iCloud 可用性
   - 暴露最近同步时间
 
-CrashLogConsentService
-  - 保存用户是否允许匿名崩溃日志上传
-  - 第一版只预留设置项和隐私说明
-  - 后续发布后再接入自动上传链路
+DiagnosticsPrivacyService
+  - 第一版不接入崩溃诊断上传
+  - 不在设置页显示无实现的诊断开关
+  - 未来接入自动上传前，必须补齐隐私说明、内容范围和关闭方式
 ```
 
 ## 6. 数据模型设计
@@ -1220,16 +1220,16 @@ duplicateKey = sha256(
 
 导出文件包含用户收藏内容，可能有隐私风险。第一版不支持加密导出，导出前必须提示用户妥善保管文件。
 
-### 12.4 匿名崩溃日志
+### 12.4 崩溃诊断
 
-Release build 保留匿名崩溃日志能力，并另写隐私说明。
+第一版不接入崩溃诊断上传，也不显示相关开关。
 
 第一版要求：
 
-- 预留用户选择接口，例如“允许发送匿名崩溃日志”。
-- 默认是否开启需要在隐私说明中明确；若不能确定，建议默认关闭。
-- 崩溃日志不得包含 API Token、用户原文、译文、RawAPIResponse、导出文件内容。
-- 如果未来接入自动上传，需要在 App 内隐私说明中明确收集目的、内容范围、关闭方式。
+- 不在隐私页放置没有后端实现的诊断上传控制。
+- 不收集、上传或导出崩溃诊断数据。
+- 如果未来接入自动上传，需要先在 App 内隐私说明中明确收集目的、内容范围、关闭方式，并补充用户控制。
+- 任何诊断数据都不得包含 API Token、用户原文、译文、RawAPIResponse、导出文件内容。
 - 第一版不实现 Face ID / Touch ID 应用锁。
 
 ## 13. 非功能需求
@@ -1314,7 +1314,7 @@ Release build 保留匿名崩溃日志能力，并另写隐私说明。
 - 第一版不做 Face ID / Touch ID 应用锁。
 - RawAPIResponse 只在 Debug build 保存。
 - Release build 不保存 RawAPIResponse。
-- Release build 预留匿名崩溃日志设置和隐私说明。
+- Release build 不显示无实现的崩溃诊断上传开关。
 
 ### 14.7 视觉兼容
 
@@ -1330,7 +1330,7 @@ Release build 保留匿名崩溃日志能力，并另写隐私说明。
 - SwiftUI multiplatform target。
 - Core Data + CloudKit container。
 - Keychain credential service。
-- 匿名崩溃日志用户选择接口预留。
+- 隐私页只展示已实现的本机敏感数据边界。
 - 基础设置页。
 
 ### M2: DeepSeek 翻译链路
@@ -1396,7 +1396,7 @@ Release build 保留匿名崩溃日志能力，并另写隐私说明。
 - 标签支持用户删除和修改。
 - 导出不支持加密。
 - RawAPIResponse 只在 Debug build 保存。
-- Release build 保留匿名崩溃日志能力，另写隐私说明，预留用户选择接口。
+- Release build 不保存 RawAPIResponse，也不显示无实现的诊断上传开关。
 - 第一版只支持全量导入和全量导出。
 - iOS 26 及以上默认采用系统 Liquid Glass/液态玻璃视觉能力。
 - Provider 增加 OpenAI-compatible Chat Completions 通用适配器。
