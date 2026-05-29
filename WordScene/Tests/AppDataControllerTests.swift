@@ -19,6 +19,32 @@ final class AppDataControllerTests: XCTestCase {
         return defaults
     }
 
+    func testUITestLaunchUsesIsolatedEmptyStores() throws {
+        let suiteName = "WordSceneUITests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        try MemoryLibraryStore(defaults: defaults).saveOrThrow([
+            MemoryItem(
+                sourceText: "stale",
+                translatedText: "旧数据",
+                sourceLanguage: .en,
+                targetLanguage: .zh
+            )
+        ])
+
+        let controller = AppDataController.liveForProcess(
+            arguments: ["WordScene", "-WordSceneUITest"],
+            environment: ["WORDSCENE_UI_TEST_SUITE": suiteName]
+        )
+
+        XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [])
+        XCTAssertEqual(try controller.translationHistory.loadOrThrow(), [])
+        XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable(syncMode: .localOnly))
+        XCTAssertEqual(controller.syncStatus, .localOnly)
+    }
+
     func testRepositoriesShareInjectedCoreDataStore() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(coreDataStore: coreDataStore)

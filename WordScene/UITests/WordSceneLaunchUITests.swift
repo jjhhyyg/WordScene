@@ -8,6 +8,7 @@ final class WordSceneLaunchUITests: XCTestCase {
 
         app = XCUIApplication()
         app.launchArguments.append("-WordSceneUITest")
+        app.launchEnvironment["WORDSCENE_UI_TEST_SUITE"] = "WordSceneUITests.\(UUID().uuidString)"
         app.launch()
     }
 

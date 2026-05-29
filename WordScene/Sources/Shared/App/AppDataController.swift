@@ -3,7 +3,7 @@ import Network
 import SwiftUI
 
 struct AppDataController {
-    nonisolated(unsafe) static let live = AppDataController(startsNetworkMonitoring: true)
+    nonisolated(unsafe) static let live = liveForProcess()
 
     let memoryLibrary: MemoryLibraryRepository
     let translationHistory: TranslationHistoryRepository
@@ -126,6 +126,44 @@ struct AppDataController {
     private static func failureReason(for error: Error) -> String {
         let message = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         return message.isEmpty ? String(describing: error) : message
+    }
+
+    static func liveForProcess(
+        arguments: [String] = ProcessInfo.processInfo.arguments,
+        environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> AppDataController {
+        guard arguments.contains("-WordSceneUITest") else {
+            return AppDataController(startsNetworkMonitoring: true)
+        }
+
+        let suiteName = environment["WORDSCENE_UI_TEST_SUITE"] ?? "WordSceneUITests"
+        let userDefaults = UserDefaults(suiteName: suiteName) ?? .standard
+        userDefaults.removePersistentDomain(forName: suiteName)
+
+        let coreDataStore = try? CoreDataMemoryStore(inMemory: true)
+        let legacyMemoryStore = MemoryLibraryStore(defaults: userDefaults)
+        let legacyHistoryStore = TranslationHistoryStore(defaults: userDefaults)
+        let syncEventStore = CloudKitSyncEventStore(userDefaults: userDefaults)
+        let localDocumentRecovery = LocalPersistenceRecoveryController(defaults: userDefaults)
+
+        if let coreDataStore {
+            return AppDataController(
+                coreDataStore: coreDataStore,
+                syncEventStore: syncEventStore,
+                legacyMemoryStore: legacyMemoryStore,
+                legacyHistoryStore: legacyHistoryStore,
+                localDocumentRecovery: localDocumentRecovery
+            )
+        }
+
+        return AppDataController(
+            coreDataStoreFactory: { throw CocoaError(.persistentStoreOpen) },
+            syncMode: .localOnly,
+            syncEventStore: syncEventStore,
+            legacyMemoryStore: legacyMemoryStore,
+            legacyHistoryStore: legacyHistoryStore,
+            localDocumentRecovery: localDocumentRecovery
+        )
     }
 }
 
