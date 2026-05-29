@@ -9,6 +9,7 @@ CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 EVIDENCE="$TMPDIR/release-smoke-evidence.md"
 MISSING_CANDIDATE_EVIDENCE="$TMPDIR/missing-candidate-evidence.md"
 STALE_CANDIDATE_EVIDENCE="$TMPDIR/stale-candidate-evidence.md"
+IOS_ONLY_CANDIDATE_EVIDENCE="$TMPDIR/ios-only-candidate-evidence.md"
 
 cat >"$EVIDENCE" <<EVIDENCE_MD
 ## Non-Manual Release Gate
@@ -139,6 +140,48 @@ set -e
 
 test "$status" -eq 1
 grep -qF "Manual smoke evidence requires current release candidate metadata: evidence 000000000000, current $CURRENT_COMMIT." "$TMPDIR/stale-candidate.err"
+
+cat >"$IOS_ONLY_CANDIDATE_EVIDENCE" <<IOS_ONLY_MD
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | iOS | local build host | 1 | PASS | signed iOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Git commit | $CURRENT_COMMIT |
+IOS_ONLY_MD
+
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "iPhone" \
+  --device "iPhone 17 Pro Max / iOS 26.0" \
+  --build "1" \
+  --result "PASS" \
+  --notes "iPhone smoke can use the iOS candidate."
+
+grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | iPhone smoke can use the iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
+
+set +e
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro" \
+  --build "1" \
+  --result "PASS" \
+  --notes "macOS smoke should require a macOS candidate." >"$TMPDIR/missing-macos-build.out" 2>"$TMPDIR/missing-macos-build.err"
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Manual smoke evidence requires PASS candidate build evidence for: macOS.' "$TMPDIR/missing-macos-build.err"
+if grep -qF '| Translation loop | macOS |' "$IOS_ONLY_CANDIDATE_EVIDENCE"; then
+  echo "record_release_smoke_result should not write macOS smoke rows without macOS candidate evidence" >&2
+  exit 1
+fi
 
 set +e
 "$ROOT/scripts/record_release_smoke_result.sh" \

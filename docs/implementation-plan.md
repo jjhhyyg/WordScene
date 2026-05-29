@@ -60,6 +60,7 @@ Baseline already completed:
 - Manual smoke results can be recorded consistently through `scripts/record_release_smoke_result.sh`.
 - Manual smoke recording rejects non-canonical Area/Platform pairs so typos cannot create evidence rows ignored by release completion.
 - Manual smoke recording requires current release candidate Git metadata before writing evidence rows.
+- Manual smoke recording requires PASS release candidate build evidence for the platform being tested.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion rejects stale candidate Git commit metadata when evidence does not match the current repository HEAD.
@@ -302,6 +303,7 @@ Verification:
 - Hardened `scripts/check_release_completion.sh` so candidate build evidence must match the current repository HEAD, preventing stale signed-build evidence from making a changed tree look releasable.
 - Hardened `scripts/run_release_candidate_gate.sh` so signed candidate evidence cannot be generated while the git worktree has uncommitted changes.
 - Hardened `scripts/record_release_smoke_result.sh` so manual smoke rows cannot be recorded unless release candidate evidence exists for the current repository HEAD.
+- Hardened `scripts/record_release_smoke_result.sh` so platform-specific manual smoke rows require matching PASS candidate build evidence before they can be recorded.
 
 Next:
 

@@ -149,6 +149,65 @@ assert_current_candidate_metadata() {
   fi
 }
 
+required_candidate_platforms() {
+  case "$1|$2" in
+    "Translation loop|macOS" | \
+    "Import/export|macOS" | \
+    "Local recovery|macOS")
+      printf 'macOS\n'
+      ;;
+    "Translation loop|iPhone" | \
+    "Translation loop|iPad" | \
+    "Import/export|iOS/iPadOS" | \
+    "Local recovery|iOS/iPadOS")
+      printf 'iOS\n'
+      ;;
+    "iCloud create sync|iPhone + macOS" | \
+    "iCloud delete sync|iPhone + macOS" | \
+    "Local-only fallback|macOS/iOS")
+      printf 'macOS\n'
+      printf 'iOS\n'
+      ;;
+  esac
+}
+
+has_pass_candidate_build() {
+  local platform="$1"
+
+  awk -F'|' -v expected_platform="$platform" '
+    function trim(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      return value
+    }
+    trim($2) == "Candidate build" &&
+    trim($3) == expected_platform &&
+    trim($6) == "PASS" {
+      found = 1
+    }
+    END {
+      exit(found == 1 ? 0 : 1)
+    }
+  ' "$EVIDENCE_FILE"
+}
+
+assert_required_candidate_builds() {
+  local missing=()
+  local platform
+
+  while IFS= read -r platform; do
+    if [[ -n "$platform" ]] && ! has_pass_candidate_build "$platform"; then
+      missing+=("$platform")
+    fi
+  done < <(required_candidate_platforms "$AREA_CELL" "$PLATFORM_CELL")
+
+  if [[ "${#missing[@]}" -gt 0 ]]; then
+    local joined
+    joined="$(IFS=', '; printf '%s' "${missing[*]}")"
+    echo "Manual smoke evidence requires PASS candidate build evidence for: $joined." >&2
+    exit 1
+  fi
+}
+
 ensure_section() {
   if grep -qF '## Manual Smoke Evidence' "$EVIDENCE_FILE"; then
     return
@@ -190,6 +249,7 @@ ERROR
 fi
 
 assert_current_candidate_metadata
+assert_required_candidate_builds
 
 ensure_section
 

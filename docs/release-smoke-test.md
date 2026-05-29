@@ -180,6 +180,9 @@ as `iPadOS` instead of `iOS/iPadOS` are rejected before they create evidence
 rows that the completion audit cannot count. It also requires release candidate
 metadata for the current repository HEAD before writing manual rows, so run the
 candidate gate again after any code change and before recording smoke results.
+Each manual row must also have PASS candidate build evidence for the platform it
+tests: macOS rows require a macOS candidate, iPhone/iPad rows require an iOS
+candidate, and iCloud/local-only cross-platform rows require both.
 Recording the same `Area` and `Platform` again replaces the stale manual row,
 so a retest can move a row from `BLOCKED` or `FAIL` to the current result
 without leaving contradictory evidence behind:
