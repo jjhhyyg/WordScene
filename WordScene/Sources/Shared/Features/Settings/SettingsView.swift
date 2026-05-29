@@ -33,6 +33,7 @@ struct SettingsView: View {
     private var recoveryController: LocalPersistenceRecoveryController {
         dataController.localDocumentRecovery
     }
+    private let appBuildInfo = AppBuildInfo.current()
 
     var body: some View {
         Group {
@@ -89,6 +90,7 @@ struct SettingsView: View {
                 if usesTwoColumnSettings {
                     LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
                         deepSeekCard
+                        appInfoCard
                         persistenceStatusCard
                         privacyCard
                         importExportCard
@@ -96,6 +98,7 @@ struct SettingsView: View {
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
                         deepSeekCard
+                        appInfoCard
                         persistenceStatusCard
                         privacyCard
                         importExportCard
@@ -156,6 +159,12 @@ struct SettingsView: View {
                     Spacer()
                     localRecoveryButtons
                 }
+            }
+
+            Section("关于") {
+                settingValueRow("版本", value: appBuildInfo.version)
+                settingValueRow("构建", value: appBuildInfo.build)
+                settingValueRow("验收标识", value: appBuildInfo.smokeTestDisplayValue)
             }
 
             Section("导入导出") {
@@ -292,6 +301,18 @@ struct SettingsView: View {
             .accessibilityLabel("删除 DeepSeek Token")
         }
         .controlSize(.large)
+    }
+
+    private var appInfoCard: some View {
+        SettingsCard(title: "关于", systemImage: "info.circle") {
+            VStack(alignment: .leading, spacing: 14) {
+                settingValueRow("版本", value: appBuildInfo.version)
+                settingValueRow("构建", value: appBuildInfo.build)
+                settingValueRow("验收标识", value: appBuildInfo.smokeTestDisplayValue)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("App 版本 \(appBuildInfo.smokeTestDisplayValue)")
+        }
     }
 
     private var privacyCard: some View {

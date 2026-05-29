@@ -46,6 +46,7 @@ Baseline already completed:
 - Settings import records local data changes so already loaded Library/Search/Translate views can refresh after an import.
 - Memory library and recent-history repository writes record local data changes so already loaded Library/Search/Translate views can refresh after normal save/delete/history updates.
 - Settings surfaces network availability so offline sync/translation pauses are explicit while local data remains usable.
+- Settings shows the app version, build number, and a smoke-test identifier so manual release evidence can be recorded from inside the app.
 - Import/export surfaces that exported JSON is unencrypted, contains saved content, and excludes the API token.
 - Release smoke testing is defined in `docs/release-smoke-test.md` for translation, import/export, recovery, iCloud sync, deletion sync, and local-only fallback.
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`, including the Git commit used for candidate traceability.
@@ -361,6 +362,7 @@ Verification:
 - Relaxed manual evidence recording for `Local-only fallback / macOS/iOS` so the row can be recorded with PASS iOS candidate evidence and the readiness-covered unsigned macOS Release build, matching the checklist's intended unsigned Mac fallback test.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `ef54c78d451b`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `5c23f284eda5`.
+- Added `AppBuildInfo` and surfaced version/build/smoke-test identifier in Settings so manual smoke testers can copy the build metadata from the app instead of inspecting the bundle.
 
 Next:
 
