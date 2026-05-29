@@ -14,7 +14,7 @@ Cloud sync, import/export, richer library management, and advanced search are la
 
 ## Current Stage
 
-Status: Milestone 1 completed; Milestone 2 is next.
+Status: Milestone 2 implemented; Search is next.
 
 Baseline already completed:
 
@@ -26,12 +26,12 @@ Baseline already completed:
 - DeepSeek token save/delete/test flow in Settings.
 - DeepSeek chat-completions translation loop in Translate.
 - Local recent translation history backed by `UserDefaults`.
+- Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 
 Known gaps:
 
-- Saved memory library remains a placeholder.
 - Search and import/export remain placeholders.
 - CloudKit/iCloud sync is not connected.
 
@@ -57,7 +57,7 @@ Verification:
 
 ## Milestone 2: Local Memory Library
 
-Target status: next.
+Target status: completed.
 
 Deliverables:
 
@@ -132,9 +132,13 @@ Verification:
 - Added tests for DeepSeek translation response decoding and translation history persistence.
 - Verified the local token against the DeepSeek API with a direct non-stream request.
 - Confirmed the initial iPhone, iPad, and macOS UI is now acceptable as the baseline for the next product milestone.
+- Implemented `MemoryItem` and `MemoryLibraryStore` for saved local memory items.
+- Added favorite/unfavorite controls in the translation result and recent history views.
+- Replaced the Library placeholder with persisted saved items, empty/loading/content states, deletion, and note editing.
+- Added memory library persistence, duplicate prevention, removal, and note update tests.
 
 Next:
 
-- Start Milestone 2 by promoting history entries into saved memory items.
-- Add favorite/unfavorite controls from translation result and recent history.
-- Replace the Library placeholder with persisted saved items, including delete and note editing.
+- Start Milestone 3 by adding local search across saved memory items and recent history.
+- Use the existing pinyin transliterator for Chinese search matching.
+- Keep import/export and CloudKit sync behind later milestones.

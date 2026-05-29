@@ -11,13 +11,16 @@ struct TranslationView: View {
     @State private var targetLanguage: LanguageSelection = .zh
     @State private var inputText = ""
     @State private var translationState: TranslationState = .idle
+    @State private var lastTranslatedRecord: TranslationRecord?
     @State private var history: [TranslationRecord] = []
+    @State private var memoryItems: [MemoryItem] = []
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private let credentialStore = KeychainCredentialStore()
     private let translationClient = DeepSeekTranslationClient()
     private let historyStore = TranslationHistoryStore()
+    private let memoryStore = MemoryLibraryStore()
 
     var body: some View {
         contentContainer
@@ -31,6 +34,7 @@ struct TranslationView: View {
         .navigationTitle("翻译")
         .task {
             loadHistory()
+            loadMemoryItems()
         }
     }
 
@@ -442,6 +446,7 @@ struct TranslationView: View {
             Button {
                 inputText = ""
                 translationState = .idle
+                lastTranslatedRecord = nil
             } label: {
                 Label("清空", systemImage: "xmark.circle")
                     .lineLimit(1)
@@ -521,12 +526,28 @@ struct TranslationView: View {
                 ProgressView("正在翻译...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .translated(let text):
-                ScrollView {
-                    Text(text)
-                        .font(.title3.weight(.semibold))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .padding(14)
+                VStack(alignment: .leading, spacing: 10) {
+                    if let lastTranslatedRecord {
+                        HStack(alignment: .center, spacing: 10) {
+                            Text("译文")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            memoryTextButton(for: lastTranslatedRecord)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.top, 12)
+                    }
+
+                    ScrollView {
+                        Text(text)
+                            .font(.title3.weight(.semibold))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                            .padding(.horizontal, 14)
+                            .padding(.top, lastTranslatedRecord == nil ? 14 : 0)
+                            .padding(.bottom, 14)
+                    }
                 }
             case .failed(let message):
                 ContentUnavailableView(
@@ -561,6 +582,7 @@ struct TranslationView: View {
                                 Text(record.targetLanguage.title)
                                 Spacer()
                                 Text(record.createdAt, style: .time)
+                                memoryIconButton(for: record)
                             }
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -643,9 +665,57 @@ struct TranslationView: View {
         TranslationLanguageDirection(source: sourceLanguage, target: targetLanguage)
     }
 
+    private func isSavedToMemory(_ record: TranslationRecord) -> Bool {
+        memoryStore.item(matching: record, in: memoryItems) != nil
+    }
+
+    private func memoryTextButton(for record: TranslationRecord) -> some View {
+        Button {
+            toggleMemory(for: record)
+        } label: {
+            Label(
+                isSavedToMemory(record) ? "已收藏" : "收藏",
+                systemImage: isSavedToMemory(record) ? "bookmark.fill" : "bookmark"
+            )
+            .lineLimit(1)
+            .minimumScaleFactor(0.86)
+        }
+        .buttonStyle(.borderless)
+        .controlSize(.small)
+        .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
+    }
+
+    private func memoryIconButton(for record: TranslationRecord) -> some View {
+        Button {
+            toggleMemory(for: record)
+        } label: {
+            Image(systemName: isSavedToMemory(record) ? "bookmark.fill" : "bookmark")
+                .symbolRenderingMode(.hierarchical)
+        }
+        .buttonStyle(.borderless)
+        .controlSize(.small)
+        .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
+    }
+
     @MainActor
     private func loadHistory() {
         history = historyStore.load()
+    }
+
+    @MainActor
+    private func loadMemoryItems() {
+        memoryItems = memoryStore.load()
+    }
+
+    @MainActor
+    private func toggleMemory(for record: TranslationRecord) {
+        if isSavedToMemory(record) {
+            memoryItems = memoryStore.removing(record, from: memoryItems)
+        } else {
+            memoryItems = memoryStore.adding(record, to: memoryItems)
+        }
+
+        memoryStore.save(memoryItems)
     }
 
     @MainActor
@@ -662,6 +732,7 @@ struct TranslationView: View {
             }
 
             translationState = .translating
+            lastTranslatedRecord = nil
             let translatedText = try await translationClient.translate(
                 text: trimmedInput,
                 source: sourceLanguage,
@@ -678,6 +749,7 @@ struct TranslationView: View {
             let updatedHistory = historyStore.adding(record, to: history)
             history = updatedHistory
             historyStore.save(updatedHistory)
+            lastTranslatedRecord = record
             translationState = .translated(translatedText)
         } catch {
             translationState = .failed(translationErrorMessage(for: error))
