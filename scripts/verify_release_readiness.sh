@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_CANDIDATE_GATE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT:-scripts/test_run_release_candidate_gate.sh}"
+RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT="${WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT:-scripts/test_run_live_deepseek_translation_smoke.sh}"
 
 run() {
   printf '\n==> %s\n' "$*"
@@ -43,12 +44,15 @@ run bash -n \
   scripts/build_release_candidates.sh \
   scripts/collect_release_candidate_evidence.sh \
   scripts/test_collect_release_candidate_evidence.sh \
+  scripts/run_live_deepseek_translation_smoke.sh \
+  scripts/test_run_live_deepseek_translation_smoke.sh \
   scripts/run_release_candidate_gate.sh \
   scripts/test_run_release_candidate_gate.sh \
   scripts/test_verify_release_readiness.sh \
   scripts/verify_release_readiness.sh
 
 run scripts/test_collect_release_candidate_evidence.sh
+run "$RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_TEST_SCRIPT"
 run "$RUN_CANDIDATE_GATE_TEST_SCRIPT"
 if [[ "${WORDSCENE_SKIP_READINESS_SELF_TEST:-0}" != "1" ]]; then
   run scripts/test_verify_release_readiness.sh

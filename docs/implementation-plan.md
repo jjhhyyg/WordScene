@@ -48,6 +48,7 @@ Baseline already completed:
 - Release candidate build evidence is recorded in `docs/release-smoke-evidence.md`.
 - Non-manual release readiness checks are runnable through `scripts/verify_release_readiness.sh`.
 - Release candidate builds can be run and recorded through `scripts/run_release_candidate_gate.sh`.
+- Real DeepSeek translation protocol can be smoke-tested without a signed app through `scripts/run_live_deepseek_translation_smoke.sh`.
 
 Known gaps:
 
@@ -257,6 +258,7 @@ Verification:
 - Verified the candidate gate records the macOS signing blocker while still continuing to collect iOS signed-build evidence.
 - Hardened the DeepSeek translation adapter to request JSON Output, extract only `translated_text`, retry one empty assistant response, and surface truncated/filter/resource finish reasons as explicit translation errors.
 - Structured the DeepSeek user prompt payload as JSON so the model translates only the `text` field instead of receiving a free-form `Text:` block.
+- Added `scripts/run_live_deepseek_translation_smoke.sh` plus a shell regression test so the real DeepSeek JSON Output path can be checked with the ignored local token before signed app smoke testing.
 
 Next:
 

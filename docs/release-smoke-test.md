@@ -19,6 +19,10 @@ and pass/fail notes for each run.
 - Use `scripts/run_release_candidate_gate.sh --allow-provisioning-updates` to
   build each release candidate and append build evidence or blocker rows to
   `docs/release-smoke-evidence.md`.
+- Optionally run `scripts/run_live_deepseek_translation_smoke.sh` before signed
+  app smoke testing to verify the current DeepSeek token, JSON Output request,
+  and structured prompt payload against the real API. It reads the token from
+  `.local/deepseek-token` by default and does not print the token.
 - Use the same Apple ID on all devices used for iCloud sync testing.
 - Confirm iCloud Drive and CloudKit are enabled for the Apple ID.
 - Keep the DeepSeek API token local to each device; do not expect it to sync.

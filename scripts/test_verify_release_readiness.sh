@@ -51,16 +51,24 @@ set -euo pipefail
 printf 'test_run_release_candidate_gate\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_GATE_TEST
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate"
+cat >"$BIN/scripts-test-run-live-deepseek-translation-smoke" <<'FAKE_LIVE_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_run_live_deepseek_translation_smoke\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_LIVE_TEST
+
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
   WORDSCENE_SKIP_READINESS_SELF_TEST=1 \
   WORDSCENE_TEST_RUN_CANDIDATE_GATE_SCRIPT="$BIN/scripts-test-run-release-candidate-gate" \
+  WORDSCENE_TEST_RUN_LIVE_DEEPSEEK_TRANSLATION_SMOKE_SCRIPT="$BIN/scripts-test-run-live-deepseek-translation-smoke" \
   "$ROOT/scripts/verify_release_readiness.sh"
 
 grep -qF 'git diff --check' "$LOG"
 grep -qF 'test_run_release_candidate_gate' "$LOG"
+grep -qF 'test_run_live_deepseek_translation_smoke' "$LOG"
 token_pattern='sk-[A-Za-z0-9]|e2a'
 token_pattern+='988'
 grep -qF "rg -n $token_pattern WordScene docs project.yml .gitignore scripts" "$LOG"
