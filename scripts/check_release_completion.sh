@@ -30,7 +30,7 @@ if [[ ! -f "$EVIDENCE_FILE" ]]; then
   exit 1
 fi
 
-has_pass_row() {
+pass_row_count() {
   local area="$1"
   local platform="$2"
 
@@ -42,10 +42,10 @@ has_pass_row() {
     trim($2) == expected_area &&
     trim($3) == expected_platform &&
     trim($6) == "PASS" {
-      found = 1
+      count += 1
     }
     END {
-      exit(found == 1 ? 0 : 1)
+      print count + 0
     }
   ' "$EVIDENCE_FILE"
 }
@@ -91,8 +91,12 @@ ROWS
 status=0
 
 while IFS='|' read -r area platform; do
-  if ! has_pass_row "$area" "$platform"; then
+  pass_count="$(pass_row_count "$area" "$platform")"
+  if [[ "$pass_count" -eq 0 ]]; then
     echo "Missing PASS evidence: $area / $platform" >&2
+    status=1
+  elif [[ "$pass_count" -gt 1 ]]; then
+    echo "Duplicate PASS evidence: $area / $platform ($pass_count rows)" >&2
     status=1
   fi
 done < <(required_rows)

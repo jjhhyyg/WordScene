@@ -9,6 +9,7 @@ CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 PASSING_EVIDENCE="$TMPDIR/passing-evidence.md"
 INCOMPLETE_EVIDENCE="$TMPDIR/incomplete-evidence.md"
 MISSING_COMMIT_EVIDENCE="$TMPDIR/missing-commit-evidence.md"
+DUPLICATE_PASS_EVIDENCE="$TMPDIR/duplicate-pass-evidence.md"
 
 cat >"$PASSING_EVIDENCE" <<'PASSING_MD'
 ## Non-Manual Release Gate
@@ -53,6 +54,20 @@ COMMIT_MD
 "$ROOT/scripts/check_release_completion.sh" --evidence "$PASSING_EVIDENCE" \
   >/tmp/wordscene-completion-pass.out 2>/tmp/wordscene-completion-pass.err
 grep -qF 'Release completion evidence is complete.' /tmp/wordscene-completion-pass.out
+
+cp "$PASSING_EVIDENCE" "$DUPLICATE_PASS_EVIDENCE"
+cat >>"$DUPLICATE_PASS_EVIDENCE" <<'DUPLICATE_MD'
+| Translation loop | macOS | MacBook Pro / macOS 26.5 | 1 | PASS | duplicate stale retest row |
+DUPLICATE_MD
+
+set +e
+"$ROOT/scripts/check_release_completion.sh" --evidence "$DUPLICATE_PASS_EVIDENCE" \
+  >/tmp/wordscene-completion-duplicate-pass.out 2>/tmp/wordscene-completion-duplicate-pass.err
+status=$?
+set -e
+
+test "$status" -eq 1
+grep -qF 'Duplicate PASS evidence: Translation loop / macOS (2 rows)' /tmp/wordscene-completion-duplicate-pass.err
 
 cat >"$INCOMPLETE_EVIDENCE" <<'INCOMPLETE_MD'
 ## Non-Manual Release Gate
