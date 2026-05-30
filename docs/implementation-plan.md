@@ -473,6 +473,8 @@ Verification:
 - Hardened `scripts/record_release_smoke_result.sh` so PASS/FAIL manual rows require `--confirm-executed`, while BLOCKED rows can still be recorded without execution confirmation.
 - Updated `scripts/manual_smoke_readiness.sh --commands` and `docs/release-smoke-test.md` so generated PASS record templates include `--confirm-executed`.
 - Reran `scripts/test_record_release_smoke_result.sh`, `scripts/test_manual_smoke_readiness.sh`, `scripts/test_manual_smoke_session_guide.sh`, and `scripts/test_verify_release_readiness.sh`; the confirmation guard is covered by targeted script tests and the full non-manual gate.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `278a6386037b`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `5b7302e9aeb4` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
