@@ -37,6 +37,7 @@ Baseline already completed:
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Versioned local persistence rejects unsupported future schema versions without clearing the original local data.
+- Settings maps local persistence read/version errors to recovery-oriented guidance before backup/reset or upgrade decisions.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
@@ -516,6 +517,9 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `905cc471ed28`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/release_next_actions.sh`; it now surfaces the unavailable physical iPhone guidance and the missing signed macOS candidate guidance directly in the ordered next-action output.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `81d00c86f948` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Mapped Settings import/export and local recovery errors from unreadable or future-version local persistence documents to actionable backup/reset or upgrade guidance, instead of surfacing raw technical errors.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/SettingsErrorMessageFactoryTests -derivedDataPath /tmp/WordSceneSettingsErrorsMac CODE_SIGNING_ALLOWED=NO`; the 3 Settings error-message tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the Settings recovery-error guidance change plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

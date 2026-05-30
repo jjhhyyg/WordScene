@@ -687,6 +687,17 @@ struct SettingsView: View {
     }
 
     private func importExportErrorMessage(for error: Error) -> String {
+        SettingsErrorMessageFactory.importExportMessage(for: error)
+    }
+
+    private func isUserCancelled(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError
+    }
+}
+
+enum SettingsErrorMessageFactory {
+    static func importExportMessage(for error: Error) -> String {
         if let importExportError = error as? MemoryImportExportError {
             switch importExportError {
             case .invalidJSON:
@@ -698,12 +709,16 @@ struct SettingsView: View {
             }
         }
 
-        return error.localizedDescription.isEmpty ? "导入导出失败，请稍后重试。" : error.localizedDescription
-    }
+        if let persistenceError = error as? LocalPersistenceStoreError {
+            switch persistenceError {
+            case .unreadableDocument:
+                return "本地旧缓存无法读取。请先在“数据存储”导出旧缓存原始备份，再重置旧缓存文档。"
+            case .unsupportedSchemaVersion:
+                return "本地旧缓存来自更新版本的 App。请先升级 WordScene；不要直接重置，除非已经导出旧缓存原始备份。"
+            }
+        }
 
-    private func isUserCancelled(_ error: Error) -> Bool {
-        let nsError = error as NSError
-        return nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError
+        return error.localizedDescription.isEmpty ? "导入导出失败，请稍后重试。" : error.localizedDescription
     }
 }
 
