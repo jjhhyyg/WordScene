@@ -513,6 +513,9 @@ Verification:
 - Extended `scripts/release_next_actions.sh` to include the concrete environment actions reported by manual smoke preflight, including unavailable physical-device and missing signed macOS candidate guidance.
 - Reran `scripts/test_release_next_actions.sh`; it covers the environment-action section and updated action numbering.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the release next-action environment guidance plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `905cc471ed28`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/release_next_actions.sh`; it now surfaces the unavailable physical iPhone guidance and the missing signed macOS candidate guidance directly in the ordered next-action output.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `81d00c86f948` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
