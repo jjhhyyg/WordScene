@@ -45,6 +45,7 @@ Baseline already completed:
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Search results can remove matching recent-history records directly, without affecting saved memory items.
 - Search results can save matching recent-history records directly into the memory library.
+- Search results can remove matching saved-memory records directly from the memory library.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
@@ -553,6 +554,8 @@ Verification:
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 6 search-index tests passed.
 - Added a Search-result save action backed by `MemorySearchResult.translationRecord`, so users can promote a matched recent-history record into the memory library from Search.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchSaveGreen CODE_SIGNING_ALLOWED=NO`; the 7 search-index tests passed.
+- Added a Search-result saved-memory delete action backed by `MemorySearchResult.memoryItem`, so users can remove a matched memory item directly from Search.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchMemoryDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 8 search-index tests passed.
 
 Next:
 

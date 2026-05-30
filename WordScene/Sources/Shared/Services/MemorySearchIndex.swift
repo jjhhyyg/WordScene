@@ -109,6 +109,7 @@ struct MemorySearchResult: Identifiable, Equatable {
     let targetLanguage: LanguageSelection
     let note: String
     let createdAt: Date
+    let updatedAt: Date
 
     var translationRecord: TranslationRecord {
         TranslationRecord(
@@ -118,6 +119,19 @@ struct MemorySearchResult: Identifiable, Equatable {
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage,
             createdAt: createdAt
+        )
+    }
+
+    var memoryItem: MemoryItem {
+        MemoryItem(
+            id: sourceID,
+            sourceText: sourceText,
+            translatedText: translatedText,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            note: note,
+            createdAt: createdAt,
+            updatedAt: updatedAt
         )
     }
 
@@ -131,6 +145,7 @@ struct MemorySearchResult: Identifiable, Equatable {
         self.targetLanguage = item.targetLanguage
         self.note = item.note
         self.createdAt = item.createdAt
+        self.updatedAt = item.updatedAt
     }
 
     init(record: TranslationRecord) {
@@ -143,6 +158,7 @@ struct MemorySearchResult: Identifiable, Equatable {
         self.targetLanguage = record.targetLanguage
         self.note = ""
         self.createdAt = record.createdAt
+        self.updatedAt = record.createdAt
     }
 }
 

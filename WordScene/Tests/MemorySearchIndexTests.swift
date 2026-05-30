@@ -18,6 +18,24 @@ final class MemorySearchIndexTests: XCTestCase {
         XCTAssertEqual(index.search(query: "英文", memoryItems: [item], history: []).map(\.sourceText), ["hello"])
     }
 
+    func testMemoryResultExposesOriginalItemForManagementActions() {
+        let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
+        let item = MemoryItem(
+            sourceText: "managed memory",
+            translatedText: "可管理收藏",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "important",
+            createdAt: Date(timeIntervalSince1970: 11),
+            updatedAt: Date(timeIntervalSince1970: 22)
+        )
+
+        let result = index.search(query: "managed", memoryItems: [item], history: []).first
+
+        XCTAssertEqual(result?.memoryItem, item)
+        XCTAssertEqual(result?.kind, .memory)
+    }
+
     func testMatchesRecentHistoryWhenItemIsNotSaved() {
         let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
         let record = TranslationRecord(

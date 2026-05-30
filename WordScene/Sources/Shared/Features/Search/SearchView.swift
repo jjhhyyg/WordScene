@@ -72,6 +72,9 @@ struct SearchView: View {
                                     onSaveHistory: result.kind == .history ? {
                                         saveHistoryRecord(result.translationRecord)
                                     } : nil,
+                                    onDeleteMemory: result.kind == .memory ? {
+                                        deleteMemoryItem(id: result.memoryItem.id)
+                                    } : nil,
                                     onDeleteHistory: result.kind == .history ? {
                                         deleteHistoryRecord(id: result.sourceID)
                                     } : nil
@@ -138,6 +141,17 @@ struct SearchView: View {
         }
     }
 
+    private func deleteMemoryItem(id: UUID) {
+        let updatedItems = memoryStore.removing(id: id, from: memoryItems)
+        do {
+            try memoryStore.saveOrThrow(updatedItems)
+            memoryItems = updatedItems
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = "收藏删除失败：\(error.localizedDescription)"
+        }
+    }
+
     private func deleteHistoryRecord(id: UUID) {
         let updatedHistory = historyStore.removing(id: id, from: history)
         do {
@@ -153,6 +167,7 @@ struct SearchView: View {
 private struct SearchResultRow: View {
     let result: MemorySearchResult
     let onSaveHistory: (() -> Void)?
+    let onDeleteMemory: (() -> Void)?
     let onDeleteHistory: (() -> Void)?
 
     var body: some View {
@@ -180,6 +195,19 @@ private struct SearchResultRow: View {
                     .controlSize(.small)
                     .accessibilityLabel("保存到收藏")
                     .accessibilityIdentifier("search.history.save")
+                }
+
+                if let onDeleteMemory {
+                    Button(role: .destructive) {
+                        onDeleteMemory()
+                    } label: {
+                        Image(systemName: "trash")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                    .accessibilityLabel("删除收藏")
+                    .accessibilityIdentifier("search.memory.delete")
                 }
 
                 if let onDeleteHistory {
