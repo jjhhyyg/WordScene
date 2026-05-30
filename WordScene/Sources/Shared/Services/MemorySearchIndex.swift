@@ -68,10 +68,10 @@ struct MemorySearchIndex {
             translatedText,
             sourceLanguage.title,
             targetLanguage.title,
-            sourceLanguage.rawValue,
-            targetLanguage.rawValue,
             note
         ]
+        terms.append(contentsOf: sourceLanguage.searchAliases)
+        terms.append(contentsOf: targetLanguage.searchAliases)
 
         terms.append(contentsOf: pinyinTerms(for: sourceText))
         terms.append(contentsOf: pinyinTerms(for: translatedText))

@@ -95,7 +95,10 @@ struct TranslationWorkflow {
             try historyStore.saveOrThrow(updatedHistory)
             warningMessage = nil
         } catch {
-            warningMessage = "译文已生成，但翻译历史保存失败：\(error.localizedDescription)"
+            warningMessage = String(
+                format: String(localized: "译文已生成，但翻译历史保存失败：%@", comment: "Warning shown when translation succeeds but history cannot be saved. The placeholder is the system error description."),
+                error.localizedDescription
+            )
         }
 
         return TranslationWorkflowResult(

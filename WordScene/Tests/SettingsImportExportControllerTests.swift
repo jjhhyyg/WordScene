@@ -23,8 +23,10 @@ final class SettingsImportExportControllerTests: XCTestCase {
 
         XCTAssertEqual(export.fileName, "memory-book-export-20270115.json")
         XCTAssertEqual(export.itemCount, 1)
-        XCTAssertTrue(export.privacyNotice.contains("不加密"))
-        XCTAssertTrue(export.privacyNotice.contains("不包含 API Token"))
+        XCTAssertEqual(
+            export.privacyNotice,
+            String(localized: "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。")
+        )
         XCTAssertEqual(imported.items, [item])
     }
 
@@ -176,7 +178,8 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertEqual(summary.replacedCount, 0)
         XCTAssertEqual(summary.skippedCount, 1)
         XCTAssertEqual(summary.totalCount, 1)
-        XCTAssertEqual(summary.statusMessage, "未导入新内容，已跳过 1 条重复项。")
+        let expectedFormat = String(localized: "未导入新内容，已跳过 %lld 条重复项。")
+        XCTAssertEqual(summary.statusMessage, String(format: expectedFormat, Int64(1)))
         XCTAssertEqual(store.saveCount, 0)
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(store.items, [existingItem])

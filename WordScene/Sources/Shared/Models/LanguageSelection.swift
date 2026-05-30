@@ -10,10 +10,10 @@ enum LanguageSelection: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .auto: "自动检测"
-        case .zh: "中文"
-        case .en: "英文"
-        case .es: "西班牙语"
+        case .auto: String(localized: "自动检测")
+        case .zh: String(localized: "中文")
+        case .en: String(localized: "英文")
+        case .es: String(localized: "西班牙语")
         }
     }
 
@@ -23,6 +23,19 @@ enum LanguageSelection: String, CaseIterable, Identifiable, Codable {
         case .zh: "Chinese"
         case .en: "English"
         case .es: "Spanish"
+        }
+    }
+
+    var searchAliases: [String] {
+        switch self {
+        case .auto:
+            ["自动检测", "Auto Detect", "Detección automática", rawValue]
+        case .zh:
+            ["中文", "Chinese", "Chino", rawValue]
+        case .en:
+            ["英文", "English", "Inglés", rawValue]
+        case .es:
+            ["西班牙语", "Spanish", "Español", rawValue]
         }
     }
 

@@ -48,7 +48,9 @@ struct SettingsImportExportController {
         )
     }
 
-    private static let exportPrivacyNotice = "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
+    private static var exportPrivacyNotice: String {
+        String(localized: "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。", comment: "Privacy note shown before exporting saved memory.")
+    }
 }
 
 struct SettingsMemoryExport: Equatable {
@@ -66,10 +68,12 @@ struct SettingsMemoryImportSummary: Equatable {
 
     var statusMessage: String {
         if importedCount == 0 && replacedCount == 0 && skippedCount > 0 {
-            return "未导入新内容，已跳过 \(skippedCount) 条重复项。"
+            let format = String(localized: "未导入新内容，已跳过 %lld 条重复项。", comment: "Import summary when all selected memory items were duplicates. The placeholder is the skipped count.")
+            return String(format: format, Int64(skippedCount))
         }
 
-        return "已导入 \(importedCount) 条，覆盖 \(replacedCount) 条，跳过 \(skippedCount) 条。"
+        let format = String(localized: "已导入 %lld 条，覆盖 %lld 条，跳过 %lld 条。", comment: "Import summary. Placeholders are imported count, replaced count, and skipped count.")
+        return String(format: format, Int64(importedCount), Int64(replacedCount), Int64(skippedCount))
     }
 }
 
@@ -82,9 +86,9 @@ enum SettingsMemoryImportConflictPolicy: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .replaceExisting:
-            return "覆盖重复项"
+            return String(localized: "覆盖重复项", comment: "Import conflict policy that replaces duplicate saved memory items.")
         case .keepExisting:
-            return "保留现有项"
+            return String(localized: "保留现有项", comment: "Import conflict policy that keeps existing saved memory items.")
         }
     }
 

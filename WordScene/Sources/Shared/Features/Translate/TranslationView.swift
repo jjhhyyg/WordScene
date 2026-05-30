@@ -40,7 +40,7 @@ struct TranslationView: View {
             }
         }
         #endif
-        .navigationTitle("翻译")
+        .navigationTitle(String(localized: "翻译", comment: "Main translation tab title and primary translate action."))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
@@ -131,7 +131,7 @@ struct TranslationView: View {
 
     private var translationHeader: some View {
         HStack(alignment: .center, spacing: 12) {
-            Text("翻译")
+            Text(String(localized: "翻译", comment: "Main translation tab title and primary translate action."))
                 .font(.largeTitle.bold())
                 .accessibilityIdentifier("translation.title")
 
@@ -149,7 +149,7 @@ struct TranslationView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.regular)
             .disabled(!hasTranslatableInput || translationState.isTranslating)
-            .accessibilityLabel("开始翻译")
+            .accessibilityLabel(String(localized: "开始翻译", comment: "Accessibility label for the primary translate button."))
             .accessibilityIdentifier("translation.start")
             #endif
         }
@@ -200,7 +200,7 @@ struct TranslationView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .bottom, spacing: 10) {
                     languagePicker(
-                        "源语言",
+                        .source,
                         selection: $sourceLanguage,
                         options: LanguageSelection.sourceOptions,
                         maxWidth: 180
@@ -211,7 +211,7 @@ struct TranslationView: View {
                         .frame(height: 32, alignment: .center)
                         .accessibilityHidden(true)
                     languagePicker(
-                        "目标语言",
+                        .target,
                         selection: $targetLanguage,
                         options: LanguageSelection.targetOptions(excluding: sourceLanguage),
                         maxWidth: 180
@@ -326,7 +326,7 @@ struct TranslationView: View {
             if usesTwoColumnLayout {
                 HStack(alignment: .bottom, spacing: usesMacDesktopLayout ? 10 : 12) {
                     languagePicker(
-                        "源语言",
+                        .source,
                         selection: $sourceLanguage,
                         options: LanguageSelection.sourceOptions,
                         maxWidth: languagePickerMaxWidth
@@ -337,7 +337,7 @@ struct TranslationView: View {
                         .frame(height: 32, alignment: .center)
                         .accessibilityHidden(true)
                     languagePicker(
-                        "目标语言",
+                        .target,
                         selection: $targetLanguage,
                         options: LanguageSelection.targetOptions(excluding: sourceLanguage),
                         maxWidth: languagePickerMaxWidth
@@ -351,8 +351,8 @@ struct TranslationView: View {
                 }
             } else {
                 VStack(alignment: .leading, spacing: 12) {
-                    languagePicker("源语言", selection: $sourceLanguage, options: LanguageSelection.sourceOptions)
-                    languagePicker("目标语言", selection: $targetLanguage, options: LanguageSelection.targetOptions(excluding: sourceLanguage))
+                    languagePicker(.source, selection: $sourceLanguage, options: LanguageSelection.sourceOptions)
+                    languagePicker(.target, selection: $targetLanguage, options: LanguageSelection.targetOptions(excluding: sourceLanguage))
                 }
             }
         }
@@ -375,7 +375,7 @@ struct TranslationView: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
-                    inlineLanguagePicker("源语言", selection: $sourceLanguage, options: LanguageSelection.sourceOptions)
+                    inlineLanguagePicker(.source, selection: $sourceLanguage, options: LanguageSelection.sourceOptions)
                     Spacer()
 
                     if !inputText.isEmpty {
@@ -386,18 +386,18 @@ struct TranslationView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
-                        .accessibilityLabel("清空输入")
+                        .accessibilityLabel(String(localized: "清空输入", comment: "Accessibility label for clearing the translation input."))
                         .accessibilityIdentifier("translation.input.clear")
                     }
                 }
 
                 PromptedTextEditor(
                     text: $inputText,
-                    prompt: "输入要翻译的文本",
+                    prompt: String(localized: "输入要翻译的文本", comment: "Placeholder for the compact translation input field."),
                     minHeight: inputEditorMinHeight,
                     textStyle: .largePrompt
                 )
-                    .accessibilityLabel("待翻译文本")
+                    .accessibilityLabel(String(localized: "待翻译文本", comment: "Accessibility label for the translation input editor."))
                     .accessibilityIdentifier("translation.input.editor")
             }
             .padding(.bottom, 10)
@@ -416,13 +416,13 @@ struct TranslationView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(canSwapLanguageDirection ? Color.accentColor : Color.secondary)
                 .disabled(!canSwapLanguageDirection)
-                .accessibilityLabel("交换翻译方向")
+                .accessibilityLabel(String(localized: "交换翻译方向", comment: "Accessibility label for swapping translation source and target languages."))
                 .accessibilityIdentifier("translation.swapDirection")
             }
 
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
-                    inlineLanguagePicker("目标语言", selection: $targetLanguage, options: LanguageSelection.targetOptions(excluding: sourceLanguage))
+                    inlineLanguagePicker(.target, selection: $targetLanguage, options: LanguageSelection.targetOptions(excluding: sourceLanguage))
                     Spacer()
                     Label(translationState.statusText, systemImage: translationState.statusSystemImage)
                         .font(.caption)
@@ -439,7 +439,7 @@ struct TranslationView: View {
     private var inputPanel: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("输入")
+                Text(String(localized: "输入", comment: "Heading for the translation input panel."))
                     .font(.headline)
                 Spacer()
                 if inputText.isEmpty {
@@ -447,14 +447,14 @@ struct TranslationView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
-                        .accessibilityLabel("输入字符数 \(inputText.count)")
+                        .accessibilityLabel(inputCharacterCountAccessibilityLabel)
                 } else {
                     HStack(spacing: 8) {
                         Text("\(inputText.count)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
-                            .accessibilityLabel("输入字符数 \(inputText.count)")
+                            .accessibilityLabel(inputCharacterCountAccessibilityLabel)
 
                         Button {
                             clearTranslationDraft()
@@ -463,7 +463,7 @@ struct TranslationView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
-                        .accessibilityLabel("清空输入和译文")
+                        .accessibilityLabel(String(localized: "清空输入和译文", comment: "Accessibility label for clearing both the input and translated result."))
                         .accessibilityIdentifier("translation.input.clear")
                     }
                 }
@@ -471,12 +471,12 @@ struct TranslationView: View {
 
             PromptedTextEditor(
                 text: $inputText,
-                prompt: "输入要翻译的单词、短语或句子",
+                prompt: String(localized: "输入要翻译的单词、短语或句子", comment: "Placeholder for the full translation input field."),
                 minHeight: inputEditorMinHeight,
                 contentPadding: EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             )
                 .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .accessibilityLabel("待翻译文本")
+                .accessibilityLabel(String(localized: "待翻译文本", comment: "Accessibility label for the translation input editor."))
                 .accessibilityIdentifier("translation.input.editor")
         }
         .panelStyle()
@@ -504,7 +504,7 @@ struct TranslationView: View {
                     await translateInput()
                 }
             } label: {
-                Label(translationState.isTranslating ? "翻译中" : "翻译", systemImage: translationState.isTranslating ? "arrow.triangle.2.circlepath" : "arrow.right.circle.fill")
+                Label(translationState.isTranslating ? String(localized: "翻译中", comment: "Status while a translation request is running.") : String(localized: "翻译", comment: "Main translation tab title and primary translate action."), systemImage: translationState.isTranslating ? "arrow.triangle.2.circlepath" : "arrow.right.circle.fill")
                     .lineLimit(1)
                     .minimumScaleFactor(0.86)
                     .frame(width: style.primaryWidth)
@@ -512,7 +512,7 @@ struct TranslationView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(!hasTranslatableInput || translationState.isTranslating)
-            .accessibilityLabel("开始翻译")
+            .accessibilityLabel(String(localized: "开始翻译", comment: "Accessibility label for the primary translate button."))
             .accessibilityIdentifier("translation.start")
         }
     }
@@ -520,7 +520,7 @@ struct TranslationView: View {
     private var resultPanel: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("结果")
+                Text(String(localized: "结果", comment: "Heading for the translation result panel."))
                     .font(.headline)
                 Spacer()
                 Label(translationState.statusText, systemImage: translationState.statusSystemImage)
@@ -540,22 +540,22 @@ struct TranslationView: View {
             switch translationState {
             case .idle:
                 ContentUnavailableView(
-                    "还没有翻译结果",
+                    String(localized: "还没有翻译结果", comment: "Empty result title before a translation has run."),
                     systemImage: "text.bubble",
-                    description: Text("配置 DeepSeek Token 后，输入内容即可开始翻译。")
+                    description: Text(String(localized: "配置 DeepSeek Token 后，输入内容即可开始翻译。", comment: "Empty result description before a translation has run."))
                 )
             case .translating:
-                ProgressView("正在翻译...")
+                ProgressView(String(localized: "正在翻译...", comment: "Progress label while translating."))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .translated(let text):
                 VStack(alignment: .leading, spacing: 10) {
                     if let lastTranslatedRecord {
                         HStack(alignment: .center, spacing: 10) {
-                            Text("译文")
+                            Text(String(localized: "译文", comment: "Section title for translated text."))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             if didCopyTranslation {
-                                Label("已复制", systemImage: "checkmark.circle.fill")
+                                Label(String(localized: "已复制", comment: "Status label shown after copying translated text."), systemImage: "checkmark.circle.fill")
                                     .font(.caption)
                                     .foregroundStyle(.green)
                             }
@@ -579,12 +579,12 @@ struct TranslationView: View {
                     .onTapGesture {
                         copyTranslation(text)
                     }
-                    .accessibilityLabel("译文，点击复制")
+                    .accessibilityLabel(String(localized: "译文，点击复制", comment: "Accessibility label for the translated text copy area."))
                     .accessibilityIdentifier("translation.result.copyArea")
                 }
             case .failed(let message):
                 ContentUnavailableView(
-                    "翻译失败",
+                    String(localized: "翻译失败", comment: "Error state title when translation fails."),
                     systemImage: "exclamationmark.triangle",
                     description: Text(message)
                 )
@@ -595,13 +595,19 @@ struct TranslationView: View {
         .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
+    private var inputCharacterCountAccessibilityLabel: String {
+        let format = String(localized: "输入字符数 %lld", comment: "Accessibility label for the translation input character count. The placeholder is the character count.")
+        return String(format: format, Int64(inputText.count))
+    }
+
     private func languagePicker(
-        _ title: String,
+        _ role: TranslationLanguagePickerRole,
         selection: Binding<LanguageSelection>,
         options: [LanguageSelection],
         maxWidth: CGFloat? = nil
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        let title = role.title
+        return VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -616,17 +622,18 @@ struct TranslationView: View {
             .lineLimit(1)
             .frame(maxWidth: maxWidth ?? (usesTwoColumnLayout ? 220 : .infinity), alignment: .leading)
             .accessibilityLabel(title)
-            .accessibilityIdentifier(languagePickerIdentifier(for: title))
+            .accessibilityIdentifier(role.accessibilityIdentifier)
         }
         .frame(minWidth: usesTwoColumnLayout ? min(maxWidth ?? 220, 150) : 0)
     }
 
     private func inlineLanguagePicker(
-        _ title: String,
+        _ role: TranslationLanguagePickerRole,
         selection: Binding<LanguageSelection>,
         options: [LanguageSelection]
     ) -> some View {
-        Picker(title, selection: selection) {
+        let title = role.title
+        return Picker(title, selection: selection) {
             ForEach(options) { language in
                 Text(language.title).tag(language)
             }
@@ -635,18 +642,7 @@ struct TranslationView: View {
         .controlSize(.large)
         .font(.headline)
         .accessibilityLabel(title)
-        .accessibilityIdentifier(languagePickerIdentifier(for: title))
-    }
-
-    private func languagePickerIdentifier(for title: String) -> String {
-        switch title {
-        case "源语言":
-            return "translation.sourceLanguage.picker"
-        case "目标语言":
-            return "translation.targetLanguage.picker"
-        default:
-            return "translation.language.picker"
-        }
+        .accessibilityIdentifier(role.accessibilityIdentifier)
     }
 
     private func swapLanguageDirection() {
@@ -690,7 +686,7 @@ struct TranslationView: View {
             toggleMemory(for: record)
         } label: {
             Label(
-                isSavedToMemory(record) ? "已收藏" : "收藏",
+                isSavedToMemory(record) ? String(localized: "translation.result.savedToMemory", defaultValue: "已收藏", comment: "Button title when a translation result is already saved to memory.") : String(localized: "translation.result.saveToMemory", defaultValue: "收藏", comment: "Button title for saving a translation result to memory."),
                 systemImage: isSavedToMemory(record) ? "bookmark.fill" : "bookmark"
             )
             .lineLimit(1)
@@ -698,7 +694,7 @@ struct TranslationView: View {
         }
         .buttonStyle(.borderless)
         .controlSize(.small)
-        .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
+        .accessibilityLabel(isSavedToMemory(record) ? String(localized: "translation.result.removeFromMemory.accessibility", defaultValue: "取消收藏", comment: "Accessibility label for removing a translation result from saved memory.") : String(localized: "translation.result.saveToMemory.accessibility", defaultValue: "收藏", comment: "Accessibility label for saving a translation result to memory."))
     }
 
     @MainActor
@@ -707,7 +703,10 @@ struct TranslationView: View {
             history = try historyStore.loadOrThrow()
         } catch {
             history = []
-            persistenceWarningMessage = "翻译历史读取失败：\(error.localizedDescription)"
+            persistenceWarningMessage = String(
+                format: String(localized: "翻译历史读取失败：%@", comment: "Warning shown when translation history cannot be loaded. The placeholder is the system error description."),
+                error.localizedDescription
+            )
         }
     }
 
@@ -717,7 +716,10 @@ struct TranslationView: View {
             memoryItems = try memoryStore.loadOrThrow()
         } catch {
             memoryItems = []
-            persistenceWarningMessage = "收藏数据读取失败：\(error.localizedDescription)"
+            persistenceWarningMessage = String(
+                format: String(localized: "收藏数据读取失败：%@", comment: "Warning shown when saved memory cannot be loaded. The placeholder is the system error description."),
+                error.localizedDescription
+            )
         }
     }
 
@@ -735,7 +737,10 @@ struct TranslationView: View {
             memoryItems = updatedItems
             persistenceWarningMessage = nil
         } catch {
-            persistenceWarningMessage = "收藏保存失败：\(error.localizedDescription)"
+            persistenceWarningMessage = String(
+                format: String(localized: "收藏保存失败：%@", comment: "Warning shown when saving a translation result to memory fails. The placeholder is the system error description."),
+                error.localizedDescription
+            )
         }
     }
 
@@ -812,39 +817,64 @@ struct TranslationView: View {
         if let workflowError = error as? TranslationWorkflowError {
             switch workflowError {
             case .missingToken:
-                return "请先在设置中保存 DeepSeek API Token。"
+                return String(localized: "请先在设置中保存 DeepSeek API Token。", comment: "Error shown when translating without a saved API token.")
             }
         }
 
         if let translationError = error as? DeepSeekTranslationError {
             switch translationError {
             case .emptyInput:
-                return "请输入需要翻译的文本。"
+                return String(localized: "请输入需要翻译的文本。", comment: "Error shown when the user tries to translate empty text.")
             case .emptyOutput:
-                return "DeepSeek 没有返回可用译文。"
+                return String(localized: "DeepSeek 没有返回可用译文。", comment: "Error shown when the translation provider returns no usable translation.")
             case .incompleteOutput:
-                return "DeepSeek 输出被截断，请缩短文本后重试。"
+                return String(localized: "DeepSeek 输出被截断，请缩短文本后重试。", comment: "Error shown when the translation provider truncates the output.")
             case .filteredOutput:
-                return "DeepSeek 拒绝了该内容，请调整文本后重试。"
+                return String(localized: "DeepSeek 拒绝了该内容，请调整文本后重试。", comment: "Error shown when the translation provider refuses the content.")
             case .insufficientSystemResource:
-                return "DeepSeek 暂时资源不足，请稍后重试。"
+                return String(localized: "DeepSeek 暂时资源不足，请稍后重试。", comment: "Error shown when the translation provider reports insufficient resources.")
             case .invalidResponse:
-                return "DeepSeek 返回无效响应。"
+                return String(localized: "DeepSeek 返回无效响应。", comment: "Error shown when the DeepSeek response cannot be parsed.")
             case .unauthorized:
-                return "DeepSeek Token 无效或已过期。"
+                return String(localized: "DeepSeek Token 无效或已过期。", comment: "Error shown when the translation API token is rejected.")
             case .httpStatus(let status):
-                return "DeepSeek 请求失败：HTTP \(status)。"
+                let format = String(localized: "DeepSeek 请求失败：HTTP %lld。", comment: "Error shown when an HTTP request to DeepSeek fails. The placeholder is the HTTP status code.")
+                return String(format: format, Int64(status))
             }
         }
 
         if let keychainError = error as? KeychainCredentialError {
             switch keychainError {
             case .unhandledStatus(let status):
-                return "读取系统凭据失败：\(status)。"
+                let format = String(localized: "读取系统凭据失败：%lld。", comment: "Error shown when reading from Keychain fails. The placeholder is the OSStatus code.")
+                return String(format: format, Int64(status))
             }
         }
 
-        return "翻译请求失败，请检查网络后重试。"
+        return String(localized: "翻译请求失败，请检查网络后重试。", comment: "Generic translation request failure.")
+    }
+}
+
+private enum TranslationLanguagePickerRole {
+    case source
+    case target
+
+    var title: String {
+        switch self {
+        case .source:
+            return String(localized: "源语言", comment: "Picker label for source language.")
+        case .target:
+            return String(localized: "目标语言", comment: "Picker label for target language.")
+        }
+    }
+
+    var accessibilityIdentifier: String {
+        switch self {
+        case .source:
+            return "translation.sourceLanguage.picker"
+        case .target:
+            return "translation.targetLanguage.picker"
+        }
     }
 }
 
@@ -861,13 +891,13 @@ private enum TranslationState: Equatable {
     var statusText: String {
         switch self {
         case .idle:
-            return "等待翻译"
+            return String(localized: "等待翻译", comment: "Idle status before a translation starts.")
         case .translating:
-            return "翻译中"
+            return String(localized: "翻译中", comment: "Status while a translation request is running.")
         case .translated:
-            return "已翻译"
+            return String(localized: "已翻译", comment: "Translation status after a successful translation.")
         case .failed:
-            return "需要处理"
+            return String(localized: "需要处理", comment: "Status shown when translation needs user attention.")
         }
     }
 

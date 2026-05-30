@@ -14,10 +14,10 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .translate: "翻译"
-        case .library: "收藏"
-        case .history: "翻译历史"
-        case .settings: "设置"
+        case .translate: String(localized: "翻译")
+        case .library: String(localized: "收藏")
+        case .history: String(localized: "翻译历史")
+        case .settings: String(localized: "设置")
         }
     }
 

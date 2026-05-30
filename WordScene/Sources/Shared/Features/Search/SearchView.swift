@@ -37,7 +37,7 @@ struct HistoryView: View {
     var body: some View {
         Group {
             if !hasLoaded {
-                ProgressView("正在加载翻译历史...")
+                ProgressView(String(localized: "正在加载翻译历史...", comment: "Loading indicator while translation history is being read."))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 #if os(iOS)
@@ -69,18 +69,18 @@ struct HistoryView: View {
             }
         }
         .background(pageBackground.ignoresSafeArea())
-        .navigationTitle("翻译历史")
+        .navigationTitle(String(localized: "翻译历史", comment: "Navigation title for the translation history screen."))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         #endif
-        .alert("删除全部翻译历史？", isPresented: $isConfirmingDeleteAll) {
-            Button("全部删除", role: .destructive) {
+        .alert(String(localized: "删除全部翻译历史？", comment: "Confirmation title before deleting all translation history."), isPresented: $isConfirmingDeleteAll) {
+            Button(String(localized: "全部删除", comment: "Destructive button that deletes all items."), role: .destructive) {
                 deleteAllHistory()
             }
-            Button("取消", role: .cancel) {}
+            Button(String(localized: "取消", comment: "Cancel button title."), role: .cancel) {}
         } message: {
-            Text("此操作会清空本机历史，并通过同步删除其他设备上的历史记录。")
+            Text(String(localized: "此操作会清空本机历史，并通过同步删除其他设备上的历史记录。", comment: "Warning shown before deleting all translation history."))
         }
         .onAppear {
             loadHistoryData()
@@ -163,7 +163,7 @@ struct HistoryView: View {
     private var historyListRows: some View {
         if let persistenceErrorMessage, history.isEmpty {
             ContentUnavailableView(
-                "无法读取翻译历史",
+                String(localized: "无法读取翻译历史", comment: "Empty state title when translation history cannot be read."),
                 systemImage: "externaldrive.badge.exclamationmark",
                 description: Text(persistenceErrorMessage)
             )
@@ -173,9 +173,9 @@ struct HistoryView: View {
             .listRowBackground(Color.clear)
         } else if history.isEmpty {
             ContentUnavailableView(
-                "还没有翻译历史",
+                String(localized: "还没有翻译历史", comment: "Empty state title when there is no translation history."),
                 systemImage: "clock.arrow.circlepath",
-                description: Text("完成翻译后，最近 100 条记录会显示在这里。")
+                description: Text(String(localized: "完成翻译后，最近 100 条记录会显示在这里。", comment: "Empty state description for translation history."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
             .listRowInsets(EdgeInsets(top: 8, leading: pageHorizontalPadding, bottom: 8, trailing: pageHorizontalPadding))
@@ -183,9 +183,9 @@ struct HistoryView: View {
             .listRowBackground(Color.clear)
         } else if matchingHistory.isEmpty {
             ContentUnavailableView(
-                "没有找到匹配内容",
+                String(localized: "没有找到匹配内容", comment: "Empty state title when search returns no matches."),
                 systemImage: "magnifyingglass",
-                description: Text("可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。")
+                description: Text(String(localized: "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。", comment: "Search empty state suggestion."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
             .listRowInsets(EdgeInsets(top: 8, leading: pageHorizontalPadding, bottom: 8, trailing: pageHorizontalPadding))
@@ -217,7 +217,7 @@ struct HistoryView: View {
     private var historyHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
             #if os(iOS)
-            Text("翻译历史")
+            Text(String(localized: "翻译历史", comment: "Large title for the translation history screen."))
                 .font(.largeTitle.bold())
                 .accessibilityIdentifier("history.title")
             #endif
@@ -226,7 +226,7 @@ struct HistoryView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
 
-                TextField("搜索翻译历史", text: $query)
+                TextField(String(localized: "搜索翻译历史", comment: "Placeholder for searching translation history."), text: $query)
                     .textFieldStyle(.plain)
                     .accessibilityIdentifier("history.search.field")
 
@@ -239,7 +239,7 @@ struct HistoryView: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("清空搜索")
+                    .accessibilityLabel(String(localized: "清空搜索", comment: "Accessibility label for clearing the search field."))
                     .accessibilityIdentifier("history.search.clear")
                 }
             }
@@ -257,23 +257,23 @@ struct HistoryView: View {
     private var historyContent: some View {
         if let persistenceErrorMessage, history.isEmpty {
             ContentUnavailableView(
-                "无法读取翻译历史",
+                String(localized: "无法读取翻译历史", comment: "Empty state title when translation history cannot be read."),
                 systemImage: "externaldrive.badge.exclamationmark",
                 description: Text(persistenceErrorMessage)
             )
             .frame(maxWidth: .infinity, minHeight: 320)
         } else if history.isEmpty {
             ContentUnavailableView(
-                "还没有翻译历史",
+                String(localized: "还没有翻译历史", comment: "Empty state title when there is no translation history."),
                 systemImage: "clock.arrow.circlepath",
-                description: Text("完成翻译后，最近 100 条记录会显示在这里。")
+                description: Text(String(localized: "完成翻译后，最近 100 条记录会显示在这里。", comment: "Empty state description for translation history."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
         } else if matchingHistory.isEmpty {
             ContentUnavailableView(
-                "没有找到匹配内容",
+                String(localized: "没有找到匹配内容", comment: "Empty state title when search returns no matches."),
                 systemImage: "magnifyingglass",
-                description: Text("可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。")
+                description: Text(String(localized: "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。", comment: "Search empty state suggestion."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
         } else {
@@ -299,7 +299,7 @@ struct HistoryView: View {
 
     private var historySummaryRow: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(trimmedQuery.isEmpty ? "翻译历史 \(history.count) 条" : "\(matchingHistory.count) 个结果")
+            Text(trimmedQuery.isEmpty ? historyCountText(history.count) : resultCountText(matchingHistory.count))
                 .font(.headline)
             Spacer()
             Button(role: .destructive) {
@@ -310,7 +310,7 @@ struct HistoryView: View {
             .buttonStyle(.borderless)
             .controlSize(.small)
             .disabled(history.isEmpty)
-            .accessibilityLabel("删除全部翻译历史")
+            .accessibilityLabel(String(localized: "删除全部翻译历史", comment: "Accessibility label for the button that deletes all translation history."))
             .accessibilityIdentifier("history.deleteAll")
         }
     }
@@ -323,7 +323,8 @@ struct HistoryView: View {
         } catch {
             memoryItems = []
             history = []
-            persistenceErrorMessage = "翻译历史读取失败：\(error.localizedDescription)"
+            let format = String(localized: "翻译历史读取失败：%@", comment: "Error shown when translation history cannot be loaded. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
         hasLoaded = true
     }
@@ -338,7 +339,8 @@ struct HistoryView: View {
             history = updatedHistory
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "收藏保存失败：\(error.localizedDescription)"
+            let format = String(localized: "收藏保存失败：%@", comment: "Error shown when a history item cannot be saved to the library. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -349,7 +351,8 @@ struct HistoryView: View {
             history = updatedHistory
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "翻译历史删除失败：\(error.localizedDescription)"
+            let format = String(localized: "翻译历史删除失败：%@", comment: "Error shown when a history item cannot be deleted. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -359,8 +362,19 @@ struct HistoryView: View {
             history = []
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "翻译历史清空失败：\(error.localizedDescription)"
+            let format = String(localized: "翻译历史清空失败：%@", comment: "Error shown when all translation history cannot be deleted. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
+    }
+
+    private func historyCountText(_ count: Int) -> String {
+        let format = String(localized: "翻译历史 %lld 条", comment: "Summary count for translation history items. The placeholder is the item count.")
+        return String(format: format, Int64(count))
+    }
+
+    private func resultCountText(_ count: Int) -> String {
+        let format = String(localized: "%lld 个结果", comment: "Summary count for search results. The placeholder is the result count.")
+        return String(format: format, Int64(count))
     }
 }
 
@@ -404,7 +418,7 @@ private struct HistoryRecordRow: View {
                 }
                 .buttonStyle(.borderless)
                 .controlSize(.small)
-                .accessibilityLabel("保存到收藏")
+                .accessibilityLabel(String(localized: "保存到收藏", comment: "Accessibility label for saving a history item to the library."))
 
                 Button(role: .destructive) {
                     onDelete()
@@ -413,7 +427,7 @@ private struct HistoryRecordRow: View {
                 }
                 .buttonStyle(.borderless)
                 .controlSize(.small)
-                .accessibilityLabel("删除历史")
+                .accessibilityLabel(String(localized: "删除历史", comment: "Accessibility label for deleting a history item."))
                 #endif
             }
 
@@ -438,12 +452,13 @@ private struct HistoryRecordRow: View {
     }
 
     private var languageDirectionText: String {
-        "\(record.sourceLanguage.title) 到 \(record.targetLanguage.title)"
+        let format = String(localized: "%@ 到 %@", comment: "Language direction label. The placeholders are source language and target language.")
+        return String(format: format, record.sourceLanguage.title, record.targetLanguage.title)
     }
 
     private var saveSwipeAction: ConfirmingSwipeAction {
         ConfirmingSwipeAction(
-            title: "收藏",
+            title: String(localized: "收藏", comment: "Swipe action title for saving to the library."),
             systemImage: "bookmark",
             tint: .accentColor,
             accessibilityIdentifier: "history.swipe.save"
@@ -454,7 +469,7 @@ private struct HistoryRecordRow: View {
 
     private var deleteSwipeAction: ConfirmingSwipeAction {
         ConfirmingSwipeAction(
-            title: "删除",
+            title: String(localized: "删除", comment: "Swipe action title for deleting an item."),
             systemImage: "trash",
             tint: .red,
             accessibilityIdentifier: "history.swipe.delete"
@@ -484,9 +499,9 @@ extension MemorySearchResult.Kind {
     var title: String {
         switch self {
         case .memory:
-            return "收藏"
+            return String(localized: "收藏", comment: "Search result kind for saved memory items.")
         case .history:
-            return "历史"
+            return String(localized: "历史", comment: "Search result kind for translation history items.")
         }
     }
 

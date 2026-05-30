@@ -13,9 +13,15 @@ final class WordSceneLaunchUITests: XCTestCase {
         app = nil
     }
 
-    private func launchApp(seed: String? = nil) {
+    private func launchApp(seed: String? = nil, language: String? = nil, locale: String? = nil) {
         app = XCUIApplication()
         app.launchArguments.append("-WordSceneUITest")
+        if let language {
+            app.launchArguments += ["-AppleLanguages", "(\(language))"]
+        }
+        if let locale {
+            app.launchArguments += ["-AppleLocale", locale]
+        }
         app.launchEnvironment["WORDSCENE_UI_TEST_SUITE"] = "WordSceneUITests.\(UUID().uuidString)"
         if let seed {
             app.launchEnvironment["WORDSCENE_UI_TEST_SEED"] = seed
@@ -124,6 +130,40 @@ final class WordSceneLaunchUITests: XCTestCase {
 
         openTab("翻译")
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 8))
+    }
+
+    func testEnglishLocalizationSmoke() throws {
+        app.terminate()
+        launchApp(language: "en", locale: "en_US")
+
+        XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
+        chooseMenuValue(pickerIdentifier: "translation.sourceLanguage.picker", value: "English")
+
+        openTab("Saved")
+        XCTAssertTrue(app.staticTexts["No Saved Items Yet"].waitForExistence(timeout: 8))
+
+        openTab("Settings")
+        XCTAssertTrue(app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8))
+
+        openTab("History")
+        XCTAssertTrue(app.staticTexts["No Translation History Yet"].waitForExistence(timeout: 8))
+    }
+
+    func testSpanishLocalizationSmoke() throws {
+        app.terminate()
+        launchApp(language: "es", locale: "es_ES")
+
+        XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
+        chooseMenuValue(pickerIdentifier: "translation.sourceLanguage.picker", value: "Inglés")
+
+        openTab("Guardados")
+        XCTAssertTrue(app.staticTexts["Aún no hay guardados"].waitForExistence(timeout: 8))
+
+        openTab("Ajustes")
+        XCTAssertTrue(app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8))
+
+        openTab("Historial")
+        XCTAssertTrue(app.staticTexts["Aún no hay historial de traducción"].waitForExistence(timeout: 8))
     }
 
     func testSeededLibraryAndSearchContentRender() throws {

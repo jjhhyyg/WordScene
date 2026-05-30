@@ -14,9 +14,13 @@ CloudKit 容器：iCloud.com.erikssonhou.leximemory
 ## 本地化
 
 ```text
-UI 默认语言：跟随系统语言
-支持语言：中文、英文、西班牙语
-系统设置路径：Settings -> Apps -> 词境 / Word Scene -> Preferred Language
+UI 默认语言：跟随系统语言，不在 App 内提供独立语言开关
+工程技术：Localizable.xcstrings 管理界面文案，InfoPlist.strings 管理系统显示名
+开发语言：简体中文 zh-Hans
+支持语言：简体中文 zh-Hans、英文 en、西班牙语 es
+iOS / iPadOS 设置路径：Settings -> Apps -> 词境 / Word Scene -> Preferred Language
+macOS 设置路径：System Settings -> General -> Language & Region -> Applications
+macOS 生效规则：如果 App 已打开，修改单个 App 语言后需要退出并重新打开
 ```
 
 ## 视觉方向

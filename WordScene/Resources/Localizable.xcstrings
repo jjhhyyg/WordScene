@@ -1,0 +1,5321 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "%@ 到 %@": {
+      "comment": "Language direction label. The placeholders are source language and target language.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 到 %@"
+          }
+        }
+      }
+    },
+    "%@失败：%@。%@": {
+      "comment": "Sync event message after a failed event. Placeholders are the event label, completion date, and failure reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ failed: %@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ falló: %@. %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@失败：%@。%@"
+          }
+        }
+      }
+    },
+    "%@已完成：%@。": {
+      "comment": "Sync event message after a successful event. Placeholders are the event label and completion date.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ completed: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ completado: %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@已完成：%@。"
+          }
+        }
+      }
+    },
+    "%@中，开始于 %@。": {
+      "comment": "Sync event message while an event is in progress. Placeholders are the event label and start date.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ in progress, started at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ en curso, comenzó a las %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@中，开始于 %@。"
+          }
+        }
+      }
+    },
+    "%lld 个结果": {
+      "comment": "Summary count for search results. The placeholder is the result count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld result"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld results"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld resultado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld resultados"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个结果"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个结果"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "版本": {
+      "comment": "Settings row title for app version.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "保存": {
+      "comment": "Save button title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "保存 DeepSeek Token": {
+      "comment": "Accessibility label for saving the DeepSeek token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save DeepSeek Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar token de DeepSeek"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存 DeepSeek Token"
+          }
+        }
+      }
+    },
+    "保存 Raw API Response": {
+      "comment": "Debug setting title for storing raw API responses.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Raw API Response"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar respuesta API sin procesar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存 Raw API Response"
+          }
+        }
+      }
+    },
+    "保存到收藏": {
+      "comment": "Accessibility label for saving a history item to the library.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save to Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar en guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存到收藏"
+          }
+        }
+      }
+    },
+    "保留现有项": {
+      "comment": "Import conflict policy that keeps existing saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Existing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservar existentes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留现有项"
+          }
+        }
+      }
+    },
+    "备注": {
+      "comment": "Section title for the optional note field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nota"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "备注"
+          }
+        }
+      }
+    },
+    "本地旧缓存来自更新版本的 App。请先升级 WordScene；不要直接重置，除非已经导出旧缓存原始备份。": {
+      "comment": "Recovery error shown when a legacy local cache document requires a newer app version.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The legacy local cache was created by a newer version of WordScene. Upgrade first; do not reset it unless you have exported a raw backup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La caché local antigua se creó con una versión más reciente de WordScene. Actualiza primero; no la restablezcas salvo que hayas exportado una copia original."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地旧缓存来自更新版本的 App。请先升级 WordScene；不要直接重置，除非已经导出旧缓存原始备份。"
+          }
+        }
+      }
+    },
+    "本地旧缓存无法读取。请先在“数据存储”导出旧缓存原始备份，再重置旧缓存文档。": {
+      "comment": "Recovery error shown when a legacy local cache document cannot be read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The legacy local cache cannot be read. Export its raw backup from Data Storage before resetting legacy cache documents."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede leer la caché local antigua. Exporta una copia original desde Almacenamiento de datos antes de restablecer esos documentos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地旧缓存无法读取。请先在“数据存储”导出旧缓存原始备份，再重置旧缓存文档。"
+          }
+        }
+      }
+    },
+    "本地数据文件版本不支持：%@ schema_version %lld。请升级 App 后重试。": {
+      "comment": "Local persistence error when a legacy data document schema is too new. Placeholders are document key and schema version.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local data file version is unsupported: %@ schema_version %lld. Upgrade the app and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La versión del archivo de datos local no es compatible: %@ schema_version %lld. Actualiza la app e inténtalo de nuevo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地数据文件版本不支持：%@ schema_version %lld。请升级 App 后重试。"
+          }
+        }
+      }
+    },
+    "本地数据文件无法读取：%@。": {
+      "comment": "Local persistence error when a legacy data document cannot be read. The placeholder is the document key.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local data file cannot be read: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede leer el archivo de datos local: %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地数据文件无法读取：%@。"
+          }
+        }
+      }
+    },
+    "本机数据正在写入主存储。": {
+      "comment": "Persistence status message when local data is writing to the primary store.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local data is being written to the primary store."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos locales se están escribiendo en el almacenamiento principal."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本机数据正在写入主存储。"
+          }
+        }
+      }
+    },
+    "编辑收藏": {
+      "comment": "Title or accessibility label for editing a saved memory item.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Saved Item"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar guardado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑收藏"
+          }
+        }
+      }
+    },
+    "部分失败 %@": {
+      "comment": "Diagnostic label for a partial failure. The placeholder is the failed item identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partial Failure %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallo parcial %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分失败 %@"
+          }
+        }
+      }
+    },
+    "操作失败，请稍后重试。": {
+      "comment": "Generic settings operation failure.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The operation failed. Please try again later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La operación falló. Inténtalo de nuevo más tarde."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作失败，请稍后重试。"
+          }
+        }
+      }
+    },
+    "测试 DeepSeek Token": {
+      "comment": "Accessibility label for testing the DeepSeek token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test DeepSeek Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar token de DeepSeek"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试 DeepSeek Token"
+          }
+        }
+      }
+    },
+    "测试连接": {
+      "comment": "Button title for testing the DeepSeek token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Connection"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar conexión"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试连接"
+          }
+        }
+      }
+    },
+    "词境": {
+      "comment": "Root sidebar navigation title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Word Scene"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escena de Palabras"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "词境"
+          }
+        }
+      }
+    },
+    "此操作会清空本机历史，并通过同步删除其他设备上的历史记录。": {
+      "comment": "Warning shown before deleting all translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This clears local history and deletes synced history on your other devices."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto borra el historial local y elimina el historial sincronizado en tus otros dispositivos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作会清空本机历史，并通过同步删除其他设备上的历史记录。"
+          }
+        }
+      }
+    },
+    "此操作会删除全部收藏，并同步到其他设备。": {
+      "comment": "Warning shown before deleting all saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This deletes all saved items and syncs the deletion to your other devices."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina todos los guardados y sincroniza la eliminación con tus otros dispositivos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作会删除全部收藏，并同步到其他设备。"
+          }
+        }
+      }
+    },
+    "从 iCloud 导入": {
+      "comment": "Cloud sync event label for importing from iCloud.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import from iCloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar desde iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 iCloud 导入"
+          }
+        }
+      }
+    },
+    "待翻译文本": {
+      "comment": "Accessibility label for the translation input editor.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text to Translate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto para traducir"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "待翻译文本"
+          }
+        }
+      }
+    },
+    "当前处于低数据模式，同步和翻译可能由系统延后。本机收藏和搜索不受影响。": {
+      "comment": "Network status message for constrained low data mode.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low Data Mode is active, so sync and translation may be delayed by the system. Local saved items and search are unaffected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El modo de datos reducidos está activo, así que el sistema puede retrasar la sincronización y traducción. Los guardados locales y la búsqueda no se ven afectados."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前处于低数据模式，同步和翻译可能由系统延后。本机收藏和搜索不受影响。"
+          }
+        }
+      }
+    },
+    "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。": {
+      "comment": "Settings message when local-only storage is active.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device is using local Core Data storage only and will not write data to iCloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este dispositivo usa solo almacenamiento local de Core Data y no escribirá datos en iCloud."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。"
+          }
+        }
+      }
+    },
+    "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。": {
+      "comment": "Sync status message when CloudKit entitlements are unavailable.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This process has no available CloudKit entitlement. Data remains available locally, but will not sync through iCloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este proceso no tiene entitlement de CloudKit disponible. Los datos siguen disponibles localmente, pero no se sincronizarán mediante iCloud."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。"
+          }
+        }
+      }
+    },
+    "当前可能使用蜂窝或热点网络，同步和翻译可能产生流量。本机收藏和搜索不受影响。": {
+      "comment": "Network status message for expensive network connections.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You may be using a cellular or hotspot network. Sync and translation may use data. Local saved items and search are unaffected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puede que estés usando una red móvil o punto de acceso. La sincronización y traducción pueden consumir datos. Los guardados locales y la búsqueda no se ven afectados."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前可能使用蜂窝或热点网络，同步和翻译可能产生流量。本机收藏和搜索不受影响。"
+          }
+        }
+      }
+    },
+    "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。": {
+      "comment": "Network status message when offline.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are offline. Translation requests and iCloud sync are paused, but local saved items, search, and deletion remain available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estás sin conexión. Las solicitudes de traducción y la sincronización con iCloud se pausan, pero los guardados locales, la búsqueda y la eliminación siguen disponibles."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。"
+          }
+        }
+      }
+    },
+    "当前使用 iCloud 私有数据库同步收藏和历史。": {
+      "comment": "Settings message when iCloud sync is active.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved items and history are syncing through your private iCloud database."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los guardados y el historial se sincronizan mediante tu base privada de iCloud."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前使用 iCloud 私有数据库同步收藏和历史。"
+          }
+        }
+      }
+    },
+    "当前为仅本机存储，不会收到 iCloud 同步事件。": {
+      "comment": "Sync event status message when using local-only storage.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app is using local storage only, so it will not receive iCloud sync events."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app usa solo almacenamiento local, así que no recibirá eventos de sincronización de iCloud."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前为仅本机存储，不会收到 iCloud 同步事件。"
+          }
+        }
+      }
+    },
+    "导出": {
+      "comment": "Button title for exporting saved memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出"
+          }
+        }
+      }
+    },
+    "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。": {
+      "comment": "Privacy note shown before exporting saved memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exported files are not encrypted and include saved items, but not your API token. Store them carefully."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los archivos exportados no están cifrados e incluyen elementos guardados, pero no tu token de API. Guárdalos con cuidado."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
+          }
+        }
+      }
+    },
+    "导出文件名": {
+      "comment": "Settings row title for export file name.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export File Name"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre del archivo de exportación"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出文件名"
+          }
+        }
+      }
+    },
+    "导出原始备份": {
+      "comment": "Button title for exporting a raw legacy local cache backup.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Raw Backup"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar copia original"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出原始备份"
+          }
+        }
+      }
+    },
+    "导入": {
+      "comment": "Button title for importing saved memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入"
+          }
+        }
+      }
+    },
+    "导入导出": {
+      "comment": "Settings section title for import and export.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import & Export"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar y exportar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入导出"
+          }
+        }
+      }
+    },
+    "导入导出失败，请稍后重试。": {
+      "comment": "Generic import/export failure.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import or export failed. Please try again later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La importación o exportación falló. Inténtalo de nuevo más tarde."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入导出失败，请稍后重试。"
+          }
+        }
+      }
+    },
+    "导入文件版本不支持，请升级 App 后重试。": {
+      "comment": "Error shown when an import file requires a newer app version.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This import file version is not supported. Upgrade the app and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta versión del archivo de importación no es compatible. Actualiza la app e inténtalo de nuevo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件版本不支持，请升级 App 后重试。"
+          }
+        }
+      }
+    },
+    "导入文件不是有效的 WordScene JSON。": {
+      "comment": "Error shown when the import file is not valid WordScene JSON.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The import file is not valid WordScene JSON."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo de importación no es un JSON válido de WordScene."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件不是有效的 WordScene JSON。"
+          }
+        }
+      }
+    },
+    "导入文件校验失败，文件可能已被修改或损坏。": {
+      "comment": "Error shown when an import file checksum does not match.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import file verification failed. The file may have been changed or damaged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La verificación del archivo falló. Es posible que el archivo se haya modificado o dañado."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件校验失败，文件可能已被修改或损坏。"
+          }
+        }
+      }
+    },
+    "等待 iCloud 同步事件": {
+      "comment": "Sync event status title while waiting for iCloud events.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for iCloud Sync Events"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando eventos de sincronización de iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待 iCloud 同步事件"
+          }
+        }
+      }
+    },
+    "等待翻译": {
+      "comment": "Idle status before a translation starts.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En espera"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待翻译"
+          }
+        }
+      }
+    },
+    "底层错误": {
+      "comment": "Diagnostic label for underlying errors.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Underlying Error"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error subyacente"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "底层错误"
+          }
+        }
+      }
+    },
+    "读取系统凭据失败：%lld。": {
+      "comment": "Error shown when reading from Keychain fails. The placeholder is the OSStatus code.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to read system credentials: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron leer las credenciales del sistema: %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读取系统凭据失败：%lld。"
+          }
+        }
+      }
+    },
+    "翻译": {
+      "comment": "Main translation tab title and primary translate action.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traducir"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译"
+          }
+        }
+      }
+    },
+    "翻译后点收藏，或手动新增一条本机记忆。": {
+      "comment": "Empty state description for the saved memory library.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save an item after translating, or add a local memory item manually."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda algo después de traducir o añade manualmente un recuerdo local."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译后点收藏，或手动新增一条本机记忆。"
+          }
+        }
+      }
+    },
+    "翻译历史": {
+      "comment": "Navigation title for translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译历史"
+          }
+        }
+      }
+    },
+    "翻译历史 %lld 条": {
+      "comment": "Summary count for translation history items. The placeholder is the item count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld history item"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld history items"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld elemento del historial"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld elementos del historial"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "翻译历史 %lld 条"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "翻译历史 %lld 条"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "翻译历史读取失败：%@": {
+      "comment": "Error shown when translation history cannot be loaded. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to read translation history: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer el historial de traducción: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译历史读取失败：%@"
+          }
+        }
+      }
+    },
+    "翻译历史清空失败：%@": {
+      "comment": "Error shown when all translation history cannot be deleted. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to clear translation history: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo borrar el historial de traducción: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译历史清空失败：%@"
+          }
+        }
+      }
+    },
+    "翻译历史删除失败：%@": {
+      "comment": "Error shown when a history item cannot be deleted. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to delete translation history item: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo eliminar el elemento del historial: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译历史删除失败：%@"
+          }
+        }
+      }
+    },
+    "翻译请求失败，请检查网络后重试。": {
+      "comment": "Generic translation request failure.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The translation request failed. Check your connection and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud de traducción falló. Revisa la conexión e inténtalo de nuevo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译请求失败，请检查网络后重试。"
+          }
+        }
+      }
+    },
+    "翻译失败": {
+      "comment": "Error state title when translation fails.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation Failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译失败"
+          }
+        }
+      }
+    },
+    "翻译中": {
+      "comment": "Status while a translation request is running.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translating"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traduciendo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译中"
+          }
+        }
+      }
+    },
+    "范围": {
+      "comment": "Settings row title for import/export scope.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scope"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alcance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "范围"
+          }
+        }
+      }
+    },
+    "覆盖重复项": {
+      "comment": "Import conflict policy that replaces duplicate saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace Duplicates"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reemplazar duplicados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖重复项"
+          }
+        }
+      }
+    },
+    "给重要收藏加星标后，可在这里快速筛选。": {
+      "comment": "Empty state description for starred saved items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star important saved items to filter them here quickly."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca guardados importantes con una estrella para filtrarlos rápidamente aquí."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "给重要收藏加星标后，可在这里快速筛选。"
+          }
+        }
+      }
+    },
+    "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。": {
+      "comment": "Settings message after changing the iCloud sync preference.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes take effect the next time you open the app. Local data is not deleted when you change the sync setting."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los cambios se aplicarán la próxima vez que abras la app. Los datos locales no se eliminan al cambiar la sincronización."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。"
+          }
+        }
+      }
+    },
+    "构建": {
+      "comment": "Settings row title for build number.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compilación"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建"
+          }
+        }
+      }
+    },
+    "关于": {
+      "comment": "Settings section title for app information.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acerca de"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于"
+          }
+        }
+      }
+    },
+    "还没有翻译结果": {
+      "comment": "Empty result title before a translation has run.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Translation Yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有翻译结果"
+          }
+        }
+      }
+    },
+    "还没有翻译历史": {
+      "comment": "Empty state title when there is no translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Translation History Yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay historial de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有翻译历史"
+          }
+        }
+      }
+    },
+    "还没有收藏": {
+      "comment": "Empty state title when no saved memory exists.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Saved Items Yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有收藏"
+          }
+        }
+      }
+    },
+    "还没有收到 iCloud 同步事件。完成签名设备测试前，这不能证明多端已同步。": {
+      "comment": "Sync event status message before any iCloud events are observed.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No iCloud sync events have been received yet. Until signed device testing is complete, this does not prove that multi-device sync is working."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no se han recibido eventos de sincronización de iCloud. Hasta completar pruebas en dispositivos firmados, esto no demuestra que la sincronización multidispositivo funcione."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有收到 iCloud 同步事件。完成签名设备测试前，这不能证明多端已同步。"
+          }
+        }
+      }
+    },
+    "恢复建议": {
+      "comment": "Diagnostic label for an error recovery suggestion.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recovery Suggestion"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugerencia de recuperación"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复建议"
+          }
+        }
+      }
+    },
+    "兼容存储模式": {
+      "comment": "Persistence status title when legacy storage fallback is active.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatibility Storage Mode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo de almacenamiento compatible"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "兼容存储模式"
+          }
+        }
+      }
+    },
+    "交换翻译方向": {
+      "comment": "Accessibility label for swapping translation source and target languages.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap Translation Direction"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intercambiar dirección de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交换翻译方向"
+          }
+        }
+      }
+    },
+    "结果": {
+      "comment": "Heading for the translation result panel.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Result"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resultado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "结果"
+          }
+        }
+      }
+    },
+    "仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。": {
+      "comment": "Debug raw API response privacy explanation.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available only in Debug builds for inspecting model responses. Release builds do not save, show, sync, or export this data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponible solo en compilaciones Debug para revisar respuestas del modelo. Las versiones Release no guardan, muestran, sincronizan ni exportan estos datos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。"
+          }
+        }
+      }
+    },
+    "仅 Debug build 可用；Release build 不保存、不同步、不导出。": {
+      "comment": "Short debug raw API response privacy explanation.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available only in Debug builds. Release builds do not save, sync, or export this data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponible solo en compilaciones Debug. Las versiones Release no guardan, sincronizan ni exportan estos datos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅 Debug build 可用；Release build 不保存、不同步、不导出。"
+          }
+        }
+      }
+    },
+    "仅本机存储": {
+      "comment": "Sync status title when only local storage is active.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Storage Only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo almacenamiento local"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅本机存储"
+          }
+        }
+      }
+    },
+    "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。": {
+      "comment": "Description for legacy local cache recovery tools.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legacy cache maintenance only handles earlier local documents. Export a raw backup before resetting them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mantenimiento de caché antigua solo gestiona documentos locales anteriores. Exporta una copia original antes de restablecerlos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。"
+          }
+        }
+      }
+    },
+    "开始翻译": {
+      "comment": "Accessibility label for the primary translate button.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Translation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始翻译"
+          }
+        }
+      }
+    },
+    "可选": {
+      "comment": "Placeholder for an optional note field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选"
+          }
+        }
+      }
+    },
+    "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。": {
+      "comment": "Search empty state suggestion.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten the query, or try searching by pinyin, Chinese characters, or language."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acorta la búsqueda o prueba con pinyin, caracteres chinos o idioma."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。"
+          }
+        }
+      }
+    },
+    "历史": {
+      "comment": "Search result kind for translation history items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "历史"
+          }
+        }
+      }
+    },
+    "连接成功，Token 已保存。": {
+      "comment": "Status shown after a successful DeepSeek connection test.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection succeeded. The token has been saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La conexión se realizó correctamente. El token se guardó."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接成功，Token 已保存。"
+          }
+        }
+      }
+    },
+    "没有发现旧缓存文档，无需导出原始备份。": {
+      "comment": "Status shown when no legacy local cache backup is needed.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No legacy cache documents were found, so no raw backup is needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron documentos de caché antigua, así que no hace falta una copia original."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有发现旧缓存文档，无需导出原始备份。"
+          }
+        }
+      }
+    },
+    "没有旧缓存文档需要重置。": {
+      "comment": "Status shown when there are no legacy local cache documents to reset.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no legacy cache documents to reset."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay documentos de caché antigua para restablecer."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有旧缓存文档需要重置。"
+          }
+        }
+      }
+    },
+    "没有同步事件": {
+      "comment": "Sync event status title when there are no sync events.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Sync Events"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin eventos de sincronización"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有同步事件"
+          }
+        }
+      }
+    },
+    "没有星标收藏": {
+      "comment": "Empty state title when the starred saved items filter is empty.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Starred Saved Items"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay guardados destacados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有星标收藏"
+          }
+        }
+      }
+    },
+    "没有找到匹配内容": {
+      "comment": "Empty state title when search returns no matches.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Matches Found"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron resultados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有找到匹配内容"
+          }
+        }
+      }
+    },
+    "敏感内容仅保存在本机设置和系统凭据存储中。": {
+      "comment": "Short privacy note for local credential storage.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensitive content is saved only in local settings and the system credential store."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenido sensible se guarda solo en los ajustes locales y el almacén de credenciales del sistema."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "敏感内容仅保存在本机设置和系统凭据存储中。"
+          }
+        }
+      }
+    },
+    "敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。": {
+      "comment": "Privacy explanation for API tokens and sensitive content.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensitive content is saved only in local settings and the system credential store. API tokens are not stored in CloudKit, export files, or debug response logs."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenido sensible se guarda solo en los ajustes locales y el almacén de credenciales del sistema. Los tokens de API no se guardan en CloudKit, archivos exportados ni registros de depuración."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。"
+          }
+        }
+      }
+    },
+    "模型": {
+      "comment": "Settings row title for the translation model.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型"
+          }
+        }
+      }
+    },
+    "目标语言": {
+      "comment": "Picker label for target language.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target Language"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma de destino"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标语言"
+          }
+        }
+      }
+    },
+    "配置 DeepSeek Token 后，输入内容即可开始翻译。": {
+      "comment": "Empty result description before a translation has run.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a DeepSeek token, then enter text to start translating."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda un token de DeepSeek y luego introduce texto para empezar a traducir."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置 DeepSeek Token 后，输入内容即可开始翻译。"
+          }
+        }
+      }
+    },
+    "清空输入": {
+      "comment": "Accessibility label for clearing the translation input.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Input"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar entrada"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空输入"
+          }
+        }
+      }
+    },
+    "清空输入和译文": {
+      "comment": "Accessibility label for clearing both the input and translated result.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Input and Translation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar entrada y traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空输入和译文"
+          }
+        }
+      }
+    },
+    "清空搜索": {
+      "comment": "Accessibility label for clearing a search field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Search"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar búsqueda"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空搜索"
+          }
+        }
+      }
+    },
+    "请输入需要翻译的文本。": {
+      "comment": "Error shown when the user tries to translate empty text.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter text to translate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce el texto que quieres traducir."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入需要翻译的文本。"
+          }
+        }
+      }
+    },
+    "请先在设置中保存 DeepSeek API Token。": {
+      "comment": "Error shown when translating without a saved API token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save your DeepSeek API token in Settings first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primero guarda tu token de API de DeepSeek en Ajustes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先在设置中保存 DeepSeek API Token。"
+          }
+        }
+      }
+    },
+    "请选择要导入的 JSON 文件。": {
+      "comment": "Status shown before the user chooses a JSON import file.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the JSON file to import."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el archivo JSON que quieres importar."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择要导入的 JSON 文件。"
+          }
+        }
+      }
+    },
+    "取消": {
+      "comment": "Cancel button title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "取消星标": {
+      "comment": "Action title for removing a star from a saved memory item.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Star"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar estrella"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消星标"
+          }
+        }
+      }
+    },
+    "全部": {
+      "comment": "Filter option that shows all saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "全部删除": {
+      "comment": "Destructive button that deletes all items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete All"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar todo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部删除"
+          }
+        }
+      }
+    },
+    "全量导入 / 全量导出": {
+      "comment": "Settings value describing import/export scope.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full import / full export"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importación completa / exportación completa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全量导入 / 全量导出"
+          }
+        }
+      }
+    },
+    "删除": {
+      "comment": "Delete action title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "删除 DeepSeek Token": {
+      "comment": "Accessibility label for deleting the DeepSeek token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete DeepSeek Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar token de DeepSeek"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 DeepSeek Token"
+          }
+        }
+      }
+    },
+    "删除记录清理失败：%@": {
+      "comment": "Error shown when deletion tombstones cannot be purged. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to clean up deletion records: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron limpiar los registros de eliminación: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除记录清理失败：%@"
+          }
+        }
+      }
+    },
+    "删除历史": {
+      "comment": "Accessibility label for deleting a history item.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar historial"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除历史"
+          }
+        }
+      }
+    },
+    "删除全部翻译历史": {
+      "comment": "Accessibility label for the button that deletes all translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete All Translation History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar todo el historial de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除全部翻译历史"
+          }
+        }
+      }
+    },
+    "删除全部翻译历史？": {
+      "comment": "Confirmation title before deleting all translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete all translation history?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar todo el historial de traducción?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除全部翻译历史？"
+          }
+        }
+      }
+    },
+    "删除全部收藏": {
+      "comment": "Accessibility label for deleting all saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete All Saved Items"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar todos los guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除全部收藏"
+          }
+        }
+      }
+    },
+    "删除全部收藏？": {
+      "comment": "Confirmation title before deleting all saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete all saved items?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar todos los guardados?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除全部收藏？"
+          }
+        }
+      }
+    },
+    "删除收藏": {
+      "comment": "Accessibility label for deleting a saved memory item.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Saved Item"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar guardado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除收藏"
+          }
+        }
+      }
+    },
+    "设置": {
+      "comment": "Settings navigation title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "失败原因": {
+      "comment": "Diagnostic label for an error failure reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failure Reason"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo del fallo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败原因"
+          }
+        }
+      }
+    },
+    "使用 iCloud 同步": {
+      "comment": "Toggle title for enabling iCloud sync.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use iCloud Sync"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar sincronización con iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 iCloud 同步"
+          }
+        }
+      }
+    },
+    "收藏": {
+      "comment": "Navigation item and action for saved translations.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏"
+          }
+        }
+      }
+    },
+    "收藏 %lld": {
+      "comment": "Compact saved memory count shown next to search results. The placeholder is the item count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld saved"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld saved"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardados"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "收藏 %lld"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "收藏 %lld"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "收藏保存失败：%@": {
+      "comment": "Warning shown when saving a translation result to memory fails. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to save item: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar el elemento: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏保存失败：%@"
+          }
+        }
+      }
+    },
+    "收藏更新失败：%@": {
+      "comment": "Error shown when a saved memory item cannot be updated. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to update saved item: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo actualizar el guardado: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏更新失败：%@"
+          }
+        }
+      }
+    },
+    "收藏清空失败：%@": {
+      "comment": "Error shown when all saved memory items cannot be deleted. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to clear saved items: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron borrar los guardados: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏清空失败：%@"
+          }
+        }
+      }
+    },
+    "收藏筛选": {
+      "comment": "Picker label for filtering saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved Items Filter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtro de guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏筛选"
+          }
+        }
+      }
+    },
+    "收藏删除失败：%@": {
+      "comment": "Error shown when a saved memory item cannot be deleted. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to delete saved item: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo eliminar el guardado: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏删除失败：%@"
+          }
+        }
+      }
+    },
+    "收藏数据读取失败：%@": {
+      "comment": "Error shown when saved memory cannot be loaded. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to read saved items: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron leer los guardados: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏数据读取失败：%@"
+          }
+        }
+      }
+    },
+    "手动新增": {
+      "comment": "Button or title for manually adding a saved memory item.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Manually"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir manualmente"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手动新增"
+          }
+        }
+      }
+    },
+    "手动新增失败：%@": {
+      "comment": "Error shown when manually adding a saved memory item fails. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manual add failed: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo añadir manualmente: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手动新增失败：%@"
+          }
+        }
+      }
+    },
+    "输入": {
+      "comment": "Heading for the translation input panel.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Input"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrada"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入"
+          }
+        }
+      }
+    },
+    "输入要翻译的单词、短语或句子": {
+      "comment": "Placeholder for the full translation input field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a word, phrase, or sentence to translate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce una palabra, frase u oración para traducir"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入要翻译的单词、短语或句子"
+          }
+        }
+      }
+    },
+    "输入要翻译的文本": {
+      "comment": "Placeholder for the compact translation input field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter text to translate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce el texto para traducir"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入要翻译的文本"
+          }
+        }
+      }
+    },
+    "输入字符数 %lld": {
+      "comment": "Accessibility label for the translation input character count. The placeholder is the character count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld input character"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld input characters"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld carácter de entrada"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld caracteres de entrada"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "输入字符数 %lld"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "输入字符数 %lld"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "数据存储": {
+      "comment": "Settings section title for data storage.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data Storage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenamiento de datos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "数据存储"
+          }
+        }
+      }
+    },
+    "搜索单词、短语、句子": {
+      "comment": "Placeholder for searching saved memory items.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search words, phrases, or sentences"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar palabras, frases u oraciones"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索单词、短语、句子"
+          }
+        }
+      }
+    },
+    "搜索翻译历史": {
+      "comment": "Placeholder for searching translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Translation History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar en el historial de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索翻译历史"
+          }
+        }
+      }
+    },
+    "同步": {
+      "comment": "General sync label.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步"
+          }
+        }
+      }
+    },
+    "同步不可用": {
+      "comment": "Sync status title when sync is unavailable.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync Unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización no disponible"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步不可用"
+          }
+        }
+      }
+    },
+    "同步不可用：%@": {
+      "comment": "Sync event status message when sync is unavailable. The placeholder is the reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync unavailable: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización no disponible: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步不可用：%@"
+          }
+        }
+      }
+    },
+    "同步出现错误": {
+      "comment": "Sync event status title after a sync error.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync Error"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error de sincronización"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步出现错误"
+          }
+        }
+      }
+    },
+    "同步未完成": {
+      "comment": "Short sync badge after sync failure.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync Incomplete"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización incompleta"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步未完成"
+          }
+        }
+      }
+    },
+    "完成翻译后，最近 100 条记录会显示在这里。": {
+      "comment": "Empty state description for translation history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After translating, your 100 most recent records appear here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después de traducir, tus 100 registros más recientes aparecerán aquí."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成翻译后，最近 100 条记录会显示在这里。"
+          }
+        }
+      }
+    },
+    "网络不可用": {
+      "comment": "Network status title when network is unavailable.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network Unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red no disponible"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络不可用"
+          }
+        }
+      }
+    },
+    "网络可用": {
+      "comment": "Network status title when network is available.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network Available"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red disponible"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络可用"
+          }
+        }
+      }
+    },
+    "网络可用于翻译请求和 iCloud 同步。本机数据仍会先写入本地存储。": {
+      "comment": "Network status message when normal network is available.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The network is available for translation requests and iCloud sync. Local data is still written to local storage first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La red está disponible para solicitudes de traducción y sincronización con iCloud. Los datos locales se escriben primero en el almacenamiento local."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络可用于翻译请求和 iCloud 同步。本机数据仍会先写入本地存储。"
+          }
+        }
+      }
+    },
+    "网络状态检测中": {
+      "comment": "Network status title while checking connectivity.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking Network Status"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando estado de red"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络状态检测中"
+          }
+        }
+      }
+    },
+    "未导入新内容，已跳过 %lld 条重复项。": {
+      "comment": "Import summary when all selected memory items were duplicates. The placeholder is the skipped count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No new items imported. Skipped %lld duplicate item."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No new items imported. Skipped %lld duplicate items."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se importaron elementos nuevos. Se omitió %lld duplicado."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se importaron elementos nuevos. Se omitieron %lld duplicados."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "未导入新内容，已跳过 %lld 条重复项。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "未导入新内容，已跳过 %lld 条重复项。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "无法读取翻译历史": {
+      "comment": "Empty state title when translation history cannot be read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to Read Translation History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede leer el historial de traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取翻译历史"
+          }
+        }
+      }
+    },
+    "无法读取收藏": {
+      "comment": "Empty state title when saved memory cannot be read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to Read Saved Items"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pueden leer los guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取收藏"
+          }
+        }
+      }
+    },
+    "西班牙语": {
+      "comment": "Language picker option for Spanish.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spanish"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Español"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "西班牙语"
+          }
+        }
+      }
+    },
+    "系统凭据存储失败：%lld。": {
+      "comment": "Error shown when Keychain storage fails. The placeholder is the OSStatus code.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to store system credentials: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron guardar las credenciales del sistema: %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统凭据存储失败：%lld。"
+          }
+        }
+      }
+    },
+    "详细错误": {
+      "comment": "Diagnostic label for detailed errors.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detailed Error"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error detallado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详细错误"
+          }
+        }
+      }
+    },
+    "向 iCloud 上传": {
+      "comment": "Cloud sync event label for uploading to iCloud.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to iCloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir a iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向 iCloud 上传"
+          }
+        }
+      }
+    },
+    "星标": {
+      "comment": "Starred label or action title.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starred"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destacados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星标"
+          }
+        }
+      }
+    },
+    "星标更新失败：%@": {
+      "comment": "Error shown when a saved memory star cannot be updated. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to update star: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo actualizar la estrella: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星标更新失败：%@"
+          }
+        }
+      }
+    },
+    "星标收藏": {
+      "comment": "Caption for starred saved memory filter.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starred Saved Items"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardados destacados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星标收藏"
+          }
+        }
+      }
+    },
+    "需要处理": {
+      "comment": "Status shown when translation needs user attention.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Needs Attention"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requiere atención"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要处理"
+          }
+        }
+      }
+    },
+    "验收标识": {
+      "comment": "Settings row title for smoke test identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke Test ID"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID de prueba de validación"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "验收标识"
+          }
+        }
+      }
+    },
+    "已保存": {
+      "comment": "Short sync badge when data is saved locally.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存"
+          }
+        }
+      }
+    },
+    "已导出 %@。%@": {
+      "comment": "Status shown after exporting memory. The first placeholder is the file name; the second is the privacy notice.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exported %@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se exportó %@. %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已导出 %@。%@"
+          }
+        }
+      }
+    },
+    "已导出旧缓存原始备份 %@。": {
+      "comment": "Status shown after exporting a legacy local cache backup. The placeholder is the file name.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exported raw legacy cache backup %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se exportó la copia original de caché antigua %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已导出旧缓存原始备份 %@。"
+          }
+        }
+      }
+    },
+    "已导入 %lld 条，覆盖 %lld 条，跳过 %lld 条。": {
+      "comment": "Import summary. Placeholders are imported count, replaced count, and skipped count.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported: %lld. Replaced: %lld. Skipped: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importados: %lld. Reemplazados: %lld. Omitidos: %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已导入 %lld 条，覆盖 %lld 条，跳过 %lld 条。"
+          }
+        }
+      }
+    },
+    "已翻译": {
+      "comment": "Translation status after a successful translation.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translated"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traducido"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已翻译"
+          }
+        }
+      }
+    },
+    "已复制": {
+      "comment": "Status label shown after copying translated text.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制"
+          }
+        }
+      }
+    },
+    "已配置通过 %@ 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。": {
+      "comment": "Sync status message when iCloud sync is configured. The placeholder is the CloudKit container identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configured to write to the private iCloud database through %@. Sync is not instantaneous and depends on the system, network, and Apple ID state."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurado para escribir en la base privada de iCloud mediante %@. La sincronización no es inmediata y depende del sistema, la red y el estado del Apple ID."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已配置通过 %@ 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。"
+          }
+        }
+      }
+    },
+    "已取消导出，未写入文件。": {
+      "comment": "Status shown when the user cancels memory export.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export canceled. No file was written."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportación cancelada. No se escribió ningún archivo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消导出，未写入文件。"
+          }
+        }
+      }
+    },
+    "已取消导入，未读取文件。": {
+      "comment": "Status shown when the user cancels memory import.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import canceled. No file was read."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importación cancelada. No se leyó ningún archivo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消导入，未读取文件。"
+          }
+        }
+      }
+    },
+    "已取消旧缓存原始备份导出，未写入文件。": {
+      "comment": "Status shown when the user cancels legacy cache backup export.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legacy cache backup export canceled. No file was written."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportación de la copia de caché antigua cancelada. No se escribió ningún archivo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消旧缓存原始备份导出，未写入文件。"
+          }
+        }
+      }
+    },
+    "已收藏 %lld 条": {
+      "comment": "Summary count for saved memory items. The placeholder is the item count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld saved item"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld saved items"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardados"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已收藏 %lld 条"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已收藏 %lld 条"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "已同步云端": {
+      "comment": "Short sync badge after cloud export succeeds.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced to Cloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronizado en la nube"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已同步云端"
+          }
+        }
+      }
+    },
+    "已重置 %lld 个旧缓存文档。": {
+      "comment": "Status shown after resetting legacy local cache documents. The placeholder is the reset document count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reset %lld legacy cache document."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reset %lld legacy cache documents."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se restableció %lld documento de caché antigua."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se restablecieron %lld documentos de caché antigua."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已重置 %lld 个旧缓存文档。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已重置 %lld 个旧缓存文档。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "已准备 %lld 个旧缓存文档，请在系统面板中选择保存位置。": {
+      "comment": "Status shown after preparing a legacy local cache backup. The placeholder is the document count.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Prepared %lld legacy cache document. Choose a save location in the system panel."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Prepared %lld legacy cache documents. Choose a save location in the system panel."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se preparó %lld documento de caché antigua. Elige una ubicación en el panel del sistema."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se prepararon %lld documentos de caché antigua. Elige una ubicación en el panel del sistema."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已准备 %lld 个旧缓存文档，请在系统面板中选择保存位置。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已准备 %lld 个旧缓存文档，请在系统面板中选择保存位置。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@": {
+      "comment": "Status shown after preparing a memory export. The first placeholder is the exported item count; the second is the privacy notice.",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Prepared %lld memory item. Choose a save location in the system panel. %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Prepared %lld memory items. Choose a save location in the system panel. %@"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se preparó %lld elemento de memoria. Elige una ubicación en el panel del sistema. %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se prepararon %lld elementos de memoria. Elige una ubicación en el panel del sistema. %@"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "译文": {
+      "comment": "Section title for the translated text field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traducción"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "译文"
+          }
+        }
+      }
+    },
+    "译文，点击复制": {
+      "comment": "Accessibility label for the translated text copy area.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation, tap to copy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traducción, toca para copiar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "译文，点击复制"
+          }
+        }
+      }
+    },
+    "译文已生成，但翻译历史保存失败：%@": {
+      "comment": "Warning shown when translation succeeds but history cannot be saved. The placeholder is the system error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation was generated, but history could not be saved: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La traducción se generó, pero no se pudo guardar el historial: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "译文已生成，但翻译历史保存失败：%@"
+          }
+        }
+      }
+    },
+    "隐私": {
+      "comment": "Settings section title for privacy controls.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidad"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐私"
+          }
+        }
+      }
+    },
+    "英文": {
+      "comment": "Language picker option for English.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inglés"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "英文"
+          }
+        }
+      }
+    },
+    "语言": {
+      "comment": "Section title for language pickers in the saved memory editor.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Languages"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idiomas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
+          }
+        }
+      }
+    },
+    "原文": {
+      "comment": "Section title for the source text field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source Text"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto original"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原文"
+          }
+        }
+      }
+    },
+    "源语言": {
+      "comment": "Picker label for source language.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source Language"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma de origen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "源语言"
+          }
+        }
+      }
+    },
+    "这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。": {
+      "comment": "Warning shown before resetting legacy local cache documents.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This deletes earlier local memory and translation history caches. Export a raw backup first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina cachés locales antiguas de recuerdos e historial de traducción. Exporta primero una copia original."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。"
+          }
+        }
+      }
+    },
+    "正在测试 DeepSeek 连接...": {
+      "comment": "Status while validating a DeepSeek token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testing the DeepSeek connection..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probando la conexión con DeepSeek..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在测试 DeepSeek 连接..."
+          }
+        }
+      }
+    },
+    "正在翻译...": {
+      "comment": "Progress label while translating.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translating..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traduciendo..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在翻译..."
+          }
+        }
+      }
+    },
+    "正在加载翻译历史...": {
+      "comment": "Loading indicator while translation history is being read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading translation history..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando historial de traducción..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载翻译历史..."
+          }
+        }
+      }
+    },
+    "正在加载收藏...": {
+      "comment": "Loading indicator while saved memory items are being read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading saved items..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando guardados..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载收藏..."
+          }
+        }
+      }
+    },
+    "正在检测网络状态。本机收藏和搜索仍可使用。": {
+      "comment": "Network status message while checking connectivity.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking network status. Local saved items and search remain available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando el estado de la red. Los guardados locales y la búsqueda siguen disponibles."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检测网络状态。本机收藏和搜索仍可使用。"
+          }
+        }
+      }
+    },
+    "正在同步": {
+      "comment": "Short status shown while checking library sync state.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronizando"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在同步"
+          }
+        }
+      }
+    },
+    "正在准备导出文件...": {
+      "comment": "Status shown while preparing a memory export file.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing the export file..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando el archivo de exportación..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在准备导出文件..."
+          }
+        }
+      }
+    },
+    "正在准备旧缓存原始备份...": {
+      "comment": "Status shown while preparing a legacy local cache backup.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing the raw legacy cache backup..."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando la copia original de la caché antigua..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在准备旧缓存原始备份..."
+          }
+        }
+      }
+    },
+    "中文": {
+      "comment": "Language picker option for Chinese.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinese"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chino"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中文"
+          }
+        }
+      }
+    },
+    "重复项": {
+      "comment": "Picker label for duplicate import handling.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicates"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重复项"
+          }
+        }
+      }
+    },
+    "重置旧缓存": {
+      "comment": "Button title for resetting legacy local cache documents.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Legacy Cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restablecer caché antigua"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置旧缓存"
+          }
+        }
+      }
+    },
+    "重置旧缓存？": {
+      "comment": "Confirmation title before resetting legacy local cache documents.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset legacy cache?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Restablecer caché antigua?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置旧缓存？"
+          }
+        }
+      }
+    },
+    "主存储初始化失败，当前使用兼容存储：%@": {
+      "comment": "Persistence status message when primary storage fails. The placeholder is the failure reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primary storage failed to initialize, so compatibility storage is being used: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El almacenamiento principal no pudo inicializarse, así que se usa almacenamiento compatible: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主存储初始化失败，当前使用兼容存储：%@"
+          }
+        }
+      }
+    },
+    "主存储初始化失败，当前无法使用 iCloud 同步：%@": {
+      "comment": "Sync status message when sync is unavailable because storage failed. The placeholder is the failure reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primary storage failed to initialize, so iCloud sync is unavailable: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El almacenamiento principal no pudo inicializarse, así que la sincronización con iCloud no está disponible: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主存储初始化失败，当前无法使用 iCloud 同步：%@"
+          }
+        }
+      }
+    },
+    "准备 iCloud 同步": {
+      "comment": "Cloud sync event label for setup.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepare iCloud Sync"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparar sincronización con iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "准备 iCloud 同步"
+          }
+        }
+      }
+    },
+    "自动检测": {
+      "comment": "Language picker option for automatic source-language detection.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Detect"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detección automática"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动检测"
+          }
+        }
+      }
+    },
+    "最近同步成功": {
+      "comment": "Sync event status title after recent successful sync.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent Sync Succeeded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización reciente correcta"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近同步成功"
+          }
+        }
+      }
+    },
+    "API Token": {
+      "comment": "Settings label for the API token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token de API"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API Token"
+          }
+        }
+      }
+    },
+    "App 版本 %@": {
+      "comment": "Accessibility label for app version information. The placeholder is the visible smoke test version value.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App version %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión de la app %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 版本 %@"
+          }
+        }
+      }
+    },
+    "Base URL": {
+      "comment": "Settings row title for the API base URL.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base URL"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL base"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base URL"
+          }
+        }
+      }
+    },
+    "Core Data 已启用": {
+      "comment": "Persistence status title when Core Data is active.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core Data Enabled"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core Data activado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core Data 已启用"
+          }
+        }
+      }
+    },
+    "DeepSeek": {
+      "comment": "DeepSeek product name.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek"
+          }
+        }
+      }
+    },
+    "DeepSeek 返回无效响应。": {
+      "comment": "Error shown when the DeepSeek response cannot be parsed.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek returned an invalid response."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek devolvió una respuesta no válida."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 返回无效响应。"
+          }
+        }
+      }
+    },
+    "DeepSeek 拒绝了该内容，请调整文本后重试。": {
+      "comment": "Error shown when the translation provider refuses the content.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek rejected this content. Please revise the text and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek rechazó este contenido. Ajusta el texto e inténtalo de nuevo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 拒绝了该内容，请调整文本后重试。"
+          }
+        }
+      }
+    },
+    "DeepSeek 没有返回可用译文。": {
+      "comment": "Error shown when the translation provider returns no usable translation.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek did not return a usable translation."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek no devolvió una traducción utilizable."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 没有返回可用译文。"
+          }
+        }
+      }
+    },
+    "DeepSeek 请求失败：HTTP %lld。": {
+      "comment": "Error shown when an HTTP request to DeepSeek fails. The placeholder is the HTTP status code.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek request failed: HTTP %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud a DeepSeek falló: HTTP %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 请求失败：HTTP %lld。"
+          }
+        }
+      }
+    },
+    "DeepSeek 输出被截断，请缩短文本后重试。": {
+      "comment": "Error shown when the translation provider truncates the output.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek output was truncated. Please shorten the text and try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La salida de DeepSeek se truncó. Acorta el texto e inténtalo de nuevo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 输出被截断，请缩短文本后重试。"
+          }
+        }
+      }
+    },
+    "DeepSeek 暂时资源不足，请稍后重试。": {
+      "comment": "Error shown when the translation provider reports insufficient resources.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek is temporarily low on resources. Please try again later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek tiene recursos limitados temporalmente. Inténtalo de nuevo más tarde."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek 暂时资源不足，请稍后重试。"
+          }
+        }
+      }
+    },
+    "DeepSeek API Token": {
+      "comment": "Accessibility label for the DeepSeek API token field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek API Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token de API de DeepSeek"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek API Token"
+          }
+        }
+      }
+    },
+    "DeepSeek Token 无效或已过期。": {
+      "comment": "Error shown when the translation API token is rejected.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The DeepSeek token is invalid or expired."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El token de DeepSeek no es válido o caducó."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek Token 无效或已过期。"
+          }
+        }
+      }
+    },
+    "iCloud 同步存储初始化失败，已切换为仅本机存储。数据仍可本机使用，但不会通过 iCloud 同步：%@": {
+      "comment": "Sync status message when iCloud storage fails and local fallback is used. The placeholder is the failure reason.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud sync storage failed to initialize, so the app switched to local storage only. Data remains available locally, but will not sync through iCloud: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El almacenamiento de sincronización de iCloud no pudo inicializarse, así que la app cambió a solo almacenamiento local. Los datos siguen disponibles localmente, pero no se sincronizarán mediante iCloud: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud 同步存储初始化失败，已切换为仅本机存储。数据仍可本机使用，但不会通过 iCloud 同步：%@"
+          }
+        }
+      }
+    },
+    "iCloud 同步已配置": {
+      "comment": "Sync status title when iCloud sync is configured.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud Sync Configured"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización con iCloud configurada"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud 同步已配置"
+          }
+        }
+      }
+    },
+    "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。": {
+      "comment": "Status shown when DeepSeek accepts a token but balance is unavailable.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The token is valid, but the account balance is unavailable. Check your DeepSeek balance."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El token es válido, pero el saldo de la cuenta no está disponible. Revisa tu saldo de DeepSeek."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。"
+          }
+        }
+      }
+    },
+    "Token 无效或已过期。": {
+      "comment": "Status shown when a token is invalid during balance check.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The token is invalid or expired."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El token no es válido o caducó."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token 无效或已过期。"
+          }
+        }
+      }
+    },
+    "Token 已保存在本机。": {
+      "comment": "Status shown after saving an API token.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The token has been saved on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El token se guardó en este dispositivo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token 已保存在本机。"
+          }
+        }
+      }
+    },
+    "Token 只会保存在本机系统凭据存储中。": {
+      "comment": "Privacy note for the API token field.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The token is saved only in this device's system credential store."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El token se guarda solo en el almacén de credenciales del sistema de este dispositivo."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token 只会保存在本机系统凭据存储中。"
+          }
+        }
+      }
+    },
+    "translation.result.removeFromMemory.accessibility": {
+      "comment": "Accessibility label for removing a translation result from saved memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de guardados"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消收藏"
+          }
+        }
+      }
+    },
+    "translation.result.savedToMemory": {
+      "comment": "Button title when a translation result is already saved to memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已收藏"
+          }
+        }
+      }
+    },
+    "translation.result.saveToMemory": {
+      "comment": "Button title for saving a translation result to memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏"
+          }
+        }
+      }
+    },
+    "translation.result.saveToMemory.accessibility": {
+      "comment": "Accessibility label for saving a translation result to memory.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save to Memory"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar en memoria"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

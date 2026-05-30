@@ -237,14 +237,14 @@ enum AppErrorDescription {
             components.append(description)
         }
 
-        appendStringDetail(NSLocalizedFailureReasonErrorKey, prefix: "失败原因", from: nsError, to: &components)
-        appendStringDetail(NSLocalizedRecoverySuggestionErrorKey, prefix: "恢复建议", from: nsError, to: &components)
+        appendStringDetail(NSLocalizedFailureReasonErrorKey, prefix: String(localized: "失败原因", comment: "Diagnostic label for an error failure reason."), from: nsError, to: &components)
+        appendStringDetail(NSLocalizedRecoverySuggestionErrorKey, prefix: String(localized: "恢复建议", comment: "Diagnostic label for an error recovery suggestion."), from: nsError, to: &components)
         appendPartialFailures(from: nsError, to: &components, visitedErrors: &visitedErrors)
-        appendErrorList(NSDetailedErrorsKey, prefix: "详细错误", from: nsError, to: &components, visitedErrors: &visitedErrors)
-        appendErrorList(NSMultipleUnderlyingErrorsKey, prefix: "底层错误", from: nsError, to: &components, visitedErrors: &visitedErrors)
+        appendErrorList(NSDetailedErrorsKey, prefix: String(localized: "详细错误", comment: "Diagnostic label for detailed errors."), from: nsError, to: &components, visitedErrors: &visitedErrors)
+        appendErrorList(NSMultipleUnderlyingErrorsKey, prefix: String(localized: "底层错误", comment: "Diagnostic label for underlying errors."), from: nsError, to: &components, visitedErrors: &visitedErrors)
 
         if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
-            append(underlying, label: "底层错误", to: &components, visitedErrors: &visitedErrors)
+            append(underlying, label: String(localized: "底层错误", comment: "Diagnostic label for underlying errors."), to: &components, visitedErrors: &visitedErrors)
         }
     }
 
@@ -302,7 +302,10 @@ enum AppErrorDescription {
             }
             append(
                 partialError,
-                label: "部分失败 \(String(describing: key))",
+                label: String(
+                    format: String(localized: "部分失败 %@", comment: "Diagnostic label for a partial failure. The placeholder is the failed item identifier."),
+                    String(describing: key)
+                ),
                 to: &components,
                 visitedErrors: &visitedErrors
             )
@@ -344,18 +347,19 @@ enum AppPersistenceStatus: Equatable {
     var title: String {
         switch self {
         case .coreDataAvailable:
-            return "Core Data 已启用"
+            return String(localized: "Core Data 已启用", comment: "Persistence status title when Core Data is active.")
         case .legacyFallback:
-            return "兼容存储模式"
+            return String(localized: "兼容存储模式", comment: "Persistence status title when legacy storage fallback is active.")
         }
     }
 
     var message: String {
         switch self {
         case .coreDataAvailable:
-            return "本机数据正在写入主存储。"
+            return String(localized: "本机数据正在写入主存储。", comment: "Persistence status message when local data is writing to the primary store.")
         case .legacyFallback(let reason):
-            return "主存储初始化失败，当前使用兼容存储：\(reason)"
+            let format = String(localized: "主存储初始化失败，当前使用兼容存储：%@", comment: "Persistence status message when primary storage fails. The placeholder is the failure reason.")
+            return String(format: format, reason)
         }
     }
 
@@ -394,24 +398,27 @@ enum AppSyncStatus: Equatable {
     var title: String {
         switch self {
         case .cloudKitConfigured:
-            return "iCloud 同步已配置"
+            return String(localized: "iCloud 同步已配置", comment: "Sync status title when iCloud sync is configured.")
         case .localOnly, .localOnlyFallback:
-            return "仅本机存储"
+            return String(localized: "仅本机存储", comment: "Sync status title when only local storage is active.")
         case .unavailable:
-            return "同步不可用"
+            return String(localized: "同步不可用", comment: "Sync status title when sync is unavailable.")
         }
     }
 
     var message: String {
         switch self {
         case .cloudKitConfigured(let containerIdentifier):
-            return "已配置通过 \(containerIdentifier) 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。"
+            let format = String(localized: "已配置通过 %@ 写入 iCloud 私有数据库。同步不是实时承诺，具体时间取决于系统、网络和 Apple ID 状态。", comment: "Sync status message when iCloud sync is configured. The placeholder is the CloudKit container identifier.")
+            return String(format: format, containerIdentifier)
         case .localOnly:
-            return "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。"
+            return String(localized: "当前进程没有可用的 CloudKit entitlement，数据仍可本机使用，但不会通过 iCloud 同步。", comment: "Sync status message when CloudKit entitlements are unavailable.")
         case .localOnlyFallback(let reason):
-            return "iCloud 同步存储初始化失败，已切换为仅本机存储。数据仍可本机使用，但不会通过 iCloud 同步：\(reason)"
+            let format = String(localized: "iCloud 同步存储初始化失败，已切换为仅本机存储。数据仍可本机使用，但不会通过 iCloud 同步：%@", comment: "Sync status message when iCloud storage fails and local fallback is used. The placeholder is the failure reason.")
+            return String(format: format, reason)
         case .unavailable(let reason):
-            return "主存储初始化失败，当前无法使用 iCloud 同步：\(reason)"
+            let format = String(localized: "主存储初始化失败，当前无法使用 iCloud 同步：%@", comment: "Sync status message when sync is unavailable because storage failed. The placeholder is the failure reason.")
+            return String(format: format, reason)
         }
     }
 
@@ -446,28 +453,28 @@ enum AppNetworkStatus: Equatable {
     var title: String {
         switch self {
         case .checking:
-            return "网络状态检测中"
+            return String(localized: "网络状态检测中", comment: "Network status title while checking connectivity.")
         case .available:
-            return "网络可用"
+            return String(localized: "网络可用", comment: "Network status title when network is available.")
         case .unavailable:
-            return "网络不可用"
+            return String(localized: "网络不可用", comment: "Network status title when network is unavailable.")
         }
     }
 
     var message: String {
         switch self {
         case .checking:
-            return "正在检测网络状态。本机收藏和搜索仍可使用。"
+            return String(localized: "正在检测网络状态。本机收藏和搜索仍可使用。", comment: "Network status message while checking connectivity.")
         case .available(let isExpensive, let isConstrained):
             if isConstrained {
-                return "当前处于低数据模式，同步和翻译可能由系统延后。本机收藏和搜索不受影响。"
+                return String(localized: "当前处于低数据模式，同步和翻译可能由系统延后。本机收藏和搜索不受影响。", comment: "Network status message for constrained low data mode.")
             }
             if isExpensive {
-                return "当前可能使用蜂窝或热点网络，同步和翻译可能产生流量。本机收藏和搜索不受影响。"
+                return String(localized: "当前可能使用蜂窝或热点网络，同步和翻译可能产生流量。本机收藏和搜索不受影响。", comment: "Network status message for expensive network connections.")
             }
-            return "网络可用于翻译请求和 iCloud 同步。本机数据仍会先写入本地存储。"
+            return String(localized: "网络可用于翻译请求和 iCloud 同步。本机数据仍会先写入本地存储。", comment: "Network status message when normal network is available.")
         case .unavailable:
-            return "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。"
+            return String(localized: "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。", comment: "Network status message when offline.")
         }
     }
 
@@ -502,11 +509,11 @@ enum CloudSyncEventKind: String, Codable, Equatable {
     var actionLabel: String {
         switch self {
         case .setup:
-            return "准备 iCloud 同步"
+            return String(localized: "准备 iCloud 同步", comment: "Cloud sync event label for setup.")
         case .importFromCloud:
-            return "从 iCloud 导入"
+            return String(localized: "从 iCloud 导入", comment: "Cloud sync event label for importing from iCloud.")
         case .exportToCloud:
-            return "向 iCloud 上传"
+            return String(localized: "向 iCloud 上传", comment: "Cloud sync event label for uploading to iCloud.")
         }
     }
 }
@@ -531,9 +538,9 @@ enum AppSyncEventStatus: Equatable {
         case .cloudKitConfigured:
             self = .waitingForCloudEvents
         case .localOnly, .localOnlyFallback:
-            self = .unavailable("当前为仅本机存储，不会收到 iCloud 同步事件。")
+            self = .unavailable(String(localized: "当前为仅本机存储，不会收到 iCloud 同步事件。", comment: "Sync event status message when using local-only storage."))
         case .unavailable(let reason):
-            self = .unavailable("同步不可用：\(reason)")
+            self = .unavailable(String(format: String(localized: "同步不可用：%@", comment: "Sync event status message when sync is unavailable. The placeholder is the reason."), reason))
         }
     }
 
@@ -554,15 +561,15 @@ enum AppSyncEventStatus: Equatable {
     var title: String {
         switch self {
         case .unavailable:
-            return "没有同步事件"
+            return String(localized: "没有同步事件", comment: "Sync event status title when there are no sync events.")
         case .waitingForCloudEvents:
-            return "等待 iCloud 同步事件"
+            return String(localized: "等待 iCloud 同步事件", comment: "Sync event status title while waiting for iCloud events.")
         case .inProgress:
-            return "正在同步"
+            return String(localized: "正在同步", comment: "Sync event status title while syncing.")
         case .lastSuccess:
-            return "最近同步成功"
+            return String(localized: "最近同步成功", comment: "Sync event status title after recent successful sync.")
         case .lastFailure:
-            return "同步出现错误"
+            return String(localized: "同步出现错误", comment: "Sync event status title after a sync error.")
         }
     }
 
@@ -571,26 +578,29 @@ enum AppSyncEventStatus: Equatable {
         case .unavailable(let reason):
             return reason
         case .waitingForCloudEvents:
-            return "还没有收到 iCloud 同步事件。完成签名设备测试前，这不能证明多端已同步。"
+            return String(localized: "还没有收到 iCloud 同步事件。完成签名设备测试前，这不能证明多端已同步。", comment: "Sync event status message before any iCloud events are observed.")
         case .inProgress(let kind, let startDate):
-            return "\(kind.actionLabel)中，开始于 \(Self.format(startDate))。"
+            let format = String(localized: "%@中，开始于 %@。", comment: "Sync event message while an event is in progress. Placeholders are the event label and start date.")
+            return String(format: format, kind.actionLabel, Self.format(startDate))
         case .lastSuccess(let kind, let completedAt):
-            return "\(kind.actionLabel)已完成：\(Self.format(completedAt))。"
+            let format = String(localized: "%@已完成：%@。", comment: "Sync event message after a successful event. Placeholders are the event label and completion date.")
+            return String(format: format, kind.actionLabel, Self.format(completedAt))
         case .lastFailure(let kind, let completedAt, let reason):
-            return "\(kind.actionLabel)失败：\(Self.format(completedAt))。\(reason)"
+            let format = String(localized: "%@失败：%@。%@", comment: "Sync event message after a failed event. Placeholders are the event label, completion date, and failure reason.")
+            return String(format: format, kind.actionLabel, Self.format(completedAt), reason)
         }
     }
 
     var librarySyncBadgeText: String {
         switch self {
         case .inProgress:
-            return "正在同步"
+            return String(localized: "正在同步", comment: "Short sync badge while syncing.")
         case .lastSuccess(kind: .exportToCloud, completedAt: _):
-            return "已同步云端"
+            return String(localized: "已同步云端", comment: "Short sync badge after cloud export succeeds.")
         case .lastFailure:
-            return "同步未完成"
+            return String(localized: "同步未完成", comment: "Short sync badge after sync failure.")
         default:
-            return "已保存"
+            return String(localized: "已保存", comment: "Short sync badge when data is saved locally.")
         }
     }
 

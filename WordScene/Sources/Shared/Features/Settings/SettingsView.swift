@@ -80,16 +80,16 @@ struct SettingsView: View {
         }
         #endif
         .confirmationDialog(
-            "重置旧缓存？",
+            String(localized: "重置旧缓存？", comment: "Confirmation title before resetting legacy local cache documents."),
             isPresented: $isConfirmingLegacyReset,
             titleVisibility: .visible
         ) {
-            Button("重置旧缓存", role: .destructive) {
+            Button(String(localized: "重置旧缓存", comment: "Destructive button title for resetting legacy local cache documents."), role: .destructive) {
                 resetLegacyDocuments()
             }
-            Button("取消", role: .cancel) {}
+            Button(String(localized: "取消", comment: "Cancel button title."), role: .cancel) {}
         } message: {
-            Text("这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。")
+            Text(String(localized: "这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。", comment: "Warning shown before resetting legacy local cache documents."))
         }
     }
 
@@ -126,7 +126,7 @@ struct SettingsView: View {
         .scrollDismissesKeyboard(.interactively)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(settingsBackground.ignoresSafeArea())
-        .navigationTitle("设置")
+        .navigationTitle(String(localized: "设置", comment: "Navigation title for settings."))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
@@ -140,7 +140,7 @@ struct SettingsView: View {
     private var macSettingsBody: some View {
         Form {
             Section("DeepSeek") {
-                settingValueRow("模型", value: "deepseek-v4-flash")
+                settingValueRow(String(localized: "模型", comment: "Settings row title for the translation model."), value: "deepseek-v4-flash")
                 settingValueRow("Base URL", value: "https://api.deepseek.com")
 
                 SecureField("sk-...", text: $apiToken)
@@ -153,22 +153,22 @@ struct SettingsView: View {
                 deepSeekTokenButtons
             }
 
-            Section("隐私") {
-                Text("敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。")
+            Section(String(localized: "隐私", comment: "Settings section title for privacy controls.")) {
+                Text(String(localized: "敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。", comment: "Privacy explanation for API tokens and sensitive content."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
                 #if DEBUG
-                Toggle("保存 Raw API Response", isOn: $storesRawAPIResponses)
-                    .accessibilityLabel("保存 Raw API Response")
+                Toggle(String(localized: "保存 Raw API Response", comment: "Debug setting title for storing raw API responses."), isOn: $storesRawAPIResponses)
+                    .accessibilityLabel(String(localized: "保存 Raw API Response", comment: "Accessibility label for the debug raw API response toggle."))
 
-                Text("仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。")
+                Text(String(localized: "仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。", comment: "Debug raw API response privacy explanation."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 #endif
             }
 
-            Section("数据存储") {
+            Section(String(localized: "数据存储", comment: "Settings section title for data storage.")) {
                 iCloudSyncPreferenceToggle
                 persistenceStatusView
                 syncStatusView
@@ -182,16 +182,16 @@ struct SettingsView: View {
                 }
             }
 
-            Section("关于") {
-                settingValueRow("版本", value: appBuildInfo.version)
-                settingValueRow("构建", value: appBuildInfo.build)
-                settingValueRow("验收标识", value: appBuildInfo.smokeTestDisplayValue)
+            Section(String(localized: "关于", comment: "Settings section title for app information.")) {
+                settingValueRow(String(localized: "版本", comment: "Settings row title for app version."), value: appBuildInfo.version)
+                settingValueRow(String(localized: "构建", comment: "Settings row title for build number."), value: appBuildInfo.build)
+                settingValueRow(String(localized: "验收标识", comment: "Settings row title for smoke test identifier."), value: appBuildInfo.smokeTestDisplayValue)
             }
 
-            Section("导入导出") {
-                settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
-                settingValueRow("范围", value: "全量导入 / 全量导出")
-                Picker("重复项", selection: $importConflictPolicy) {
+            Section(String(localized: "导入导出", comment: "Settings section title for import and export.")) {
+                settingValueRow(String(localized: "导出文件名", comment: "Settings row title for export file name."), value: "memory-book-export-YYYYMMDD.json")
+                settingValueRow(String(localized: "范围", comment: "Settings row title for import/export scope."), value: String(localized: "全量导入 / 全量导出", comment: "Settings value describing import/export scope."))
+                Picker(String(localized: "重复项", comment: "Picker label for duplicate import handling."), selection: $importConflictPolicy) {
                     ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
                         Text(policy.title).tag(policy)
                     }
@@ -204,7 +204,7 @@ struct SettingsView: View {
                     Button {
                         presentImport()
                     } label: {
-                        Label("导入", systemImage: "square.and.arrow.down")
+                        Label(String(localized: "导入", comment: "Button title for importing saved memory."), systemImage: "square.and.arrow.down")
                     }
                     .accessibilityIdentifier("settings.import.button")
                     .disabled(importExportStatus.isWorking)
@@ -212,7 +212,7 @@ struct SettingsView: View {
                     Button {
                         prepareExport()
                     } label: {
-                        Label("导出", systemImage: "square.and.arrow.up")
+                        Label(String(localized: "导出", comment: "Button title for exporting saved memory."), systemImage: "square.and.arrow.up")
                     }
                     .accessibilityIdentifier("settings.export.button")
                     .disabled(importExportStatus.isWorking)
@@ -224,7 +224,7 @@ struct SettingsView: View {
         .padding(24)
         .frame(minWidth: 620, minHeight: 500)
         .background(settingsBackground)
-        .navigationTitle("设置")
+        .navigationTitle(String(localized: "设置", comment: "Navigation title for settings."))
         .onAppear {
             loadSavedToken()
         }
@@ -232,7 +232,7 @@ struct SettingsView: View {
     #endif
 
     private var settingsHeader: some View {
-        Text("设置")
+        Text(String(localized: "设置", comment: "Large title for settings."))
             .font(.largeTitle.bold())
             .accessibilityIdentifier("settings.title")
         #if os(macOS)
@@ -243,7 +243,7 @@ struct SettingsView: View {
     private var deepSeekCard: some View {
         SettingsCard(title: "DeepSeek", systemImage: "sparkles") {
             VStack(alignment: .leading, spacing: 14) {
-                settingValueRow("模型", value: "deepseek-v4-flash")
+                settingValueRow(String(localized: "模型", comment: "Settings row title for the translation model."), value: "deepseek-v4-flash")
                 settingValueRow("Base URL", value: "https://api.deepseek.com")
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -291,12 +291,12 @@ struct SettingsView: View {
             Button {
                 saveToken()
             } label: {
-                Label("保存", systemImage: "key")
+                Label(String(localized: "保存", comment: "Save button title."), systemImage: "key")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
             .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
-            .accessibilityLabel("保存 DeepSeek Token")
+            .accessibilityLabel(String(localized: "保存 DeepSeek Token", comment: "Accessibility label for saving the DeepSeek token."))
             .accessibilityIdentifier("settings.deepSeek.save")
 
             Button {
@@ -304,12 +304,12 @@ struct SettingsView: View {
                     await testToken()
                 }
             } label: {
-                Label("测试连接", systemImage: "checkmark.seal")
+                Label(String(localized: "测试连接", comment: "Button title for testing the DeepSeek token."), systemImage: "checkmark.seal")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
-            .accessibilityLabel("测试 DeepSeek Token")
+            .accessibilityLabel(String(localized: "测试 DeepSeek Token", comment: "Accessibility label for testing the DeepSeek token."))
             .accessibilityIdentifier("settings.deepSeek.test")
 
             Button(role: .destructive) {
@@ -320,41 +320,46 @@ struct SettingsView: View {
             }
             .buttonStyle(.bordered)
             .disabled(tokenStatus.isWorking)
-            .accessibilityLabel("删除 DeepSeek Token")
+            .accessibilityLabel(String(localized: "删除 DeepSeek Token", comment: "Accessibility label for deleting the DeepSeek token."))
             .accessibilityIdentifier("settings.deepSeek.delete")
         }
         .controlSize(.large)
     }
 
     private var appInfoCard: some View {
-        SettingsCard(title: "关于", systemImage: "info.circle") {
+        SettingsCard(title: String(localized: "关于", comment: "Settings card title for app information."), systemImage: "info.circle") {
             VStack(alignment: .leading, spacing: 14) {
-                settingValueRow("版本", value: appBuildInfo.version)
-                settingValueRow("构建", value: appBuildInfo.build)
-                settingValueRow("验收标识", value: appBuildInfo.smokeTestDisplayValue)
+                settingValueRow(String(localized: "版本", comment: "Settings row title for app version."), value: appBuildInfo.version)
+                settingValueRow(String(localized: "构建", comment: "Settings row title for build number."), value: appBuildInfo.build)
+                settingValueRow(String(localized: "验收标识", comment: "Settings row title for smoke test identifier."), value: appBuildInfo.smokeTestDisplayValue)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("App 版本 \(appBuildInfo.smokeTestDisplayValue)")
+            .accessibilityLabel(appVersionAccessibilityLabel)
         }
     }
 
+    private var appVersionAccessibilityLabel: String {
+        let format = String(localized: "App 版本 %@", comment: "Accessibility label for app version information. The placeholder is the visible smoke test version value.")
+        return String(format: format, appBuildInfo.smokeTestDisplayValue)
+    }
+
     private var privacyCard: some View {
-        SettingsCard(title: "隐私", systemImage: "hand.raised") {
+        SettingsCard(title: String(localized: "隐私", comment: "Settings card title for privacy controls."), systemImage: "hand.raised") {
             VStack(alignment: .leading, spacing: 14) {
                 #if DEBUG
                 Toggle(isOn: $storesRawAPIResponses) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("保存 Raw API Response")
-                        Text("仅 Debug build 可用；Release build 不保存、不同步、不导出。")
+                        Text(String(localized: "保存 Raw API Response", comment: "Debug setting title for storing raw API responses."))
+                        Text(String(localized: "仅 Debug build 可用；Release build 不保存、不同步、不导出。", comment: "Debug raw API response privacy explanation."))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
                 .toggleStyle(.switch)
-                .accessibilityLabel("保存 Raw API Response")
+                .accessibilityLabel(String(localized: "保存 Raw API Response", comment: "Accessibility label for the debug raw API response toggle."))
                 #endif
 
-                Label("敏感内容仅保存在本机设置和系统凭据存储中。", systemImage: "lock")
+                Label(String(localized: "敏感内容仅保存在本机设置和系统凭据存储中。", comment: "Short privacy note for local credential storage."), systemImage: "lock")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -362,7 +367,7 @@ struct SettingsView: View {
     }
 
     private var persistenceStatusCard: some View {
-        SettingsCard(title: "数据存储", systemImage: "internaldrive") {
+        SettingsCard(title: String(localized: "数据存储", comment: "Settings card title for data storage."), systemImage: "internaldrive") {
             VStack(alignment: .leading, spacing: 14) {
                 iCloudSyncPreferenceToggle
                 persistenceStatusView
@@ -395,14 +400,14 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Toggle(isOn: $isCloudKitSyncRequested) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("使用 iCloud 同步")
+                    Text(String(localized: "使用 iCloud 同步", comment: "Toggle title for enabling iCloud sync."))
                     Text(iCloudSyncPreferenceMessage)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
             .toggleStyle(.switch)
-            .accessibilityLabel("使用 iCloud 同步")
+            .accessibilityLabel(String(localized: "使用 iCloud 同步", comment: "Accessibility label for enabling iCloud sync."))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -410,11 +415,11 @@ struct SettingsView: View {
     private var iCloudSyncPreferenceMessage: String {
         if isCloudKitSyncRequested == isCloudKitSyncActive {
             return isCloudKitSyncActive
-                ? "当前使用 iCloud 私有数据库同步收藏和历史。"
-                : "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。"
+                ? String(localized: "当前使用 iCloud 私有数据库同步收藏和历史。", comment: "Settings message when iCloud sync is active.")
+                : String(localized: "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。", comment: "Settings message when local-only storage is active.")
         }
 
-        return "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。"
+        return String(localized: "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。", comment: "Settings message after changing the iCloud sync preference.")
     }
 
     private var isCloudKitSyncActive: Bool {
@@ -438,16 +443,16 @@ struct SettingsView: View {
     }
 
     private var importExportCard: some View {
-        SettingsCard(title: "导入导出", systemImage: "arrow.up.arrow.down") {
+        SettingsCard(title: String(localized: "导入导出", comment: "Settings card title for import and export."), systemImage: "arrow.up.arrow.down") {
             VStack(alignment: .leading, spacing: 14) {
-                settingValueRow("导出文件名", value: "memory-book-export-YYYYMMDD.json")
-                settingValueRow("范围", value: "全量导入 / 全量导出")
+                settingValueRow(String(localized: "导出文件名", comment: "Settings row title for export file name."), value: "memory-book-export-YYYYMMDD.json")
+                settingValueRow(String(localized: "范围", comment: "Settings row title for import/export scope."), value: String(localized: "全量导入 / 全量导出", comment: "Settings value describing import/export scope."))
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("重复项")
+                    Text(String(localized: "重复项", comment: "Picker label for duplicate import handling."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Picker("重复项", selection: $importConflictPolicy) {
+                    Picker(String(localized: "重复项", comment: "Picker label for duplicate import handling."), selection: $importConflictPolicy) {
                         ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
                             Text(policy.title).tag(policy)
                         }
@@ -461,7 +466,7 @@ struct SettingsView: View {
                     Button {
                         presentImport()
                     } label: {
-                        Label("导入", systemImage: "square.and.arrow.down")
+                        Label(String(localized: "导入", comment: "Button title for importing saved memory."), systemImage: "square.and.arrow.down")
                     }
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("settings.import.button")
@@ -470,7 +475,7 @@ struct SettingsView: View {
                     Button {
                         prepareExport()
                     } label: {
-                        Label("导出", systemImage: "square.and.arrow.up")
+                        Label(String(localized: "导出", comment: "Button title for exporting saved memory."), systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("settings.export.button")
@@ -486,7 +491,7 @@ struct SettingsView: View {
             Button {
                 prepareLocalBackup()
             } label: {
-                Label("导出原始备份", systemImage: "externaldrive.badge.timemachine")
+                Label(String(localized: "导出原始备份", comment: "Button title for exporting a raw legacy local cache backup."), systemImage: "externaldrive.badge.timemachine")
             }
             .buttonStyle(.bordered)
             .disabled(recoveryStatus.isWorking)
@@ -494,7 +499,7 @@ struct SettingsView: View {
             Button(role: .destructive) {
                 isConfirmingLegacyReset = true
             } label: {
-                Label("重置旧缓存", systemImage: "trash")
+                Label(String(localized: "重置旧缓存", comment: "Button title for resetting legacy local cache documents."), systemImage: "trash")
             }
             .buttonStyle(.bordered)
             .disabled(recoveryStatus.isWorking)
@@ -629,13 +634,14 @@ struct SettingsView: View {
 
     @MainActor
     private func prepareExport() {
-        importExportStatus = .working("正在准备导出文件...")
+        importExportStatus = .working(String(localized: "正在准备导出文件...", comment: "Status shown while preparing a memory export file."))
 
         do {
             let export = try importExportController.prepareExport()
             exportDocument = MemoryExportFileDocument(data: export.data)
             exportFileName = export.fileName
-            importExportStatus = .notice("已准备 \(export.itemCount) 条记忆，请在系统面板中选择保存位置。\(export.privacyNotice)")
+            let format = String(localized: "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@", comment: "Status shown after preparing a memory export. The first placeholder is the exported item count; the second is the privacy notice.")
+            importExportStatus = .notice(String(format: format, Int64(export.itemCount), export.privacyNotice))
             #if os(iOS)
             documentExportRequest = try makeDocumentExportRequest(
                 kind: .memory,
@@ -654,25 +660,27 @@ struct SettingsView: View {
     private func handleExportCompletion(_ result: Result<URL, Error>) {
         switch result {
         case .success(let url):
-            importExportStatus = .success("已导出 \(url.lastPathComponent)。导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。")
+            let format = String(localized: "已导出 %@。%@", comment: "Status shown after exporting memory. The first placeholder is the file name; the second is the privacy notice.")
+            importExportStatus = .success(String(format: format, url.lastPathComponent, SettingsImportExportStatus.privacyNotice))
         case .failure(let error):
-            importExportStatus = isUserCancelled(error) ? .notice("已取消导出，未写入文件。") : .failed(importExportErrorMessage(for: error))
+            importExportStatus = isUserCancelled(error) ? .notice(String(localized: "已取消导出，未写入文件。", comment: "Status shown when the user cancels memory export.")) : .failed(importExportErrorMessage(for: error))
         }
     }
 
     @MainActor
     private func prepareLocalBackup() {
-        recoveryStatus = .working("正在准备旧缓存原始备份...")
+        recoveryStatus = .working(String(localized: "正在准备旧缓存原始备份...", comment: "Status shown while preparing a legacy local cache backup."))
 
         do {
             guard recoveryController.localDocumentCount() > 0 else {
-                recoveryStatus = .notice("没有发现旧缓存文档，无需导出原始备份。")
+                recoveryStatus = .notice(String(localized: "没有发现旧缓存文档，无需导出原始备份。", comment: "Status shown when no legacy local cache backup is needed."))
                 return
             }
             let backup = try recoveryController.prepareBackup()
             recoveryBackupDocument = MemoryExportFileDocument(data: backup.data)
             recoveryBackupFileName = backup.fileName
-            recoveryStatus = .notice("已准备 \(backup.documentCount) 个旧缓存文档，请在系统面板中选择保存位置。")
+            let format = String(localized: "已准备 %lld 个旧缓存文档，请在系统面板中选择保存位置。", comment: "Status shown after preparing a legacy local cache backup. The placeholder is the document count.")
+            recoveryStatus = .notice(String(format: format, Int64(backup.documentCount)))
             #if os(iOS)
             documentExportRequest = try makeDocumentExportRequest(
                 kind: .recoveryBackup,
@@ -691,25 +699,27 @@ struct SettingsView: View {
     private func handleRecoveryBackupCompletion(_ result: Result<URL, Error>) {
         switch result {
         case .success(let url):
-            recoveryStatus = .success("已导出旧缓存原始备份 \(url.lastPathComponent)。")
+            let format = String(localized: "已导出旧缓存原始备份 %@。", comment: "Status shown after exporting a legacy local cache backup. The placeholder is the file name.")
+            recoveryStatus = .success(String(format: format, url.lastPathComponent))
         case .failure(let error):
-            recoveryStatus = isUserCancelled(error) ? .notice("已取消旧缓存原始备份导出，未写入文件。") : .failed(importExportErrorMessage(for: error))
+            recoveryStatus = isUserCancelled(error) ? .notice(String(localized: "已取消旧缓存原始备份导出，未写入文件。", comment: "Status shown when the user cancels legacy cache backup export.")) : .failed(importExportErrorMessage(for: error))
         }
     }
 
     @MainActor
     private func resetLegacyDocuments() {
         guard recoveryController.localDocumentCount() > 0 else {
-            recoveryStatus = .notice("没有旧缓存文档需要重置。")
+            recoveryStatus = .notice(String(localized: "没有旧缓存文档需要重置。", comment: "Status shown when there are no legacy local cache documents to reset."))
             return
         }
         let resetCount = recoveryController.resetLocalDocuments()
-        recoveryStatus = .success("已重置 \(resetCount) 个旧缓存文档。")
+        let format = String(localized: "已重置 %lld 个旧缓存文档。", comment: "Status shown after resetting legacy local cache documents. The placeholder is the reset document count.")
+        recoveryStatus = .success(String(format: format, Int64(resetCount)))
     }
 
     @MainActor
     private func presentImport() {
-        importExportStatus = .notice("请选择要导入的 JSON 文件。")
+        importExportStatus = .notice(String(localized: "请选择要导入的 JSON 文件。", comment: "Status shown before the user chooses a JSON import file."))
         isImportingMemory = true
     }
 
@@ -723,7 +733,7 @@ struct SettingsView: View {
             }
             importMemory(from: url)
         case .failure(let error):
-            importExportStatus = isUserCancelled(error) ? .notice("已取消导入，未读取文件。") : .failed(importExportErrorMessage(for: error))
+            importExportStatus = isUserCancelled(error) ? .notice(String(localized: "已取消导入，未读取文件。", comment: "Status shown when the user cancels memory import.")) : .failed(importExportErrorMessage(for: error))
         }
     }
 
@@ -752,24 +762,26 @@ struct SettingsView: View {
         if let balanceError = error as? DeepSeekBalanceError {
             switch balanceError {
             case .invalidResponse:
-                return "DeepSeek 返回无效响应。"
+                return String(localized: "DeepSeek 返回无效响应。", comment: "Error shown when the DeepSeek response cannot be parsed.")
             case .unavailableBalance:
-                return "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。"
+                return String(localized: "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。", comment: "Status shown when DeepSeek accepts a token but balance is unavailable.")
             case .unauthorized:
-                return "Token 无效或已过期。"
+                return String(localized: "Token 无效或已过期。", comment: "Status shown when a token is invalid during balance check.")
             case .httpStatus(let status):
-                return "DeepSeek 请求失败：HTTP \(status)。"
+                let format = String(localized: "DeepSeek 请求失败：HTTP %lld。", comment: "Error shown when an HTTP request to DeepSeek fails. The placeholder is the HTTP status code.")
+                return String(format: format, Int64(status))
             }
         }
 
         if let keychainError = error as? KeychainCredentialError {
             switch keychainError {
             case .unhandledStatus(let status):
-                return "系统凭据存储失败：\(status)。"
+                let format = String(localized: "系统凭据存储失败：%lld。", comment: "Error shown when Keychain storage fails. The placeholder is the OSStatus code.")
+                return String(format: format, Int64(status))
             }
         }
 
-        return "操作失败，请稍后重试。"
+        return String(localized: "操作失败，请稍后重试。", comment: "Generic settings operation failure.")
     }
 
     private func importExportErrorMessage(for error: Error) -> String {
@@ -822,24 +834,24 @@ enum SettingsErrorMessageFactory {
         if let importExportError = error as? MemoryImportExportError {
             switch importExportError {
             case .invalidJSON:
-                return "导入文件不是有效的 WordScene JSON。"
+                return String(localized: "导入文件不是有效的 WordScene JSON。", comment: "Error shown when the import file is not valid WordScene JSON.")
             case .unsupportedSchemaVersion:
-                return "导入文件版本不支持，请升级 App 后重试。"
+                return String(localized: "导入文件版本不支持，请升级 App 后重试。", comment: "Error shown when an import file requires a newer app version.")
             case .checksumMismatch:
-                return "导入文件校验失败，文件可能已被修改或损坏。"
+                return String(localized: "导入文件校验失败，文件可能已被修改或损坏。", comment: "Error shown when an import file checksum does not match.")
             }
         }
 
         if let persistenceError = error as? LocalPersistenceStoreError {
             switch persistenceError {
             case .unreadableDocument:
-                return "本地旧缓存无法读取。请先在“数据存储”导出旧缓存原始备份，再重置旧缓存文档。"
+                return String(localized: "本地旧缓存无法读取。请先在“数据存储”导出旧缓存原始备份，再重置旧缓存文档。", comment: "Recovery error shown when a legacy local cache document cannot be read.")
             case .unsupportedSchemaVersion:
-                return "本地旧缓存来自更新版本的 App。请先升级 WordScene；不要直接重置，除非已经导出旧缓存原始备份。"
+                return String(localized: "本地旧缓存来自更新版本的 App。请先升级 WordScene；不要直接重置，除非已经导出旧缓存原始备份。", comment: "Recovery error shown when a legacy local cache document requires a newer app version.")
             }
         }
 
-        return error.localizedDescription.isEmpty ? "导入导出失败，请稍后重试。" : error.localizedDescription
+        return error.localizedDescription.isEmpty ? String(localized: "导入导出失败，请稍后重试。", comment: "Generic import/export failure.") : error.localizedDescription
     }
 }
 
@@ -887,13 +899,13 @@ private enum SettingsTokenStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return "Token 只会保存在本机系统凭据存储中。"
+            return String(localized: "Token 只会保存在本机系统凭据存储中。", comment: "Privacy note for the API token field.")
         case .saved:
-            return "Token 已保存在本机。"
+            return String(localized: "Token 已保存在本机。", comment: "Status shown after saving an API token.")
         case .testing:
-            return "正在测试 DeepSeek 连接..."
+            return String(localized: "正在测试 DeepSeek 连接...", comment: "Status while validating a DeepSeek token.")
         case .valid:
-            return "连接成功，Token 已保存。"
+            return String(localized: "连接成功，Token 已保存。", comment: "Status shown after a successful DeepSeek connection test.")
         case .failed(let message):
             return message
         }
@@ -932,7 +944,7 @@ private enum SettingsTokenStatus: Equatable {
     }
 }
 
-private enum SettingsImportExportStatus: Equatable {
+    private enum SettingsImportExportStatus: Equatable {
     case idle
     case notice(String)
     case working(String)
@@ -942,10 +954,14 @@ private enum SettingsImportExportStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
+            return Self.privacyNotice
         case .notice(let message), .working(let message), .success(let message), .failed(let message):
             return message
         }
+    }
+
+    static var privacyNotice: String {
+        String(localized: "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。", comment: "Privacy note shown before exporting saved memory.")
     }
 
     var systemImage: String {
@@ -994,7 +1010,7 @@ private enum SettingsLocalRecoveryStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。"
+            return String(localized: "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。", comment: "Description for legacy local cache recovery tools.")
         case .notice(let message):
             return message
         case .working(let message), .success(let message), .failed(let message):

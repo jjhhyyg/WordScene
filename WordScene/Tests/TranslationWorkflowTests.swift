@@ -102,9 +102,10 @@ final class TranslationWorkflowTests: XCTestCase {
 
         XCTAssertEqual(result.translatedText, "你好，世界。")
         XCTAssertEqual(result.updatedHistory.map(\.sourceText), ["hello world"])
+        let warningFormat = String(localized: "译文已生成，但翻译历史保存失败：%@", comment: "Warning shown when translation succeeds but history cannot be saved. The placeholder is the system error description.")
         XCTAssertEqual(
             result.persistenceWarningMessage,
-            "译文已生成，但翻译历史保存失败：history write failed"
+            String(format: warningFormat, "history write failed")
         )
     }
 

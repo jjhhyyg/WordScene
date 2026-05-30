@@ -251,7 +251,7 @@ struct LibraryView: View {
     var body: some View {
         Group {
             if !hasLoaded {
-                ProgressView("正在加载收藏...")
+                ProgressView(String(localized: "正在加载收藏...", comment: "Loading indicator while saved memory items are being read."))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 #if os(iOS)
@@ -286,32 +286,32 @@ struct LibraryView: View {
             }
         }
         .background(pageBackground.ignoresSafeArea())
-        .navigationTitle("收藏")
+        .navigationTitle(String(localized: "收藏", comment: "Navigation title for the saved memory library."))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         #endif
         .sheet(isPresented: $isShowingManualAdd) {
-            MemoryItemEditorSheet(title: "手动新增") { draft in
+            MemoryItemEditorSheet(title: String(localized: "手动新增", comment: "Title for manually adding a saved memory item.")) { draft in
                 addManualItem(draft)
             }
         }
         .sheet(item: $editingItem) { item in
             MemoryItemEditorSheet(
-                title: "编辑收藏",
+                title: String(localized: "编辑收藏", comment: "Title for editing a saved memory item."),
                 initialDraft: ManualMemoryItemDraft(item: item),
                 allowsAutoSource: true
             ) { draft in
                 updateItem(id: item.id, draft: draft)
             }
         }
-        .alert("删除全部收藏？", isPresented: $isConfirmingDeleteAll) {
-            Button("全部删除", role: .destructive) {
+        .alert(String(localized: "删除全部收藏？", comment: "Confirmation title before deleting all saved memory items."), isPresented: $isConfirmingDeleteAll) {
+            Button(String(localized: "全部删除", comment: "Destructive button that deletes all items."), role: .destructive) {
                 deleteAllItems()
             }
-            Button("取消", role: .cancel) {}
+            Button(String(localized: "取消", comment: "Cancel button title."), role: .cancel) {}
         } message: {
-            Text("此操作会删除全部收藏，并同步到其他设备。")
+            Text(String(localized: "此操作会删除全部收藏，并同步到其他设备。", comment: "Warning shown before deleting all saved memory items."))
         }
         .onAppear {
             syncEventStatus = dataController.syncEventMonitor.status
@@ -425,7 +425,7 @@ struct LibraryView: View {
     private var libraryListRows: some View {
         if let persistenceErrorMessage, items.isEmpty {
             ContentUnavailableView(
-                "无法读取收藏",
+                String(localized: "无法读取收藏", comment: "Empty state title when saved memory cannot be read."),
                 systemImage: "externaldrive.badge.exclamationmark",
                 description: Text(persistenceErrorMessage)
             )
@@ -435,9 +435,9 @@ struct LibraryView: View {
             .listRowBackground(Color.clear)
         } else if !trimmedQuery.isEmpty, searchResults.isEmpty {
             ContentUnavailableView(
-                "没有找到匹配内容",
+                String(localized: "没有找到匹配内容", comment: "Empty state title when search returns no matches."),
                 systemImage: "magnifyingglass",
-                description: Text("可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。")
+                description: Text(String(localized: "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。", comment: "Search empty state suggestion."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
             .listRowInsets(EdgeInsets(top: 8, leading: pageHorizontalPadding, bottom: 8, trailing: pageHorizontalPadding))
@@ -450,9 +450,9 @@ struct LibraryView: View {
                 .listRowBackground(Color.clear)
         } else if filteredItems.isEmpty {
             ContentUnavailableView(
-                "没有星标收藏",
+                String(localized: "没有星标收藏", comment: "Empty state title when the starred saved items filter is empty."),
                 systemImage: "star",
-                description: Text("给重要收藏加星标后，可在这里快速筛选。")
+                description: Text(String(localized: "给重要收藏加星标后，可在这里快速筛选。", comment: "Empty state description for starred saved items."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
             .listRowInsets(EdgeInsets(top: 8, leading: pageHorizontalPadding, bottom: 8, trailing: pageHorizontalPadding))
@@ -490,7 +490,7 @@ struct LibraryView: View {
 
     private var librarySyncBadgeText: String {
         if isCheckingSync {
-            return "正在同步"
+            return String(localized: "正在同步", comment: "Short status shown while checking library sync state.")
         }
 
         return (syncEventStatus ?? dataController.syncEventMonitor.status).librarySyncBadgeText
@@ -500,7 +500,7 @@ struct LibraryView: View {
         VStack(alignment: .leading, spacing: 12) {
             #if os(iOS)
             HStack(alignment: .center, spacing: 12) {
-                Text("收藏")
+                Text(String(localized: "收藏", comment: "Large title for the saved memory library."))
                     .font(.largeTitle.bold())
                     .accessibilityIdentifier("library.title")
 
@@ -515,7 +515,7 @@ struct LibraryView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(!canAddManualItem)
-                .accessibilityLabel("手动新增")
+                .accessibilityLabel(String(localized: "手动新增", comment: "Accessibility label for manually adding a saved memory item."))
                 .accessibilityIdentifier("library.header.manualAdd")
             }
             #endif
@@ -524,7 +524,7 @@ struct LibraryView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
 
-                TextField("搜索单词、短语、句子", text: $query)
+                TextField(String(localized: "搜索单词、短语、句子", comment: "Placeholder for searching saved memory items."), text: $query)
                     .textFieldStyle(.plain)
                     .accessibilityIdentifier("library.search.field")
 
@@ -537,7 +537,7 @@ struct LibraryView: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("清空搜索")
+                    .accessibilityLabel(String(localized: "清空搜索", comment: "Accessibility label for clearing the search field."))
                     .accessibilityIdentifier("library.search.clear")
                 }
 
@@ -553,7 +553,7 @@ struct LibraryView: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .disabled(!canAddManualItem)
-                .accessibilityLabel("手动新增")
+                .accessibilityLabel(String(localized: "手动新增", comment: "Accessibility label for manually adding a saved memory item."))
                 .accessibilityIdentifier("library.header.manualAdd")
                 #endif
             }
@@ -571,7 +571,7 @@ struct LibraryView: View {
     private var libraryContent: some View {
         if let persistenceErrorMessage, items.isEmpty {
             ContentUnavailableView(
-                "无法读取收藏",
+                String(localized: "无法读取收藏", comment: "Empty state title when saved memory cannot be read."),
                 systemImage: "externaldrive.badge.exclamationmark",
                 description: Text(persistenceErrorMessage)
             )
@@ -587,9 +587,9 @@ struct LibraryView: View {
             VStack(alignment: .leading, spacing: 16) {
                 librarySummary
                 ContentUnavailableView(
-                    "没有星标收藏",
+                    String(localized: "没有星标收藏", comment: "Empty state title when the starred saved items filter is empty."),
                     systemImage: "star",
-                    description: Text("给重要收藏加星标后，可在这里快速筛选。")
+                    description: Text(String(localized: "给重要收藏加星标后，可在这里快速筛选。", comment: "Empty state description for starred saved items."))
                 )
                 .frame(maxWidth: .infinity, minHeight: 320)
             }
@@ -601,7 +601,7 @@ struct LibraryView: View {
     private var librarySummary: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
-                Text("已收藏 \(items.count) 条")
+                Text(libraryCountText(items.count))
                     .font(.headline)
                 Spacer()
                 Button(role: .destructive) {
@@ -612,7 +612,7 @@ struct LibraryView: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .disabled(items.isEmpty)
-                .accessibilityLabel("删除全部收藏")
+                .accessibilityLabel(String(localized: "删除全部收藏", comment: "Accessibility label for deleting all saved memory items."))
                 .accessibilityIdentifier("library.deleteAll")
 
                 Text(librarySyncBadgeText)
@@ -621,9 +621,9 @@ struct LibraryView: View {
                     .accessibilityIdentifier("library.sync.badge")
             }
 
-            Picker("收藏筛选", selection: $filter) {
-                Text("全部").tag(LibraryFilter.all)
-                Text("星标").tag(LibraryFilter.starred)
+            Picker(String(localized: "收藏筛选", comment: "Picker label for filtering saved memory items."), selection: $filter) {
+                Text(String(localized: "全部", comment: "Filter option that shows all saved memory items.")).tag(LibraryFilter.all)
+                Text(String(localized: "星标", comment: "Filter option that shows starred saved memory items.")).tag(LibraryFilter.starred)
             }
             .pickerStyle(.segmented)
             .accessibilityIdentifier("library.filter")
@@ -657,18 +657,18 @@ struct LibraryView: View {
     private var searchResultsContent: some View {
         if searchResults.isEmpty {
             ContentUnavailableView(
-                "没有找到匹配内容",
+                String(localized: "没有找到匹配内容", comment: "Empty state title when search returns no matches."),
                 systemImage: "magnifyingglass",
-                description: Text("可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。")
+                description: Text(String(localized: "可以缩短关键词，或尝试拼音、汉字、语言等不同搜索方式。", comment: "Search empty state suggestion."))
             )
             .frame(maxWidth: .infinity, minHeight: 320)
         } else {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text("\(searchResults.count) 个结果")
+                    Text(resultCountText(searchResults.count))
                         .font(.headline)
                     Spacer()
-                    Text(filter == .starred ? "星标收藏" : "收藏 \(items.count)")
+                    Text(filter == .starred ? String(localized: "星标收藏", comment: "Caption for starred saved memory filter.") : compactLibraryCountText(items.count))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -696,16 +696,16 @@ struct LibraryView: View {
     private var emptyLibraryState: some View {
         VStack(spacing: 16) {
             ContentUnavailableView(
-                "还没有收藏",
+                String(localized: "还没有收藏", comment: "Empty state title when no saved memory exists."),
                 systemImage: "bookmark",
-                description: Text("翻译后点收藏，或手动新增一条本机记忆。")
+                description: Text(String(localized: "翻译后点收藏，或手动新增一条本机记忆。", comment: "Empty state description for the saved memory library."))
             )
             .fixedSize(horizontal: false, vertical: true)
 
             Button {
                 isShowingManualAdd = true
             } label: {
-                Label("手动新增", systemImage: "plus")
+                Label(String(localized: "手动新增", comment: "Button title for manually adding a saved memory item."), systemImage: "plus")
             }
             .buttonStyle(.borderedProminent)
             .disabled(!canAddManualItem)
@@ -722,7 +722,8 @@ struct LibraryView: View {
             persistenceErrorMessage = nil
         } catch {
             items = []
-            persistenceErrorMessage = "收藏数据读取失败：\(error.localizedDescription)"
+            let format = String(localized: "收藏数据读取失败：%@", comment: "Error shown when saved memory cannot be loaded. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
         hasLoaded = true
     }
@@ -775,7 +776,8 @@ struct LibraryView: View {
                 loadLibraryData()
             }
         } catch {
-            persistenceErrorMessage = "删除记录清理失败：\(error.localizedDescription)"
+            let format = String(localized: "删除记录清理失败：%@", comment: "Error shown when deletion tombstones cannot be purged. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -785,7 +787,8 @@ struct LibraryView: View {
             items = store.removing(id: id, from: items)
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "收藏删除失败：\(error.localizedDescription)"
+            let format = String(localized: "收藏删除失败：%@", comment: "Error shown when a saved memory item cannot be deleted. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -795,7 +798,8 @@ struct LibraryView: View {
             items = []
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "收藏清空失败：\(error.localizedDescription)"
+            let format = String(localized: "收藏清空失败：%@", comment: "Error shown when all saved memory items cannot be deleted. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -807,7 +811,8 @@ struct LibraryView: View {
             }
             persistenceErrorMessage = nil
         } catch {
-            persistenceErrorMessage = "星标更新失败：\(error.localizedDescription)"
+            let format = String(localized: "星标更新失败：%@", comment: "Error shown when a saved memory star cannot be updated. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
         }
     }
 
@@ -838,7 +843,8 @@ struct LibraryView: View {
             persistenceErrorMessage = nil
             return true
         } catch {
-            persistenceErrorMessage = "收藏更新失败：\(error.localizedDescription)"
+            let format = String(localized: "收藏更新失败：%@", comment: "Error shown when a saved memory item cannot be updated. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
             return false
         }
     }
@@ -865,9 +871,25 @@ struct LibraryView: View {
             persistenceErrorMessage = nil
             return true
         } catch {
-            persistenceErrorMessage = "手动新增失败：\(error.localizedDescription)"
+            let format = String(localized: "手动新增失败：%@", comment: "Error shown when manually adding a saved memory item fails. The placeholder is the system error description.")
+            persistenceErrorMessage = String(format: format, error.localizedDescription)
             return false
         }
+    }
+
+    private func libraryCountText(_ count: Int) -> String {
+        let format = String(localized: "已收藏 %lld 条", comment: "Summary count for saved memory items. The placeholder is the item count.")
+        return String(format: format, Int64(count))
+    }
+
+    private func compactLibraryCountText(_ count: Int) -> String {
+        let format = String(localized: "收藏 %lld", comment: "Compact saved memory count shown next to search results. The placeholder is the item count.")
+        return String(format: format, Int64(count))
+    }
+
+    private func resultCountText(_ count: Int) -> String {
+        let format = String(localized: "%lld 个结果", comment: "Summary count for search results. The placeholder is the result count.")
+        return String(format: format, Int64(count))
     }
 }
 
@@ -917,34 +939,34 @@ private struct MemoryItemEditorSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("语言") {
-                    Picker("源语言", selection: $draft.sourceLanguage) {
+                Section(String(localized: "语言", comment: "Section title for language pickers in the saved memory editor.")) {
+                    Picker(String(localized: "源语言", comment: "Picker label for source language."), selection: $draft.sourceLanguage) {
                         ForEach(sourceLanguageOptions) { language in
                             Text(language.title).tag(language)
                         }
                     }
 
-                    Picker("目标语言", selection: $draft.targetLanguage) {
+                    Picker(String(localized: "目标语言", comment: "Picker label for target language."), selection: $draft.targetLanguage) {
                         ForEach(LanguageSelection.targetOptions(excluding: draft.sourceLanguage)) { language in
                             Text(language.title).tag(language)
                         }
                     }
                 }
 
-                Section("原文") {
+                Section(String(localized: "原文", comment: "Section title for the source text field.")) {
                     TextEditor(text: $draft.sourceText)
                         .frame(minHeight: 96)
-                        .accessibilityLabel("原文")
+                        .accessibilityLabel(String(localized: "原文", comment: "Accessibility label for the source text field."))
                 }
 
-                Section("译文") {
+                Section(String(localized: "译文", comment: "Section title for the translated text field.")) {
                     TextEditor(text: $draft.translatedText)
                         .frame(minHeight: 96)
-                        .accessibilityLabel("译文")
+                        .accessibilityLabel(String(localized: "译文", comment: "Accessibility label for the translated text field."))
                 }
 
-                Section("备注") {
-                    TextField("可选", text: $draft.note)
+                Section(String(localized: "备注", comment: "Section title for the optional note field.")) {
+                    TextField(String(localized: "可选", comment: "Placeholder for an optional note field."), text: $draft.note)
                 }
             }
             .scrollDismissesKeyboard(.interactively)
@@ -954,13 +976,13 @@ private struct MemoryItemEditorSheet: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button(String(localized: "取消", comment: "Cancel button title.")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
+                    Button(String(localized: "保存", comment: "Save button title.")) {
                         if onSave(draft) {
                             dismiss()
                         }
@@ -1021,7 +1043,7 @@ private struct MemoryItemRow: View {
                     Image(systemName: "star.fill")
                         .font(.caption)
                         .foregroundStyle(.yellow)
-                        .accessibilityLabel("星标")
+                        .accessibilityLabel(String(localized: "星标", comment: "Accessibility label for a starred saved memory item."))
                         .accessibilityIdentifier("library.item.star")
                 }
                 #endif
@@ -1045,7 +1067,7 @@ private struct MemoryItemRow: View {
                 }
                 .buttonStyle(.borderless)
                 .controlSize(.small)
-                .accessibilityLabel(item.isStarred ? "取消星标" : "星标")
+                .accessibilityLabel(item.isStarred ? String(localized: "取消星标", comment: "Accessibility label for removing a star from a saved memory item.") : String(localized: "星标", comment: "Accessibility label for starring a saved memory item."))
                 #endif
 
                 Button {
@@ -1055,7 +1077,7 @@ private struct MemoryItemRow: View {
                 }
                 .buttonStyle(.borderless)
                 .controlSize(.small)
-                .accessibilityLabel("编辑收藏")
+                .accessibilityLabel(String(localized: "编辑收藏", comment: "Accessibility label for editing a saved memory item."))
 
                 #if os(macOS)
                 Button(role: .destructive) {
@@ -1065,7 +1087,7 @@ private struct MemoryItemRow: View {
                 }
                 .buttonStyle(.borderless)
                 .controlSize(.small)
-                .accessibilityLabel("删除收藏")
+                .accessibilityLabel(String(localized: "删除收藏", comment: "Accessibility label for deleting a saved memory item."))
                 #endif
             }
 
@@ -1101,12 +1123,13 @@ private struct MemoryItemRow: View {
     }
 
     private var languageDirectionText: String {
-        "\(item.sourceLanguage.title) 到 \(item.targetLanguage.title)"
+        let format = String(localized: "%@ 到 %@", comment: "Language direction label. The placeholders are source language and target language.")
+        return String(format: format, item.sourceLanguage.title, item.targetLanguage.title)
     }
 
     private var starSwipeAction: ConfirmingSwipeAction {
         ConfirmingSwipeAction(
-            title: item.isStarred ? "取消星标" : "星标",
+            title: item.isStarred ? String(localized: "取消星标", comment: "Swipe action title for removing a star from a saved memory item.") : String(localized: "星标", comment: "Swipe action title for starring a saved memory item."),
             systemImage: item.isStarred ? "star.slash" : "star",
             tint: .yellow,
             accessibilityIdentifier: "library.swipe.star"
@@ -1117,7 +1140,7 @@ private struct MemoryItemRow: View {
 
     private var deleteSwipeAction: ConfirmingSwipeAction {
         ConfirmingSwipeAction(
-            title: "删除",
+            title: String(localized: "删除", comment: "Swipe action title for deleting an item."),
             systemImage: "trash",
             tint: .red,
             accessibilityIdentifier: "library.swipe.delete"

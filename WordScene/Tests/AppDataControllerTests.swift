@@ -139,12 +139,12 @@ final class AppDataControllerTests: XCTestCase {
             controller.persistenceStatus,
             .coreDataAvailable(syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier))
         )
-        XCTAssertEqual(controller.persistenceStatus.title, "Core Data 已启用")
+        XCTAssertEqual(controller.persistenceStatus.title, String(localized: "Core Data 已启用"))
         XCTAssertEqual(
             controller.syncStatus,
             .cloudKitConfigured(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
         )
-        XCTAssertEqual(controller.syncStatus.title, "iCloud 同步已配置")
+        XCTAssertEqual(controller.syncStatus.title, String(localized: "iCloud 同步已配置"))
     }
 
     func testReportsFallbackPersistenceWhenCoreDataBootstrapFails() {
@@ -157,7 +157,7 @@ final class AppDataControllerTests: XCTestCase {
             .legacyFallback(reason: "Core Data store unavailable")
         )
         XCTAssertEqual(controller.syncStatus, .unavailable(reason: "Core Data store unavailable"))
-        XCTAssertEqual(controller.syncStatus.title, "同步不可用")
+        XCTAssertEqual(controller.syncStatus.title, String(localized: "同步不可用"))
     }
 
     func testCloudKitBootstrapFailureRetriesCoreDataLocalOnlyBeforeLegacyFallback() throws {
@@ -186,7 +186,7 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable(syncMode: .localOnly))
         XCTAssertEqual(controller.syncStatus, .localOnlyFallback(reason: "Core Data store unavailable"))
         XCTAssertTrue(controller.syncStatus.message.contains("Core Data store unavailable"))
-        XCTAssertFalse(controller.syncStatus.message.contains("没有可用的 CloudKit entitlement"))
+        XCTAssertFalse(controller.syncStatus.message.contains(String(localized: "没有可用的 CloudKit entitlement")))
         XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [item])
     }
 
@@ -250,7 +250,7 @@ final class AppDataControllerTests: XCTestCase {
 
         XCTAssertTrue(reason.contains("Core Data could not load the store"))
         XCTAssertTrue(reason.contains("NSCocoaErrorDomain code \(CocoaError.persistentStoreOpen.rawValue)"))
-        XCTAssertTrue(reason.contains("底层错误"))
+        XCTAssertTrue(reason.contains(String(localized: "底层错误")))
         XCTAssertTrue(reason.contains("Network is unavailable for iCloud"))
         XCTAssertTrue(reason.contains("CKErrorDomain code 3"))
     }
@@ -263,8 +263,8 @@ final class AppDataControllerTests: XCTestCase {
         )
 
         XCTAssertEqual(controller.syncStatus, .localOnly)
-        XCTAssertEqual(controller.syncStatus.title, "仅本机存储")
-        XCTAssertTrue(controller.syncStatus.message.contains("不会通过 iCloud 同步"))
+        XCTAssertEqual(controller.syncStatus.title, String(localized: "仅本机存储"))
+        XCTAssertTrue(controller.syncStatus.message.contains("iCloud"))
     }
 
     func testCloudSyncEventStatusStartsWaitingForSignedCloudKitStores() throws {
@@ -275,8 +275,11 @@ final class AppDataControllerTests: XCTestCase {
             syncEventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
         )
 
-        XCTAssertEqual(controller.syncEventMonitor.status.title, "等待 iCloud 同步事件")
-        XCTAssertTrue(controller.syncEventMonitor.status.message.contains("不能证明多端已同步"))
+        XCTAssertEqual(controller.syncEventMonitor.status.title, String(localized: "等待 iCloud 同步事件"))
+        XCTAssertEqual(
+            controller.syncEventMonitor.status.message,
+            String(localized: "还没有收到 iCloud 同步事件。完成签名设备测试前，这不能证明多端已同步。")
+        )
     }
 
     func testCloudSyncEventStatusRecordsSuccessfulImportEvent() {
@@ -293,9 +296,9 @@ final class AppDataControllerTests: XCTestCase {
             errorDescription: nil
         ))
 
-        XCTAssertEqual(monitor.status.title, "最近同步成功")
-        XCTAssertTrue(monitor.status.message.contains("从 iCloud 导入"))
-        XCTAssertEqual(monitor.status.librarySyncBadgeText, "已保存")
+        XCTAssertEqual(monitor.status.title, String(localized: "最近同步成功"))
+        XCTAssertTrue(monitor.status.message.contains(String(localized: "从 iCloud 导入")))
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, String(localized: "已保存"))
         XCTAssertFalse(monitor.status.hasSuccessfulCloudExport)
         XCTAssertTrue(monitor.status.hasSuccessfulCloudImport)
     }
@@ -314,10 +317,10 @@ final class AppDataControllerTests: XCTestCase {
             errorDescription: "quota exceeded"
         ))
 
-        XCTAssertEqual(monitor.status.title, "同步出现错误")
-        XCTAssertTrue(monitor.status.message.contains("向 iCloud 上传"))
+        XCTAssertEqual(monitor.status.title, String(localized: "同步出现错误"))
+        XCTAssertTrue(monitor.status.message.contains(String(localized: "向 iCloud 上传")))
         XCTAssertTrue(monitor.status.message.contains("quota exceeded"))
-        XCTAssertEqual(monitor.status.librarySyncBadgeText, "同步未完成")
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, String(localized: "同步未完成"))
         XCTAssertFalse(monitor.status.hasSuccessfulCloudExport)
     }
 
@@ -335,7 +338,7 @@ final class AppDataControllerTests: XCTestCase {
             errorDescription: nil
         ))
 
-        XCTAssertEqual(monitor.status.librarySyncBadgeText, "已同步云端")
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, String(localized: "已同步云端"))
         XCTAssertTrue(monitor.status.hasSuccessfulCloudExport)
     }
 
@@ -361,8 +364,8 @@ final class AppDataControllerTests: XCTestCase {
             notificationCenter: notificationCenter
         )
 
-        XCTAssertEqual(restoredMonitor.status.title, "最近同步成功")
-        XCTAssertTrue(restoredMonitor.status.message.contains("从 iCloud 导入"))
+        XCTAssertEqual(restoredMonitor.status.title, String(localized: "最近同步成功"))
+        XCTAssertTrue(restoredMonitor.status.message.contains(String(localized: "从 iCloud 导入")))
     }
 
     func testLocalOnlySyncStatusDoesNotRestoreCloudEvents() {
@@ -381,8 +384,8 @@ final class AppDataControllerTests: XCTestCase {
             notificationCenter: NotificationCenter()
         )
 
-        XCTAssertEqual(monitor.status.title, "没有同步事件")
-        XCTAssertTrue(monitor.status.message.contains("仅本机存储"))
+        XCTAssertEqual(monitor.status.title, String(localized: "没有同步事件"))
+        XCTAssertEqual(monitor.status.message, String(localized: "当前为仅本机存储，不会收到 iCloud 同步事件。"))
     }
 
     func testDataChangeMonitorPublishesPersistentStoreRemoteChanges() {
@@ -452,8 +455,8 @@ final class AppDataControllerTests: XCTestCase {
     func testNetworkStatusExplainsOfflineLocalAvailability() {
         let status = AppNetworkStatus.unavailable
 
-        XCTAssertEqual(status.title, "网络不可用")
-        XCTAssertTrue(status.message.contains("本机收藏、搜索和删除仍可使用"))
+        XCTAssertEqual(status.title, String(localized: "网络不可用"))
+        XCTAssertEqual(status.message, String(localized: "当前离线。翻译请求和 iCloud 同步会暂停，但本机收藏、搜索和删除仍可使用。"))
     }
 
     func testNetworkStatusMonitorPublishesOfflineChanges() {
