@@ -50,7 +50,6 @@ struct TranslationView: View {
         .onChange(of: sourceLanguage) { _, _ in
             normalizeLanguageDirection()
         }
-        .keyboardDismissControls()
     }
 
     @ViewBuilder
@@ -1125,8 +1124,6 @@ private struct PlatformPromptedTextView: UIViewRepresentable {
         textView.adjustsFontForContentSizeCategory = true
         textView.isScrollEnabled = true
         textView.text = text
-        textView.inputAccessoryView = context.coordinator.makeDismissToolbar()
-        context.coordinator.textView = textView
 
         let placeholderLabel = UILabel()
         placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -1169,29 +1166,9 @@ private struct PlatformPromptedTextView: UIViewRepresentable {
         static let placeholderTag = 91001
 
         var text: Binding<String>
-        weak var textView: UITextView?
 
         init(text: Binding<String>) {
             self.text = text
-        }
-
-        func makeDismissToolbar() -> UIToolbar {
-            let toolbar = UIToolbar()
-            toolbar.items = [
-                UIBarButtonItem(systemItem: .flexibleSpace),
-                UIBarButtonItem(
-                    title: "完成",
-                    style: .done,
-                    target: self,
-                    action: #selector(dismissKeyboard)
-                )
-            ]
-            toolbar.sizeToFit()
-            return toolbar
-        }
-
-        @objc private func dismissKeyboard() {
-            textView?.resignFirstResponder()
         }
 
         func textViewDidChange(_ textView: UITextView) {

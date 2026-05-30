@@ -42,22 +42,46 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
     }
 
-    func testKeyboardDismissButtonClosesTranslationInputKeyboard() throws {
+    func testTappingOutsideTranslationInputDismissesKeyboard() throws {
         let inputEditor = app.textViews["translation.input.editor"].firstMatch
         XCTAssertTrue(inputEditor.waitForExistence(timeout: 12))
 
         inputEditor.tap()
         inputEditor.typeText("hello")
 
-        let doneButton = app.buttons["完成"].firstMatch
-        XCTAssertTrue(doneButton.waitForExistence(timeout: 4))
-        doneButton.tap()
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.18)).tap()
 
         XCTAssertFalse(app.keyboards.firstMatch.waitForExistence(timeout: 1))
 
         let startButton = app.buttons["translation.start"].firstMatch
         XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
         XCTAssertTrue(startButton.waitForHittable(timeout: 4))
+    }
+
+    func testExistingLibraryNoteRequiresEditBeforeSavingChanges() throws {
+        app.terminate()
+        launchApp(seed: "library-search-fixture")
+
+        openTab("收藏")
+        XCTAssertTrue(app.staticTexts["seeded note"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.textFields["library.note.editor"].firstMatch.exists)
+
+        let editButton = app.buttons["library.note.edit"].firstMatch
+        XCTAssertTrue(editButton.waitForExistence(timeout: 4))
+        editButton.tap()
+
+        let noteField = app.textFields["library.note.editor"].firstMatch
+        XCTAssertTrue(noteField.waitForExistence(timeout: 4))
+        noteField.tap()
+        noteField.typeText(" updated")
+
+        let saveButton = app.buttons["library.note.save"].firstMatch
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 4))
+        saveButton.tap()
+
+        XCTAssertFalse(noteField.waitForExistence(timeout: 1))
+        XCTAssertTrue(app.staticTexts["seeded note updated"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.buttons["library.note.edit"].firstMatch.waitForExistence(timeout: 4))
     }
 
     func testLanguageControlsEnableSwapOnlyForConcreteSource() throws {

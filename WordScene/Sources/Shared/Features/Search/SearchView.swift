@@ -100,7 +100,6 @@ struct SearchView: View {
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadSearchData()
         }
-        .keyboardDismissControls()
     }
 
     private var pageMaxWidth: CGFloat {

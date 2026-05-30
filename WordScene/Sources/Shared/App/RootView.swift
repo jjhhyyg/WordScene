@@ -24,6 +24,7 @@ struct RootView: View {
                 }
             }
             .environment(\.adaptiveLayout, layout)
+            .keyboardDismissControls()
         }
         #endif
     }
@@ -98,20 +99,70 @@ struct RootView: View {
 #if os(iOS)
 extension View {
     func keyboardDismissControls() -> some View {
-        toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("完成") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil,
-                        from: nil,
-                        for: nil
-                    )
-                }
-                .accessibilityIdentifier("keyboard.done")
-            }
+        background(KeyboardOutsideTapDismissalInstaller().allowsHitTesting(false))
+    }
+}
+
+private struct KeyboardOutsideTapDismissalInstaller: UIViewRepresentable {
+    func makeUIView(context: Context) -> KeyboardOutsideTapDismissalView {
+        KeyboardOutsideTapDismissalView()
+    }
+
+    func updateUIView(_ uiView: KeyboardOutsideTapDismissalView, context: Context) {}
+}
+
+private final class KeyboardOutsideTapDismissalView: UIView, UIGestureRecognizerDelegate {
+    private weak var installedWindow: UIWindow?
+    private lazy var tapRecognizer: UITapGestureRecognizer = {
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        recognizer.cancelsTouchesInView = false
+        recognizer.delegate = self
+        return recognizer
+    }()
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+
+        if installedWindow !== window {
+            installedWindow?.removeGestureRecognizer(tapRecognizer)
+            installedWindow = window
+            window?.addGestureRecognizer(tapRecognizer)
         }
+    }
+
+    deinit {
+        installedWindow?.removeGestureRecognizer(tapRecognizer)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard var touchedView = touch.view else {
+            return true
+        }
+
+        while true {
+            if touchedView is UITextField || touchedView is UITextView {
+                return false
+            }
+
+            let className = NSStringFromClass(type(of: touchedView))
+            if className.contains("UIKeyboard") {
+                return false
+            }
+
+            guard let superview = touchedView.superview else {
+                return true
+            }
+            touchedView = superview
+        }
+    }
+
+    @objc private func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 }
 #else

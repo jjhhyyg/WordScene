@@ -119,7 +119,6 @@ struct LibraryView: View {
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadItems()
         }
-        .keyboardDismissControls()
     }
 
     private var gridColumns: [GridItem] {
@@ -360,6 +359,7 @@ private struct MemoryItemRow: View {
     let onDelete: () -> Void
 
     @State private var noteDraft: String
+    @State private var isEditingNote: Bool
 
     init(
         item: MemoryItem,
@@ -372,6 +372,7 @@ private struct MemoryItemRow: View {
         self.onEdit = onEdit
         self.onDelete = onDelete
         self._noteDraft = State(initialValue: item.note)
+        self._isEditingNote = State(initialValue: item.note.isEmpty)
     }
 
     var body: some View {
@@ -422,22 +423,7 @@ private struct MemoryItemRow: View {
 
             Divider()
 
-            HStack(alignment: .center, spacing: 8) {
-                TextField("添加备注", text: $noteDraft)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit {
-                        onSaveNote(noteDraft)
-                    }
-
-                Button {
-                    onSaveNote(noteDraft)
-                } label: {
-                    Image(systemName: "checkmark.circle")
-                }
-                .buttonStyle(.borderless)
-                .controlSize(.small)
-                .accessibilityLabel("保存备注")
-            }
+            noteSection
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -446,6 +432,61 @@ private struct MemoryItemRow: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(panelBorder, lineWidth: 1)
         }
+        .onChange(of: item.note) { _, newNote in
+            if !isEditingNote {
+                noteDraft = newNote
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var noteSection: some View {
+        if isEditingNote {
+            HStack(alignment: .center, spacing: 8) {
+                TextField("添加备注", text: $noteDraft)
+                    .textFieldStyle(.roundedBorder)
+                    .accessibilityIdentifier("library.note.editor")
+                    .onSubmit {
+                        saveNoteAndExitEditing()
+                    }
+
+                Button {
+                    saveNoteAndExitEditing()
+                } label: {
+                    Image(systemName: "checkmark.circle")
+                }
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+                .accessibilityLabel("保存备注")
+                .accessibilityIdentifier("library.note.save")
+            }
+        } else {
+            HStack(alignment: .center, spacing: 8) {
+                Label(noteDraft, systemImage: "note.text")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+
+                Spacer(minLength: 8)
+
+                Button {
+                    isEditingNote = true
+                } label: {
+                    Image(systemName: "pencil.circle")
+                }
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+                .accessibilityLabel("编辑备注")
+                .accessibilityIdentifier("library.note.edit")
+            }
+            .padding(.vertical, 6)
+        }
+    }
+
+    private func saveNoteAndExitEditing() {
+        noteDraft = noteDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        onSaveNote(noteDraft)
+        isEditingNote = noteDraft.isEmpty
     }
 
     private var languageDirectionText: String {
