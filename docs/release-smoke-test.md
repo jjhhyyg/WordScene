@@ -41,8 +41,10 @@ and pass/fail notes for each run.
   recording, so stale evidence prints WAITING instead of record commands. It is
   read-only and does not record PASS evidence. Add `--summary` to append READY
   and WAITING counts plus grouped WAITING reasons for release triage. Add
-  `--scope ios`, `--scope macos`, or `--scope cross-platform` when you only want
-  rows that can run in the currently available environment.
+  `--scope ios` or `--scope ios-device` for iPhone/iPad-only rows,
+  `--scope macos` for signed Mac rows, `--scope cross-platform` for rows that
+  require both signed iOS and signed macOS candidates, or `--scope local-only`
+  for the unsigned Mac plus signed iOS fallback row.
 - Run `scripts/release_next_actions.sh` when deciding what to do next. It wraps
   the same readiness rules into an ordered action list, including the macOS
   signing recovery step, READY manual rows, and the final completion gate.

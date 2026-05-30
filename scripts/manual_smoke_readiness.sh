@@ -305,7 +305,7 @@ row_in_scope() {
       return 0
       ;;
     ios)
-      [[ "$group" == "ios-device" || "$group" == "local-only" ]]
+      [[ "$group" == "ios-device" ]]
       ;;
     ios-device)
       [[ "$group" == "ios-device" ]]

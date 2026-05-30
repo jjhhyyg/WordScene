@@ -72,9 +72,12 @@ grep -qF -- '- missing PASS candidate build: macOS (5 rows)' "$TMPDIR/summary.ou
 grep -qF 'Manual Smoke Readiness (ios scope)' "$TMPDIR/ios-commands.out"
 grep -qF 'READY Translation loop / iPhone' "$TMPDIR/ios-commands.out"
 grep -qF 'READY Translation loop / iPad' "$TMPDIR/ios-commands.out"
-grep -qF 'READY Local-only fallback / macOS/iOS' "$TMPDIR/ios-commands.out"
 if grep -qF -- '--platform "macOS"' "$TMPDIR/ios-commands.out"; then
   echo "manual_smoke_readiness --scope ios should not print macOS-only commands" >&2
+  exit 1
+fi
+if grep -qF -- '--platform "macOS/iOS"' "$TMPDIR/ios-commands.out"; then
+  echo "manual_smoke_readiness --scope ios should not print local-only fallback commands" >&2
   exit 1
 fi
 
