@@ -100,6 +100,23 @@ final class TranslationWorkflowTests: XCTestCase {
         )
     }
 
+    func testTranslationTrimsStoredTokenBeforeCallingProvider() async throws {
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: "  test-token\n"),
+            translationClient: StubTranslationClient(translatedText: "你好，世界。"),
+            historyStore: TranslationHistoryRepository(coreDataStore: try CoreDataMemoryStore(inMemory: true))
+        )
+
+        let result = try await workflow.translate(
+            text: "hello world",
+            source: .auto,
+            target: .zh,
+            currentHistory: []
+        )
+
+        XCTAssertEqual(result.translatedText, "你好，世界。")
+    }
+
     func testMissingTokenFailsBeforeCallingProvider() async {
         let workflow = TranslationWorkflow(
             credentialStore: StubCredentialStore(token: nil),

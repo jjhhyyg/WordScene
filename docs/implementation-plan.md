@@ -79,6 +79,7 @@ Baseline already completed:
 - Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
 - Manual smoke readiness now applies candidate and DeepSeek live-smoke freshness checks before printing READY rows or recording command templates.
 - Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
+- Translation execution trims stored DeepSeek tokens before invoking the provider, so pasted or migrated tokens with surrounding whitespace still authenticate correctly.
 - UI tests now launch with an isolated in-memory data stack and per-run `UserDefaults` suite, so existing simulator or developer app data cannot make initial Library/Search/Settings assertions flaky.
 
 Known gaps:
@@ -453,6 +454,7 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the iOS/local-only scope split plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fc895cd7f14e`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `2781980d190c` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Trimmed stored DeepSeek tokens in the translation workflow before provider calls and added regression coverage, closing a first-loop failure mode for tokens pasted or migrated with surrounding whitespace.
 
 Next:
 

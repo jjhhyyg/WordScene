@@ -38,8 +38,11 @@ struct TranslationWorkflow {
             throw DeepSeekTranslationError.emptyInput
         }
 
-        guard let token = try credentialStore.read(account: DeepSeekCredential.tokenAccount),
-              !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        guard let rawToken = try credentialStore.read(account: DeepSeekCredential.tokenAccount) else {
+            throw TranslationWorkflowError.missingToken
+        }
+        let token = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty else {
             throw TranslationWorkflowError.missingToken
         }
 
