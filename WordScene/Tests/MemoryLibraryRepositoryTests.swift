@@ -70,6 +70,32 @@ final class MemoryLibraryRepositoryTests: XCTestCase {
         XCTAssertEqual(try coreDataStore.loadDeletionTombstones().map(\.itemID), [item.id])
     }
 
+    func testSaveOrThrowDoesNotRecordChangeForIdenticalSnapshot() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        var changeCount = 0
+        let repository = MemoryLibraryRepository(
+            coreDataStore: coreDataStore,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+
+        try repository.saveOrThrow([item])
+        try repository.saveOrThrow([item])
+
+        XCTAssertEqual(changeCount, 1)
+        XCTAssertEqual(try coreDataStore.loadActiveItems(), [item])
+    }
+
     func testMigratesLegacyDefaultsIntoCoreDataAndClearsLegacySource() throws {
         let suiteName = "MemoryLibraryRepositoryTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

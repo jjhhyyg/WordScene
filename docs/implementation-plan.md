@@ -34,6 +34,7 @@ Baseline already completed:
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
 - Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
+- Local memory note edits avoid no-op timestamp churn, and unchanged replacement snapshots skip repository writes and local change notifications.
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Versioned local persistence rejects unsupported future schema versions without clearing the original local data.
@@ -528,6 +529,10 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the local recovery no-op guidance change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `599bf97bafe8`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `1a55e933428f` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Avoided no-op note timestamp churn by leaving a memory item unchanged when the submitted note only differs by surrounding whitespace.
+- Skipped `MemoryLibraryRepository` writes and local change notifications when the replacement memory snapshot matches the current store state.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -only-testing:WordSceneMacTests/MemoryLibraryRepositoryTests -derivedDataPath /tmp/WordSceneMemoryNoopGreen CODE_SIGNING_ALLOWED=NO`; the 18 memory library tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the memory note no-op guard plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

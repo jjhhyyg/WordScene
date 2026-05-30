@@ -211,4 +211,22 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(updatedItems.first?.note, "常用问候")
         XCTAssertGreaterThan(updatedItems.first?.updatedAt ?? item.updatedAt, item.updatedAt)
     }
+
+    func testUpdatingNoteWithSameTrimmedValueDoesNotTouchTimestamp() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "常用问候",
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+
+        let updatedItems = store.updatingNote(for: item.id, note: "  常用问候\n", in: [item])
+
+        XCTAssertEqual(updatedItems, [item])
+    }
 }

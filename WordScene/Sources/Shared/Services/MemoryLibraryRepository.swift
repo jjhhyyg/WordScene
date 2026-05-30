@@ -48,17 +48,23 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
     }
 
     func saveOrThrow(_ items: [MemoryItem]) throws {
+        let replacementItems = Array(items.prefix(maximumCount))
         guard let coreDataStore else {
-            legacyStore.save(items)
+            if (try? legacyStore.loadOrThrow()) == replacementItems {
+                return
+            }
+            legacyStore.save(replacementItems)
             changeRecorder()
             return
         }
 
         try migrateLegacyItemsIfNeeded(into: coreDataStore)
 
-        let replacementItems = Array(items.prefix(maximumCount))
         let replacementIDs = Set(replacementItems.map(\.id))
         let currentItems = try loadActiveItems(from: coreDataStore)
+        guard currentItems != replacementItems else {
+            return
+        }
 
         for currentItem in currentItems where !replacementIDs.contains(currentItem.id) {
             try coreDataStore.softDelete(id: currentItem.id)

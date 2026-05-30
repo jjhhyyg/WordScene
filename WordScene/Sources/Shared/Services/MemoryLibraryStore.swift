@@ -110,7 +110,11 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
             }
 
             var updatedItem = item
-            updatedItem.note = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard updatedItem.note != trimmedNote else {
+                return item
+            }
+            updatedItem.note = trimmedNote
             updatedItem.updatedAt = Date()
             return updatedItem
         }
