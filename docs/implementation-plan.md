@@ -44,6 +44,7 @@ Baseline already completed:
 - Settings local recovery checks for existing legacy cache documents before exporting a raw backup or resetting, avoiding empty backup files and misleading "reset 0 documents" results.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Search results can remove matching recent-history records directly, without affecting saved memory items.
+- Search results can save matching recent-history records directly into the memory library.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
@@ -550,6 +551,8 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `50f53648a06f` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Added a Search-result history delete action backed by `MemorySearchResult.sourceID`, so users can delete a matched recent-history record from Search without deleting the saved-memory duplicate.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 6 search-index tests passed.
+- Added a Search-result save action backed by `MemorySearchResult.translationRecord`, so users can promote a matched recent-history record into the memory library from Search.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchSaveGreen CODE_SIGNING_ALLOWED=NO`; the 7 search-index tests passed.
 
 Next:
 

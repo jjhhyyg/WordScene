@@ -48,6 +48,21 @@ final class MemorySearchIndexTests: XCTestCase {
         XCTAssertEqual(result?.kind, .history)
     }
 
+    func testHistoryResultExposesOriginalRecordForSavingActions() {
+        let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
+        let record = TranslationRecord(
+            sourceText: "save me",
+            translatedText: "保存我",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 42)
+        )
+
+        let result = index.search(query: "save", memoryItems: [], history: [record]).first
+
+        XCTAssertEqual(result?.translationRecord, record)
+    }
+
     func testSavedItemWinsOverDuplicateHistoryRecord() {
         let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
         let item = MemoryItem(

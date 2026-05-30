@@ -110,6 +110,17 @@ struct MemorySearchResult: Identifiable, Equatable {
     let note: String
     let createdAt: Date
 
+    var translationRecord: TranslationRecord {
+        TranslationRecord(
+            id: sourceID,
+            sourceText: sourceText,
+            translatedText: translatedText,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            createdAt: createdAt
+        )
+    }
+
     init(item: MemoryItem) {
         self.id = "memory-\(item.id.uuidString)"
         self.sourceID = item.id

@@ -69,6 +69,9 @@ struct SearchView: View {
                             ForEach(results) { result in
                                 SearchResultRow(
                                     result: result,
+                                    onSaveHistory: result.kind == .history ? {
+                                        saveHistoryRecord(result.translationRecord)
+                                    } : nil,
                                     onDeleteHistory: result.kind == .history ? {
                                         deleteHistoryRecord(id: result.sourceID)
                                     } : nil
@@ -124,6 +127,17 @@ struct SearchView: View {
         hasLoaded = true
     }
 
+    private func saveHistoryRecord(_ record: TranslationRecord) {
+        let updatedItems = memoryStore.adding(record, to: memoryItems)
+        do {
+            try memoryStore.saveOrThrow(updatedItems)
+            memoryItems = updatedItems
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = "收藏保存失败：\(error.localizedDescription)"
+        }
+    }
+
     private func deleteHistoryRecord(id: UUID) {
         let updatedHistory = historyStore.removing(id: id, from: history)
         do {
@@ -138,6 +152,7 @@ struct SearchView: View {
 
 private struct SearchResultRow: View {
     let result: MemorySearchResult
+    let onSaveHistory: (() -> Void)?
     let onDeleteHistory: (() -> Void)?
 
     var body: some View {
@@ -153,6 +168,19 @@ private struct SearchResultRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                if let onSaveHistory {
+                    Button {
+                        onSaveHistory()
+                    } label: {
+                        Image(systemName: "bookmark")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                    .accessibilityLabel("保存到收藏")
+                    .accessibilityIdentifier("search.history.save")
+                }
 
                 if let onDeleteHistory {
                     Button(role: .destructive) {
