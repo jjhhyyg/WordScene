@@ -48,4 +48,32 @@ final class LocalPersistenceRecoveryControllerTests: XCTestCase {
         XCTAssertNil(defaults.data(forKey: "translationHistory"))
         XCTAssertEqual(defaults.data(forKey: "unrelated"), Data("other".utf8))
     }
+
+    func testLocalDocumentCountReportsOnlyKnownLegacyDocuments() {
+        let suiteName = "LocalPersistenceRecoveryControllerTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        defaults.set(Data("memory".utf8), forKey: "memoryLibrary")
+        defaults.set(Data("other".utf8), forKey: "unrelated")
+        let controller = LocalPersistenceRecoveryController(defaults: defaults)
+
+        XCTAssertEqual(controller.localDocumentCount(), 1)
+
+        defaults.set(Data("history".utf8), forKey: "translationHistory")
+
+        XCTAssertEqual(controller.localDocumentCount(), 2)
+    }
+
+    func testLocalDocumentCountIgnoresMissingLegacyDocuments() {
+        let suiteName = "LocalPersistenceRecoveryControllerTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        let controller = LocalPersistenceRecoveryController(defaults: defaults)
+
+        XCTAssertEqual(controller.localDocumentCount(), 0)
+    }
 }

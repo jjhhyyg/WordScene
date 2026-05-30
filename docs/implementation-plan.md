@@ -38,6 +38,7 @@ Baseline already completed:
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Versioned local persistence rejects unsupported future schema versions without clearing the original local data.
 - Settings maps local persistence read/version errors to recovery-oriented guidance before backup/reset or upgrade decisions.
+- Settings local recovery checks for existing legacy cache documents before exporting a raw backup or resetting, avoiding empty backup files and misleading "reset 0 documents" results.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
@@ -522,6 +523,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the Settings recovery-error guidance change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fedd76525553`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `acec154d94ba` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Tightened Settings local recovery so backup export and reset first check whether known legacy `UserDefaults` documents exist, then show a no-op notice instead of creating an empty backup or claiming a reset of zero documents.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/LocalPersistenceRecoveryControllerTests -derivedDataPath /tmp/WordSceneRecoveryCountMac CODE_SIGNING_ALLOWED=NO`; the 4 local recovery tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the local recovery no-op guidance change plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

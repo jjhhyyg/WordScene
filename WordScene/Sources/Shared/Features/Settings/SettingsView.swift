@@ -595,6 +595,10 @@ struct SettingsView: View {
         recoveryStatus = .working("正在准备旧缓存原始备份...")
 
         do {
+            guard recoveryController.localDocumentCount() > 0 else {
+                recoveryStatus = .notice("没有发现旧缓存文档，无需导出原始备份。")
+                return
+            }
             let backup = try recoveryController.prepareBackup()
             recoveryBackupDocument = MemoryExportFileDocument(data: backup.data)
             recoveryBackupFileName = backup.fileName
@@ -617,6 +621,10 @@ struct SettingsView: View {
 
     @MainActor
     private func resetLegacyDocuments() {
+        guard recoveryController.localDocumentCount() > 0 else {
+            recoveryStatus = .notice("没有旧缓存文档需要重置。")
+            return
+        }
         let resetCount = recoveryController.resetLocalDocuments()
         recoveryStatus = .success("已重置 \(resetCount) 个旧缓存文档。")
     }
@@ -862,6 +870,7 @@ private enum SettingsImportExportStatus: Equatable {
 
 private enum SettingsLocalRecoveryStatus: Equatable {
     case idle
+    case notice(String)
     case working(String)
     case success(String)
     case failed(String)
@@ -870,6 +879,8 @@ private enum SettingsLocalRecoveryStatus: Equatable {
         switch self {
         case .idle:
             return "旧缓存维护只处理早期本机文档，可先导出原始备份再重置。"
+        case .notice(let message):
+            return message
         case .working(let message), .success(let message), .failed(let message):
             return message
         }
@@ -879,6 +890,8 @@ private enum SettingsLocalRecoveryStatus: Equatable {
         switch self {
         case .idle:
             return "wrench.and.screwdriver"
+        case .notice:
+            return "info.circle"
         case .working:
             return "arrow.triangle.2.circlepath"
         case .success:
@@ -890,7 +903,7 @@ private enum SettingsLocalRecoveryStatus: Equatable {
 
     var tint: Color {
         switch self {
-        case .idle:
+        case .idle, .notice:
             return .secondary
         case .working:
             return .accentColor

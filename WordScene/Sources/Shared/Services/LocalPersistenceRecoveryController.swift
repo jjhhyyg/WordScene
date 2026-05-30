@@ -23,12 +23,7 @@ struct LocalPersistenceRecoveryController {
 
     func prepareBackup() throws -> LocalPersistenceBackup {
         let createdAt = now()
-        let documents = keys.compactMap { key -> LocalPersistenceBackupDocumentEntry? in
-            guard let data = defaults.data(forKey: key) else {
-                return nil
-            }
-            return LocalPersistenceBackupDocumentEntry(key: key, dataBase64: data.base64EncodedString())
-        }
+        let documents = localDocumentEntries()
         let document = LocalPersistenceBackupDocument(
             schemaVersion: 1,
             createdAt: createdAt,
@@ -43,6 +38,10 @@ struct LocalPersistenceRecoveryController {
             fileName: backupFileName(for: createdAt),
             documentCount: documents.count
         )
+    }
+
+    func localDocumentCount() -> Int {
+        keys.filter { defaults.data(forKey: $0) != nil }.count
     }
 
     @discardableResult
@@ -69,6 +68,15 @@ struct LocalPersistenceRecoveryController {
         let minute = components.minute ?? 0
         let second = components.second ?? 0
         return String(format: "wordscene-local-backup-%04d%02d%02d-%02d%02d%02d.json", year, month, day, hour, minute, second)
+    }
+
+    private func localDocumentEntries() -> [LocalPersistenceBackupDocumentEntry] {
+        keys.compactMap { key -> LocalPersistenceBackupDocumentEntry? in
+            guard let data = defaults.data(forKey: key) else {
+                return nil
+            }
+            return LocalPersistenceBackupDocumentEntry(key: key, dataBase64: data.base64EncodedString())
+        }
     }
 }
 
