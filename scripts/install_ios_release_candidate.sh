@@ -90,6 +90,26 @@ first_available_mobile_device() {
     '
 }
 
+device_state_for_identifier() {
+  local requested_device="$1"
+
+  device_list |
+    awk -v requested_device="$requested_device" '
+      NR > 2 && index($0, requested_device) > 0 {
+        if ($0 ~ /[[:space:]]available[[:space:]]/) {
+          print "available"
+          exit
+        }
+        if ($0 ~ /[[:space:]]unavailable[[:space:]]/) {
+          print "unavailable"
+          exit
+        }
+        print "unknown"
+        exit
+      }
+    '
+}
+
 if [[ -z "$DEVICE" ]]; then
   if ! command -v xcrun >/dev/null 2>&1 && [[ -z "$DEVICE_LIST_FILE" ]]; then
     echo "xcrun is required to find an available iPhone or iPad." >&2
@@ -102,6 +122,13 @@ fi
 if [[ -z "$DEVICE" ]]; then
   echo "No available physical iPhone or iPad was reported by devicectl." >&2
   echo "Connect and unlock a target device, then rerun scripts/manual_smoke_environment_preflight.sh." >&2
+  exit 1
+fi
+
+device_state="$(device_state_for_identifier "$DEVICE")"
+if [[ "$device_state" == "unavailable" ]]; then
+  echo "Selected iPhone/iPad is visible but unavailable: $DEVICE" >&2
+  echo "Unlock it, trust this Mac, confirm Developer Mode, and reconnect or re-pair it before installing." >&2
   exit 1
 fi
 

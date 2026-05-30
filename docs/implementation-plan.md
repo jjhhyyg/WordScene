@@ -77,7 +77,7 @@ Baseline already completed:
 - Release next actions include executable smoke environment readiness, so evidence-READY rows are not mistaken for runnable device or signed-candidate smoke.
 - Manual smoke environment readiness can be checked through `scripts/manual_smoke_environment_preflight.sh`, separating evidence-eligible rows from physical-device availability and executable smoke environments before PASS rows are recorded.
 - Manual smoke environment preflight prints concrete next actions for unavailable or missing physical iPhone/iPad devices and missing candidate artifacts.
-- iOS release candidates can be installed to an available physical iPhone or iPad through `scripts/install_ios_release_candidate.sh`, with a `--dry-run` mode for checking the exact `devicectl` command before device smoke.
+- iOS release candidates can be installed to an available physical iPhone or iPad through `scripts/install_ios_release_candidate.sh`, with a `--dry-run` mode for checking the exact `devicectl` command before device smoke and an explicit unavailable-device guard before install.
 - Manual smoke sessions can be prepared through `scripts/manual_smoke_session_guide.sh`, which prints the current preflight, install command, checklist pointer, and scoped record-command templates without writing PASS evidence.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
@@ -505,6 +505,9 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1310ea255dad`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/manual_smoke_environment_preflight.sh`; the iOS candidate and unsigned macOS Release app are present, the physical iPhone is visible but unavailable, and the preflight now prints the concrete unlock/trust/Developer Mode/re-pair guidance.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `e707ef09188e` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Hardened `scripts/install_ios_release_candidate.sh` so explicitly selecting a visible but unavailable physical iPhone/iPad fails before install with the same unlock/trust/Developer Mode/re-pair guidance as preflight.
+- Reran `scripts/test_install_ios_release_candidate.sh`; it covers automatic available-device selection, explicit available device dry-run, unavailable-device failure, explicit unavailable-device failure, and missing app failure.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the install-helper unavailable-device guard plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

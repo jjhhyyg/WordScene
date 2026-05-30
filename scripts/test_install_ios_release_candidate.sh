@@ -51,6 +51,18 @@ fi
 grep -qF 'No available physical iPhone or iPad was reported by devicectl.' "$TMPDIR/no-device.err"
 
 if "$ROOT/scripts/install_ios_release_candidate.sh" \
+  --app "$APP_PATH" \
+  --device '00000000-0000-0000-0000-000000000001' \
+  --device-list "$DEVICE_LIST" \
+  --dry-run >"$TMPDIR/unavailable-explicit.out" 2>"$TMPDIR/unavailable-explicit.err"; then
+  echo "Expected an explicitly selected unavailable device to fail before install." >&2
+  exit 1
+fi
+
+grep -qF 'Selected iPhone/iPad is visible but unavailable: 00000000-0000-0000-0000-000000000001' "$TMPDIR/unavailable-explicit.err"
+grep -qF 'Unlock it, trust this Mac, confirm Developer Mode, and reconnect or re-pair it before installing.' "$TMPDIR/unavailable-explicit.err"
+
+if "$ROOT/scripts/install_ios_release_candidate.sh" \
   --app "$TMPDIR/Missing.app" \
   --device-list "$DEVICE_LIST" \
   --dry-run >"$TMPDIR/missing-app.out" 2>"$TMPDIR/missing-app.err"; then
