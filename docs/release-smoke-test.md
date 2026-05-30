@@ -53,6 +53,9 @@ and pass/fail notes for each run.
   with `scripts/install_ios_release_candidate.sh`. Add `--device <identifier>`
   to target a specific device, or `--dry-run` to print the `devicectl` command
   before installing.
+- Use `scripts/manual_smoke_session_guide.sh` to print the current preflight,
+  iOS install command, checklist pointer, and record-command templates in one
+  place. It is read-only and does not record PASS rows.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

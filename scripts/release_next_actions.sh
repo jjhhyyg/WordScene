@@ -62,7 +62,8 @@ fi
 
 echo "3. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
 echo "4. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
-echo "5. Do not call the release complete until scripts/check_release_completion.sh passes."
+echo "5. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and record-command templates in one place."
+echo "6. Do not call the release complete until scripts/check_release_completion.sh passes."
 echo
 echo "Current readiness:"
 printf '%s\n' "$readiness"

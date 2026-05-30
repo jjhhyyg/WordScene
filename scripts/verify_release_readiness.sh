@@ -13,6 +13,7 @@ MANUAL_SMOKE_READINESS_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_READINESS_SCRI
 RELEASE_NEXT_ACTIONS_TEST_SCRIPT="${WORDSCENE_TEST_RELEASE_NEXT_ACTIONS_SCRIPT:-scripts/test_release_next_actions.sh}"
 MANUAL_SMOKE_ENVIRONMENT_PREFLIGHT_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_ENVIRONMENT_PREFLIGHT_SCRIPT:-scripts/test_manual_smoke_environment_preflight.sh}"
 INSTALL_IOS_RELEASE_CANDIDATE_TEST_SCRIPT="${WORDSCENE_TEST_INSTALL_IOS_RELEASE_CANDIDATE_SCRIPT:-scripts/test_install_ios_release_candidate.sh}"
+MANUAL_SMOKE_SESSION_GUIDE_TEST_SCRIPT="${WORDSCENE_TEST_MANUAL_SMOKE_SESSION_GUIDE_SCRIPT:-scripts/test_manual_smoke_session_guide.sh}"
 IOS_TEST_DESTINATION="${WORDSCENE_IOS_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5}"
 
 run() {
@@ -68,6 +69,8 @@ run bash -n \
   scripts/test_manual_smoke_environment_preflight.sh \
   scripts/install_ios_release_candidate.sh \
   scripts/test_install_ios_release_candidate.sh \
+  scripts/manual_smoke_session_guide.sh \
+  scripts/test_manual_smoke_session_guide.sh \
   scripts/check_release_completion.sh \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
@@ -86,6 +89,7 @@ run "$MANUAL_SMOKE_READINESS_TEST_SCRIPT"
 run "$RELEASE_NEXT_ACTIONS_TEST_SCRIPT"
 run "$MANUAL_SMOKE_ENVIRONMENT_PREFLIGHT_TEST_SCRIPT"
 run "$INSTALL_IOS_RELEASE_CANDIDATE_TEST_SCRIPT"
+run "$MANUAL_SMOKE_SESSION_GUIDE_TEST_SCRIPT"
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
 run "$PRIVACY_SURFACE_TEST_SCRIPT"

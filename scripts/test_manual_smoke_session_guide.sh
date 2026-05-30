@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR"' EXIT
+
+CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
+EVIDENCE="$TMPDIR/release-smoke-evidence.md"
+CANDIDATE_ROOT="$TMPDIR/candidates"
+DEVICE_LIST="$TMPDIR/devices.txt"
+
+cat >"$EVIDENCE" <<EVIDENCE_MD
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | readiness passed |
+| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | macOS signing blocked |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live smoke passed. Git commit \`$CURRENT_COMMIT\`. |
+
+## Release Candidate Build Blocker
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | BLOCKED | missing profile |
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | iOS | local build host | 1 | PASS | signed iOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Build | 1 |
+| Git commit | $CURRENT_COMMIT |
+EVIDENCE_MD
+
+mkdir -p "$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
+
+cat >"$DEVICE_LIST" <<'DEVICES'
+Name             Hostname                         Identifier                             State         Model
+--------------   ------------------------------   ------------------------------------   -----------   --------------------
+Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   available     iPhone 17 Pro Max
+Lab iPad         Lab-iPad.coredevice.local        00000000-0000-0000-0000-000000000002   unavailable   iPad Pro 11-inch
+DEVICES
+
+"$ROOT/scripts/manual_smoke_session_guide.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/guide.out"
+
+grep -qF 'Manual Smoke Session Guide' "$TMPDIR/guide.out"
+grep -qF 'Manual Smoke Environment Preflight' "$TMPDIR/guide.out"
+grep -qF 'scripts/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/guide.out"
+grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/guide.out"
+grep -qF -- '--area "Translation loop"' "$TMPDIR/guide.out"
+grep -qF -- '--platform "iPhone"' "$TMPDIR/guide.out"
+
+rm -rf "$CANDIDATE_ROOT/iOS"
+cat >"$DEVICE_LIST" <<'DEVICES'
+Name             Hostname                         Identifier                             State         Model
+--------------   ------------------------------   ------------------------------------   -----------   --------------------
+Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   unavailable   iPhone 17 Pro Max
+DEVICES
+
+"$ROOT/scripts/manual_smoke_session_guide.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/waiting-guide.out"
+
+grep -qF 'WAIT: An available physical iPhone/iPad and iOS candidate app are required before install.' "$TMPDIR/waiting-guide.out"
