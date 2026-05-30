@@ -87,6 +87,7 @@ struct SearchView: View {
                     .padding(.top, 18)
                     .padding(.bottom, adaptiveLayout.pageBottomPadding)
                 }
+                .scrollDismissesKeyboard(.interactively)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -99,6 +100,7 @@ struct SearchView: View {
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadSearchData()
         }
+        .keyboardDismissControls()
     }
 
     private var pageMaxWidth: CGFloat {

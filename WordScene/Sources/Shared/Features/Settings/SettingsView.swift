@@ -78,6 +78,7 @@ struct SettingsView: View {
         } message: {
             Text("这会删除早期本机记忆和翻译历史缓存。建议先导出原始备份。")
         }
+        .keyboardDismissControls()
     }
 
     private var mobileSettingsBody: some View {
@@ -109,6 +110,7 @@ struct SettingsView: View {
             .padding(.horizontal, settingsHorizontalPadding)
             .padding(.vertical, settingsVerticalPadding)
         }
+        .scrollDismissesKeyboard(.interactively)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(settingsBackground.ignoresSafeArea())
         .navigationTitle("设置")

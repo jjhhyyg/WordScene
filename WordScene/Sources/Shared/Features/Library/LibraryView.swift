@@ -85,6 +85,7 @@ struct LibraryView: View {
                     .padding(.top, 18)
                     .padding(.bottom, adaptiveLayout.pageBottomPadding)
                 }
+                .scrollDismissesKeyboard(.interactively)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -118,6 +119,7 @@ struct LibraryView: View {
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadItems()
         }
+        .keyboardDismissControls()
     }
 
     private var gridColumns: [GridItem] {
@@ -316,6 +318,7 @@ private struct MemoryItemEditorSheet: View {
                     TextField("可选", text: $draft.note)
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(title)
             #if os(macOS)
             .frame(minWidth: 420, minHeight: 520)

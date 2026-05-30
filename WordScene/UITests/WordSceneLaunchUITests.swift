@@ -42,6 +42,24 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
     }
 
+    func testKeyboardDismissButtonClosesTranslationInputKeyboard() throws {
+        let inputEditor = app.textViews["translation.input.editor"].firstMatch
+        XCTAssertTrue(inputEditor.waitForExistence(timeout: 12))
+
+        inputEditor.tap()
+        inputEditor.typeText("hello")
+
+        let doneButton = app.buttons["完成"].firstMatch
+        XCTAssertTrue(doneButton.waitForExistence(timeout: 4))
+        doneButton.tap()
+
+        XCTAssertFalse(app.keyboards.firstMatch.waitForExistence(timeout: 1))
+
+        let startButton = app.buttons["translation.start"].firstMatch
+        XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
+        XCTAssertTrue(startButton.waitForHittable(timeout: 4))
+    }
+
     func testLanguageControlsEnableSwapOnlyForConcreteSource() throws {
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
 
@@ -120,6 +138,12 @@ final class WordSceneLaunchUITests: XCTestCase {
 private extension XCUIElement {
     func waitForEnabled(timeout: TimeInterval) -> Bool {
         let predicate = NSPredicate(format: "isEnabled == true")
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
+    }
+
+    func waitForHittable(timeout: TimeInterval) -> Bool {
+        let predicate = NSPredicate(format: "isHittable == true")
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
         return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
     }

@@ -1,5 +1,9 @@
 import SwiftUI
 
+#if os(iOS)
+import UIKit
+#endif
+
 struct RootView: View {
     @State private var selectedSection: AppSection = .translate
 
@@ -90,6 +94,33 @@ struct RootView: View {
         }
     }
 }
+
+#if os(iOS)
+extension View {
+    func keyboardDismissControls() -> some View {
+        toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("完成") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil,
+                        from: nil,
+                        for: nil
+                    )
+                }
+                .accessibilityIdentifier("keyboard.done")
+            }
+        }
+    }
+}
+#else
+extension View {
+    func keyboardDismissControls() -> some View {
+        self
+    }
+}
+#endif
 
 #Preview("Root") {
     RootView()
