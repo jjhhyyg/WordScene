@@ -508,6 +508,8 @@ Verification:
 - Hardened `scripts/install_ios_release_candidate.sh` so explicitly selecting a visible but unavailable physical iPhone/iPad fails before install with the same unlock/trust/Developer Mode/re-pair guidance as preflight.
 - Reran `scripts/test_install_ios_release_candidate.sh`; it covers automatic available-device selection, explicit available device dry-run, unavailable-device failure, explicit unavailable-device failure, and missing app failure.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the install-helper unavailable-device guard plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `495e1e4464de`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `d173d8c528a9` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
