@@ -520,6 +520,7 @@ Verification:
 - Mapped Settings import/export and local recovery errors from unreadable or future-version local persistence documents to actionable backup/reset or upgrade guidance, instead of surfacing raw technical errors.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/SettingsErrorMessageFactoryTests -derivedDataPath /tmp/WordSceneSettingsErrorsMac CODE_SIGNING_ALLOWED=NO`; the 3 Settings error-message tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the Settings recovery-error guidance change plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fedd76525553`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
