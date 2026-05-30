@@ -502,6 +502,9 @@ Verification:
 - Clarified `scripts/manual_smoke_environment_preflight.sh` so unavailable or missing physical iPhone/iPad devices and missing candidate artifacts produce actionable next environment steps.
 - Reran `scripts/test_manual_smoke_environment_preflight.sh`; it covered available, unavailable, and missing physical-device guidance.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the manual-smoke preflight guidance update plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1310ea255dad`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/manual_smoke_environment_preflight.sh`; the iOS candidate and unsigned macOS Release app are present, the physical iPhone is visible but unavailable, and the preflight now prints the concrete unlock/trust/Developer Mode/re-pair guidance.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `e707ef09188e` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
