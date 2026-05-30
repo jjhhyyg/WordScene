@@ -78,6 +78,21 @@ grep -qF 'Local-only fallback row:' "$TMPDIR/local-only-guide.out"
 grep -qF 'Manual Smoke Readiness (local-only scope)' "$TMPDIR/local-only-guide.out"
 grep -qF '  --platform "macOS/iOS" \' "$TMPDIR/local-only-guide.out"
 
+cat >"$DEVICE_LIST" <<'DEVICES'
+Name             Hostname                         Identifier                             State       Model
+--------------   ------------------------------   ------------------------------------   ---------   --------------------
+Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   connected   iPhone 17 Pro Max
+DEVICES
+
+"$ROOT/scripts/manual_smoke_session_guide.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --unsigned-macos-app "$UNSIGNED_MAC_APP" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/connected-guide.out"
+
+grep -qF 'scripts/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/connected-guide.out"
+grep -qF 'iOS/iPadOS device rows:' "$TMPDIR/connected-guide.out"
+
 rm -rf "$CANDIDATE_ROOT/iOS"
 cat >"$DEVICE_LIST" <<'DEVICES'
 Name             Hostname                         Identifier                             State         Model

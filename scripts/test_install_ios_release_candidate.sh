@@ -35,6 +35,21 @@ grep -qF 'Word\ Scene.app' "$TMPDIR/dry-run.out"
 grep -qF 'Moses-iPhone.coredevice.local' "$TMPDIR/explicit-device.out"
 
 cat >"$DEVICE_LIST" <<'DEVICES'
+Name             Hostname                         Identifier                             State       Model
+--------------   ------------------------------   ------------------------------------   ---------   --------------------
+Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   connected   iPhone 17 Pro Max
+DEVICES
+
+"$ROOT/scripts/install_ios_release_candidate.sh" \
+  --app "$APP_PATH" \
+  --device-list "$DEVICE_LIST" \
+  --timeout 15 \
+  --dry-run >"$TMPDIR/connected-dry-run.out"
+
+grep -qF 'DRY RUN: xcrun devicectl device install app --device' "$TMPDIR/connected-dry-run.out"
+grep -qF '00000000-0000-0000-0000-000000000001' "$TMPDIR/connected-dry-run.out"
+
+cat >"$DEVICE_LIST" <<'DEVICES'
 Name             Hostname                         Identifier                             State         Model
 --------------   ------------------------------   ------------------------------------   -----------   --------------------
 Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   unavailable   iPhone 17 Pro Max

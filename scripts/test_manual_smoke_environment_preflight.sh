@@ -68,7 +68,7 @@ grep -qF -- '- Local-only fallback smoke: WAIT - requires an available physical 
 grep -qF 'Do not record PASS for iPhone/iPad rows until the target physical device has actually run the checklist.' "$TMPDIR/preflight.out"
 grep -qF 'Do not record the local-only fallback row until both the iOS candidate is installed on a physical device and the unsigned macOS Release app has actually run the checklist.' "$TMPDIR/preflight.out"
 grep -qF 'Next environment actions:' "$TMPDIR/preflight.out"
-grep -qF 'Physical iPhone/iPad detected as available; install the iOS candidate before recording device smoke.' "$TMPDIR/preflight.out"
+grep -qF 'Physical iPhone/iPad detected as available or connected; install the iOS candidate before recording device smoke.' "$TMPDIR/preflight.out"
 grep -qF 'Signed macOS candidate app is missing; restore the Xcode account/profile for team JU68L3U235 before macOS and iCloud smoke.' "$TMPDIR/preflight.out"
 
 mkdir -p "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
@@ -84,6 +84,22 @@ grep -qF -- '- iOS/iPadOS device smoke: READY - requires an available physical i
 grep -qF -- '- macOS signed-candidate smoke: READY - requires the signed macOS candidate app' "$TMPDIR/preflight-all-ready.out"
 grep -qF -- '- Cross-platform iCloud smoke: READY - requires an available physical iPhone/iPad plus signed iOS and macOS candidates' "$TMPDIR/preflight-all-ready.out"
 grep -qF -- '- Local-only fallback smoke: READY - requires an available physical iPhone/iPad, the iOS candidate app, and the unsigned macOS Release app' "$TMPDIR/preflight-all-ready.out"
+
+cat >"$DEVICE_LIST" <<'DEVICES'
+Name             Hostname                         Identifier                             State       Model
+--------------   ------------------------------   ------------------------------------   ---------   --------------------
+Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   connected   iPhone 17 Pro Max
+DEVICES
+
+"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --unsigned-macos-app "$UNSIGNED_MAC_APP" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/preflight-connected-device.out"
+
+grep -qF 'Moses iPhone' "$TMPDIR/preflight-connected-device.out"
+grep -qF -- '- iOS/iPadOS device smoke: READY - requires an available physical iPhone/iPad and the iOS candidate app' "$TMPDIR/preflight-connected-device.out"
+grep -qF 'Physical iPhone/iPad detected as available or connected; install the iOS candidate before recording device smoke.' "$TMPDIR/preflight-connected-device.out"
 
 cat >"$DEVICE_LIST" <<'DEVICES'
 Name             Hostname                         Identifier                             State         Model

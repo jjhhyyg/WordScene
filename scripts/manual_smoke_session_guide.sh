@@ -71,7 +71,7 @@ device_list() {
 first_available_mobile_device() {
   device_list |
     awk '
-      NR > 2 && $0 ~ /(iPhone|iPad)/ && $0 ~ /[[:space:]]available[[:space:]]/ {
+      NR > 2 && $0 ~ /(iPhone|iPad)/ && $0 ~ /[[:space:]](available|connected)[[:space:]]/ {
         for (field = 1; field <= NF; field++) {
           if ($field ~ /^[0-9A-Fa-f-]{36}$/) {
             print $field

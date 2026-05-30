@@ -104,7 +104,7 @@ print_environment_state() {
 
 print_device_guidance() {
   if [[ "$has_available_mobile" -eq 1 ]]; then
-    echo "- Physical iPhone/iPad detected as available; install the iOS candidate before recording device smoke."
+    echo "- Physical iPhone/iPad detected as available or connected; install the iOS candidate before recording device smoke."
   elif [[ -n "$unavailable_mobile" ]]; then
     echo "- A physical iPhone/iPad is visible but unavailable; unlock it, trust this Mac, confirm Developer Mode, and reconnect or re-pair it before smoke."
   else
@@ -127,7 +127,7 @@ waiting_count="$(printf '%s\n' "$readiness" | sed -n 's/^Waiting rows: //p' | ta
 devices="$(device_list)"
 available_mobile="$(
   printf '%s\n' "$devices" |
-    awk 'NR > 2 && $0 ~ /(iPhone|iPad)/ && $0 ~ /[[:space:]]available[[:space:]]/ { print }'
+    awk 'NR > 2 && $0 ~ /(iPhone|iPad)/ && $0 ~ /[[:space:]](available|connected)[[:space:]]/ { print }'
 )"
 unavailable_mobile="$(
   printf '%s\n' "$devices" |
