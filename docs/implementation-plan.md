@@ -33,6 +33,7 @@ Baseline already completed:
 - Recent translation history deduplicates repeated translations by normalized source text, translated text, and language direction.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
+- Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
@@ -480,6 +481,8 @@ Verification:
 - Reran `scripts/test_release_next_actions.sh` and `scripts/test_verify_release_readiness.sh`; release next-action output now shows all four executable smoke environments as WAIT on this machine while the full non-manual gate still passes.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `4a9392062091`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `dd66356c997f` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Sanitized imported memory items so valid export documents cannot introduce blank source/translation rows or persistent leading/trailing whitespace into the library.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryImportExportServiceTests -only-testing:WordSceneMacTests/SettingsImportExportControllerTests -derivedDataPath /tmp/WordSceneImportSanitizeMac CODE_SIGNING_ALLOWED=NO`; the 11 import/export tests passed.
 
 Next:
 

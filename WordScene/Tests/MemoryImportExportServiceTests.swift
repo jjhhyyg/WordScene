@@ -97,6 +97,42 @@ final class MemoryImportExportServiceTests: XCTestCase {
         XCTAssertEqual(imported.skippedCount, 1)
     }
 
+    func testImportTrimsTextFieldsAndSkipsBlankItems() throws {
+        let service = MemoryImportExportService()
+        let validItem = MemoryItem(
+            sourceText: " hello ",
+            translatedText: " 你好 ",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: " greeting "
+        )
+        let blankSourceItem = MemoryItem(
+            sourceText: "  ",
+            translatedText: "空",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "bad source"
+        )
+        let blankTranslationItem = MemoryItem(
+            sourceText: "empty translation",
+            translatedText: "\n",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "bad translation"
+        )
+        let data = try service.exportData(items: [validItem, blankSourceItem, blankTranslationItem])
+
+        let imported = try service.importItems(from: data, existingItems: [])
+
+        XCTAssertEqual(imported.items.count, 1)
+        XCTAssertEqual(imported.items.first?.sourceText, "hello")
+        XCTAssertEqual(imported.items.first?.translatedText, "你好")
+        XCTAssertEqual(imported.items.first?.note, "greeting")
+        XCTAssertEqual(imported.importedCount, 1)
+        XCTAssertEqual(imported.replacedCount, 0)
+        XCTAssertEqual(imported.skippedCount, 2)
+    }
+
     func testExportFileNameUsesConfiguredDateFormat() {
         let service = MemoryImportExportService(
             now: { Date(timeIntervalSince1970: 1_800_000_000) },

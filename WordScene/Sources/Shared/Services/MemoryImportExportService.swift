@@ -94,6 +94,10 @@ struct MemoryImportExportService {
         var skippedCount = 0
 
         for importedItem in importedItems {
+            guard let importedItem = sanitizedImportedItem(importedItem) else {
+                skippedCount += 1
+                continue
+            }
             let importedKey = MemoryImportKey(item: importedItem)
             if let duplicateIndex = mergedItems.firstIndex(where: { MemoryImportKey(item: $0) == importedKey }) {
                 switch conflictStrategy {
@@ -116,6 +120,19 @@ struct MemoryImportExportService {
             replacedCount: replacedCount,
             skippedCount: skippedCount
         )
+    }
+
+    private func sanitizedImportedItem(_ item: MemoryItem) -> MemoryItem? {
+        var sanitizedItem = item
+        sanitizedItem.sourceText = item.sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
+        sanitizedItem.translatedText = item.translatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        sanitizedItem.note = item.note.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !sanitizedItem.sourceText.isEmpty, !sanitizedItem.translatedText.isEmpty else {
+            return nil
+        }
+
+        return sanitizedItem
     }
 
     private func checksum(for payload: MemoryExportPayload) throws -> String {
