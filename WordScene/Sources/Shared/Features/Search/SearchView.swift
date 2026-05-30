@@ -385,12 +385,25 @@ private struct HistoryRecordRow: View {
 
     var body: some View {
         #if os(iOS)
-        ConfirmingSwipeRow(
-            leadingAction: deleteSwipeAction,
-            trailingAction: saveSwipeAction
-        ) {
-            rowContent
-        }
+        rowContent
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(String(localized: "删除", comment: "Swipe action title for deleting an item."), systemImage: "trash")
+                }
+                .tint(.red)
+                .accessibilityIdentifier("history.swipe.delete")
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button {
+                    onSave()
+                } label: {
+                    Label(String(localized: "收藏", comment: "Swipe action title for saving to the library."), systemImage: "bookmark")
+                }
+                .tint(.accentColor)
+                .accessibilityIdentifier("history.swipe.save")
+            }
         #else
         rowContent
         #endif
@@ -454,28 +467,6 @@ private struct HistoryRecordRow: View {
     private var languageDirectionText: String {
         let format = String(localized: "%@ 到 %@", comment: "Language direction label. The placeholders are source language and target language.")
         return String(format: format, record.sourceLanguage.title, record.targetLanguage.title)
-    }
-
-    private var saveSwipeAction: ConfirmingSwipeAction {
-        ConfirmingSwipeAction(
-            title: String(localized: "收藏", comment: "Swipe action title for saving to the library."),
-            systemImage: "bookmark",
-            tint: .accentColor,
-            accessibilityIdentifier: "history.swipe.save"
-        ) {
-            onSave()
-        }
-    }
-
-    private var deleteSwipeAction: ConfirmingSwipeAction {
-        ConfirmingSwipeAction(
-            title: String(localized: "删除", comment: "Swipe action title for deleting an item."),
-            systemImage: "trash",
-            tint: .red,
-            accessibilityIdentifier: "history.swipe.delete"
-        ) {
-            onDelete()
-        }
     }
 
     private var panelBackground: Color {

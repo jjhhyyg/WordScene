@@ -174,7 +174,16 @@ struct AppDataController {
         environment: [String: String],
         into controller: AppDataController
     ) {
-        guard environment["WORDSCENE_UI_TEST_SEED"] == "library-search-fixture" else {
+        guard let seed = environment["WORDSCENE_UI_TEST_SEED"] else {
+            return
+        }
+
+        if seed == "scroll-swipe-fixture" {
+            seedScrollSwipeFixture(into: controller)
+            return
+        }
+
+        guard seed == "library-search-fixture" else {
             return
         }
 
@@ -194,6 +203,42 @@ struct AppDataController {
         )
         try? controller.memoryLibrary.saveOrThrow([memoryItem])
         try? controller.translationHistory.saveOrThrow([historyRecord])
+    }
+
+    private static func seedScrollSwipeFixture(into controller: AppDataController) {
+        let now = Date()
+        var memoryItems: [MemoryItem] = []
+        var historyRecords: [TranslationRecord] = []
+
+        for index in 1...16 {
+            let timestamp = now.addingTimeInterval(TimeInterval(-index))
+            let itemNumber = String(format: "%02d", index)
+
+            memoryItems.append(
+                MemoryItem(
+                    sourceText: "scroll library item \(itemNumber)",
+                    translatedText: "滚动收藏条目 \(itemNumber)",
+                    sourceLanguage: .en,
+                    targetLanguage: .zh,
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    isStarred: index == 1
+                )
+            )
+
+            historyRecords.append(
+                TranslationRecord(
+                    sourceText: "scroll history item \(itemNumber)",
+                    translatedText: "滚动历史条目 \(itemNumber)",
+                    sourceLanguage: .en,
+                    targetLanguage: .zh,
+                    createdAt: timestamp
+                )
+            )
+        }
+
+        try? controller.memoryLibrary.saveOrThrow(memoryItems)
+        try? controller.translationHistory.saveOrThrow(historyRecords)
     }
 }
 

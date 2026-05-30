@@ -176,6 +176,12 @@ final class WordSceneLaunchUITests: XCTestCase {
         let starIcon = app.images["library.item.star"].firstMatch
         XCTAssertTrue(starIcon.waitForExistence(timeout: 4))
         confirmSwipeLeft(on: app.staticTexts["seeded library phrase"].firstMatch)
+        let starSwipeAction = app.buttons["library.swipe.star"].firstMatch
+        if starSwipeAction.waitForExistence(timeout: 2) {
+            starSwipeAction.tap()
+        } else {
+            app.buttons["Unstar"].firstMatch.tap()
+        }
         XCTAssertFalse(starIcon.waitForExistence(timeout: 2))
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
 
@@ -191,6 +197,25 @@ final class WordSceneLaunchUITests: XCTestCase {
         openTab("翻译历史")
         XCTAssertTrue(app.staticTexts["seeded history phrase"].waitForExistence(timeout: 8))
         XCTAssertFalse(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 2))
+    }
+
+    func testSeededLibraryAndHistoryRowsScrollVertically() throws {
+        app.terminate()
+        launchApp(seed: "scroll-swipe-fixture")
+
+        openTab("收藏")
+        let firstLibraryRow = app.staticTexts["scroll library item 01"].firstMatch
+        XCTAssertTrue(firstLibraryRow.waitForExistence(timeout: 8))
+        firstLibraryRow.swipeUp()
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts["scroll library item 12"].firstMatch.waitForExistence(timeout: 4))
+
+        openTab("翻译历史")
+        let firstHistoryRow = app.staticTexts["scroll history item 01"].firstMatch
+        XCTAssertTrue(firstHistoryRow.waitForExistence(timeout: 8))
+        firstHistoryRow.swipeUp()
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts["scroll history item 12"].firstMatch.waitForExistence(timeout: 4))
     }
 
     private func dismissKeyboardIfNeeded() {
@@ -214,15 +239,60 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     private func openTab(_ title: String) {
-        let tab = app.tabBars.buttons[title].firstMatch
-        if tab.waitForExistence(timeout: 4) {
-            tab.tap()
-            return
+        for identifier in tabIdentifiers(for: title) {
+            for button in [app.tabBars.buttons[identifier].firstMatch, app.buttons[identifier].firstMatch] {
+                if button.waitForExistence(timeout: 1) {
+                    button.tap()
+                    return
+                }
+            }
         }
 
-        let button = app.buttons[title].firstMatch
-        XCTAssertTrue(button.waitForExistence(timeout: 4), "Missing navigation item: \(title)")
-        button.tap()
+        for label in tabLabels(for: title) {
+            let tab = app.tabBars.buttons[label].firstMatch
+            if tab.waitForExistence(timeout: 1) {
+                tab.tap()
+                return
+            }
+
+            let button = app.buttons[label].firstMatch
+            if button.waitForExistence(timeout: 1) {
+                button.tap()
+                return
+            }
+        }
+
+        XCTFail("Missing navigation item: \(title)")
+    }
+
+    private func tabIdentifiers(for title: String) -> [String] {
+        switch title {
+        case "翻译", "Translate":
+            return ["tab.translate", "navigation.translate", "text.bubble"]
+        case "收藏", "Saved":
+            return ["tab.library", "navigation.library", "bookmark"]
+        case "翻译历史", "History":
+            return ["tab.history", "navigation.history", "clock.arrow.circlepath"]
+        case "设置", "Settings":
+            return ["tab.settings", "navigation.settings", "gearshape"]
+        default:
+            return []
+        }
+    }
+
+    private func tabLabels(for title: String) -> [String] {
+        switch title {
+        case "翻译", "Translate":
+            return ["翻译", "Translate"]
+        case "收藏", "Saved":
+            return ["收藏", "Saved"]
+        case "翻译历史", "History":
+            return ["翻译历史", "History"]
+        case "设置", "Settings":
+            return ["设置", "Settings"]
+        default:
+            return [title]
+        }
     }
 
     private func chooseMenuValue(pickerIdentifier: String, value: String) {

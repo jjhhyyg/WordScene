@@ -1,209 +1,5 @@
 import SwiftUI
 
-struct ConfirmingSwipeAction {
-    let title: String
-    let systemImage: String
-    let tint: Color
-    let accessibilityIdentifier: String
-    let perform: () -> Void
-}
-
-struct ConfirmingSwipeRow<Content: View>: View {
-    private enum SwipeSide {
-        case leading
-        case trailing
-    }
-
-    let leadingAction: ConfirmingSwipeAction
-    let trailingAction: ConfirmingSwipeAction
-    @ViewBuilder let content: Content
-
-    @State private var offset: CGFloat = 0
-    @State private var lockedSide: SwipeSide?
-    @State private var confirmedSide: SwipeSide?
-    @State private var confirmationProgress = 0.0
-    @State private var confirmationTask: Task<Void, Never>?
-
-    private let maximumOffset: CGFloat = 88
-    private let confirmationDuration: TimeInterval = 0.38
-
-    var body: some View {
-        ZStack {
-            actionBackground
-
-            content
-                .offset(x: offset)
-                .animation(.interactiveSpring(response: 0.24, dampingFraction: 0.88), value: offset)
-        }
-        .contentShape(Rectangle())
-        .highPriorityGesture(
-            DragGesture(minimumDistance: 6, coordinateSpace: .local)
-                .onChanged { value in
-                    guard abs(value.translation.width) > abs(value.translation.height) else {
-                        return
-                    }
-
-                    let nextOffset = cappedOffset(for: value.translation.width)
-                    offset = nextOffset
-                    updateConfirmation(for: nextOffset)
-                }
-                .onEnded { value in
-                    let finalOffset = cappedOffset(for: value.translation.width)
-                    let action: ConfirmingSwipeAction?
-
-                    if finalOffset >= maximumOffset, confirmedSide == .leading {
-                        action = leadingAction
-                    } else if finalOffset <= -maximumOffset, confirmedSide == .trailing {
-                        action = trailingAction
-                    } else {
-                        action = nil
-                    }
-
-                    resetSwipeState()
-
-                    action?.perform()
-                }
-        )
-        .onDisappear {
-            confirmationTask?.cancel()
-        }
-    }
-
-    private var actionBackground: some View {
-        HStack {
-            SwipeActionIndicator(
-                action: leadingAction,
-                progress: lockedSide == .leading ? confirmationProgress : 0,
-                isConfirmed: confirmedSide == .leading,
-                isActive: offset > 0
-            )
-            .padding(.leading, 18)
-            .opacity(offset > 0 ? 1 : 0)
-
-            Spacer()
-
-            SwipeActionIndicator(
-                action: trailingAction,
-                progress: lockedSide == .trailing ? confirmationProgress : 0,
-                isConfirmed: confirmedSide == .trailing,
-                isActive: offset < 0
-            )
-            .padding(.trailing, 18)
-            .opacity(offset < 0 ? 1 : 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(backgroundTint)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .accessibilityHidden(true)
-    }
-
-    private var backgroundTint: Color {
-        if offset > 0 {
-            return leadingAction.tint.opacity(0.16)
-        }
-
-        if offset < 0 {
-            return trailingAction.tint.opacity(0.16)
-        }
-
-        return .clear
-    }
-
-    private func cappedOffset(for translation: CGFloat) -> CGFloat {
-        min(max(translation, -maximumOffset), maximumOffset)
-    }
-
-    private func updateConfirmation(for nextOffset: CGFloat) {
-        if nextOffset >= maximumOffset {
-            beginConfirmation(for: .leading)
-        } else if nextOffset <= -maximumOffset {
-            beginConfirmation(for: .trailing)
-        } else if lockedSide != nil {
-            cancelConfirmation()
-        }
-    }
-
-    private func beginConfirmation(for side: SwipeSide) {
-        guard lockedSide != side else {
-            return
-        }
-
-        confirmationTask?.cancel()
-        lockedSide = side
-        confirmedSide = nil
-        confirmationProgress = 0
-
-        withAnimation(.linear(duration: confirmationDuration)) {
-            confirmationProgress = 1
-        }
-
-        confirmationTask = Task {
-            try? await Task.sleep(nanoseconds: UInt64(confirmationDuration * 1_000_000_000))
-            guard !Task.isCancelled else {
-                return
-            }
-
-            await MainActor.run {
-                guard lockedSide == side else {
-                    return
-                }
-
-                confirmedSide = side
-            }
-        }
-    }
-
-    private func cancelConfirmation() {
-        confirmationTask?.cancel()
-        lockedSide = nil
-        confirmedSide = nil
-        withAnimation(.easeOut(duration: 0.12)) {
-            confirmationProgress = 0
-        }
-    }
-
-    private func resetSwipeState() {
-        confirmationTask?.cancel()
-        lockedSide = nil
-        confirmedSide = nil
-        withAnimation(.spring(response: 0.26, dampingFraction: 0.9)) {
-            offset = 0
-            confirmationProgress = 0
-        }
-    }
-}
-
-private struct SwipeActionIndicator: View {
-    let action: ConfirmingSwipeAction
-    let progress: Double
-    let isConfirmed: Bool
-    let isActive: Bool
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(action.tint.opacity(isConfirmed ? 0.2 : 0.12))
-                .frame(width: 42, height: 42)
-
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(action.tint, style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
-                .frame(width: 42, height: 42)
-                .rotationEffect(.degrees(-90))
-
-            Image(systemName: action.systemImage)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(action.tint)
-                .symbolVariant(isConfirmed ? .fill : .none)
-                .scaleEffect(isConfirmed ? 1.08 : 1.0)
-                .symbolEffect(.bounce, value: isConfirmed)
-                .animation(.spring(response: 0.22, dampingFraction: 0.72), value: isConfirmed)
-        }
-        .accessibilityIdentifier(action.accessibilityIdentifier)
-        .opacity(isActive ? 1 : 0)
-    }
-}
-
 private enum LibraryFilter: Hashable {
     case all
     case starred
@@ -1024,12 +820,28 @@ private struct MemoryItemRow: View {
 
     var body: some View {
         #if os(iOS)
-        ConfirmingSwipeRow(
-            leadingAction: deleteSwipeAction,
-            trailingAction: starSwipeAction
-        ) {
-            rowContent
-        }
+        rowContent
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(String(localized: "删除", comment: "Swipe action title for deleting an item."), systemImage: "trash")
+                }
+                .tint(.red)
+                .accessibilityIdentifier("library.swipe.delete")
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button {
+                    onToggleStar()
+                } label: {
+                    Label(
+                        item.isStarred ? String(localized: "取消星标", comment: "Swipe action title for removing a star from a saved memory item.") : String(localized: "星标", comment: "Swipe action title for starring a saved memory item."),
+                        systemImage: item.isStarred ? "star.slash" : "star"
+                    )
+                }
+                .tint(.yellow)
+                .accessibilityIdentifier("library.swipe.star")
+            }
         #else
         rowContent
         #endif
@@ -1125,28 +937,6 @@ private struct MemoryItemRow: View {
     private var languageDirectionText: String {
         let format = String(localized: "%@ 到 %@", comment: "Language direction label. The placeholders are source language and target language.")
         return String(format: format, item.sourceLanguage.title, item.targetLanguage.title)
-    }
-
-    private var starSwipeAction: ConfirmingSwipeAction {
-        ConfirmingSwipeAction(
-            title: item.isStarred ? String(localized: "取消星标", comment: "Swipe action title for removing a star from a saved memory item.") : String(localized: "星标", comment: "Swipe action title for starring a saved memory item."),
-            systemImage: item.isStarred ? "star.slash" : "star",
-            tint: .yellow,
-            accessibilityIdentifier: "library.swipe.star"
-        ) {
-            onToggleStar()
-        }
-    }
-
-    private var deleteSwipeAction: ConfirmingSwipeAction {
-        ConfirmingSwipeAction(
-            title: String(localized: "删除", comment: "Swipe action title for deleting an item."),
-            systemImage: "trash",
-            tint: .red,
-            accessibilityIdentifier: "library.swipe.delete"
-        ) {
-            onDelete()
-        }
     }
 
     private var panelBackground: Color {
