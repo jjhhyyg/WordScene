@@ -60,7 +60,10 @@ and pass/fail notes for each run.
   one place. It is read-only and does not record PASS rows. It hides PASS
   record command templates until the matching executable candidate environment
   is available, and it does not print iPhone/iPad templates just because macOS
-  smoke is runnable.
+  smoke is runnable. The local-only fallback template is shown only when an
+  iOS candidate can be installed and the readiness-built unsigned macOS Release
+  app is still present; pass `--unsigned-macos-app <path>` if that artifact was
+  moved from the default `/tmp/WordSceneVerifyReleaseMac` location.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

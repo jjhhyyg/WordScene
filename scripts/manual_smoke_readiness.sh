@@ -9,7 +9,7 @@ SCOPE="all"
 CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>] [--commands] [--summary] [--scope all|ios|macos|cross-platform]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--commands] [--summary] [--scope all|ios|ios-device|macos|cross-platform|local-only]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -37,7 +37,7 @@ while [[ $# -gt 0 ]]; do
       fi
       SCOPE="$2"
       case "$SCOPE" in
-        all | ios | macos | cross-platform) ;;
+        all | ios | ios-device | macos | cross-platform | local-only) ;;
         *)
           usage
           exit 64
@@ -267,21 +267,57 @@ Local-only fallback|macOS/iOS|iOS
 ROWS
 }
 
+row_group() {
+  local area="$1"
+  local platform="$2"
+  local required_platforms="$3"
+
+  case "$area|$platform" in
+    "Local-only fallback|macOS/iOS")
+      printf 'local-only'
+      return
+      ;;
+  esac
+
+  case "$required_platforms" in
+    iOS)
+      printf 'ios-device'
+      ;;
+    macOS)
+      printf 'macos'
+      ;;
+    macOS,iOS)
+      printf 'cross-platform'
+      ;;
+  esac
+}
+
 row_in_scope() {
-  local required_platforms="$1"
+  local area="$1"
+  local platform="$2"
+  local required_platforms="$3"
+  local group
+
+  group="$(row_group "$area" "$platform" "$required_platforms")"
 
   case "$SCOPE" in
     all)
       return 0
       ;;
     ios)
-      [[ "$required_platforms" == "iOS" ]]
+      [[ "$group" == "ios-device" || "$group" == "local-only" ]]
+      ;;
+    ios-device)
+      [[ "$group" == "ios-device" ]]
       ;;
     macos)
-      [[ "$required_platforms" == "macOS" ]]
+      [[ "$group" == "macos" ]]
       ;;
     cross-platform)
-      [[ "$required_platforms" == "macOS,iOS" ]]
+      [[ "$group" == "cross-platform" ]]
+      ;;
+    local-only)
+      [[ "$group" == "local-only" ]]
       ;;
   esac
 }
@@ -362,7 +398,7 @@ waiting_count=0
 waiting_reasons=""
 
 while IFS='|' read -r area platform required_platforms; do
-  if ! row_in_scope "$required_platforms"; then
+  if ! row_in_scope "$area" "$platform" "$required_platforms"; then
     continue
   fi
 

@@ -445,6 +445,7 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the release next-action wording update and completed the non-manual readiness gate.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `2b990d92f934`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `af7f995bb466` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Tightened manual smoke session guidance so the `Local-only fallback / macOS/iOS` record-command template is hidden until both an installable iOS candidate and the readiness-built unsigned macOS Release app are available.
 
 Next:
 

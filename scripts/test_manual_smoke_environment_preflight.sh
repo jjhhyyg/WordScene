@@ -9,6 +9,7 @@ CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 EVIDENCE="$TMPDIR/release-smoke-evidence.md"
 CANDIDATE_ROOT="$TMPDIR/candidates"
 DEVICE_LIST="$TMPDIR/devices.txt"
+UNSIGNED_MAC_APP="$TMPDIR/unsigned/Word Scene.app"
 
 cat >"$EVIDENCE" <<EVIDENCE_MD
 ## Non-Manual Release Gate
@@ -49,6 +50,7 @@ DEVICES
 "$ROOT/scripts/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
+  --unsigned-macos-app "$UNSIGNED_MAC_APP" \
   --device-list "$DEVICE_LIST" >"$TMPDIR/preflight.out"
 
 grep -qF 'Manual Smoke Environment Preflight' "$TMPDIR/preflight.out"
@@ -56,6 +58,8 @@ grep -qF -- '- Ready rows: 5' "$TMPDIR/preflight.out"
 grep -qF -- '- Waiting rows: 5' "$TMPDIR/preflight.out"
 grep -qF -- '- iOS release candidate app: FOUND' "$TMPDIR/preflight.out"
 grep -qF -- '- macOS release candidate app: MISSING' "$TMPDIR/preflight.out"
+grep -qF -- '- unsigned macOS Release app for local-only fallback: MISSING' "$TMPDIR/preflight.out"
 grep -qF 'Moses iPhone' "$TMPDIR/preflight.out"
 grep -qF 'Lab iPad' "$TMPDIR/preflight.out"
 grep -qF 'Do not record PASS for iPhone/iPad rows until the target physical device has actually run the checklist.' "$TMPDIR/preflight.out"
+grep -qF 'Do not record the local-only fallback row until both the iOS candidate is installed on a physical device and the unsigned macOS Release app has actually run the checklist.' "$TMPDIR/preflight.out"

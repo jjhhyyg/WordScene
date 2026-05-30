@@ -78,6 +78,26 @@ if grep -qF -- '--platform "macOS"' "$TMPDIR/ios-commands.out"; then
   exit 1
 fi
 
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands --scope ios-device >"$TMPDIR/ios-device-commands.out"
+
+grep -qF 'Manual Smoke Readiness (ios-device scope)' "$TMPDIR/ios-device-commands.out"
+grep -qF 'READY Translation loop / iPhone' "$TMPDIR/ios-device-commands.out"
+grep -qF 'READY Import/export / iOS/iPadOS' "$TMPDIR/ios-device-commands.out"
+if grep -qF -- '--platform "macOS/iOS"' "$TMPDIR/ios-device-commands.out"; then
+  echo "manual_smoke_readiness --scope ios-device should not print local-only fallback commands" >&2
+  exit 1
+fi
+
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands --scope local-only >"$TMPDIR/local-only-commands.out"
+
+grep -qF 'Manual Smoke Readiness (local-only scope)' "$TMPDIR/local-only-commands.out"
+grep -qF 'READY Local-only fallback / macOS/iOS' "$TMPDIR/local-only-commands.out"
+grep -qF '  --platform "macOS/iOS" \' "$TMPDIR/local-only-commands.out"
+if grep -qF '  --platform "iPhone" \' "$TMPDIR/local-only-commands.out"; then
+  echo "manual_smoke_readiness --scope local-only should not print iPhone-only commands" >&2
+  exit 1
+fi
+
 "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands --scope macos >"$TMPDIR/macos-commands.out"
 
 grep -qF 'Manual Smoke Readiness (macos scope)' "$TMPDIR/macos-commands.out"

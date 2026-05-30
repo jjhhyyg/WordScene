@@ -4,10 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 CANDIDATE_ROOT="/tmp/WordSceneReleaseCandidates"
+UNSIGNED_MACOS_RELEASE_APP="/tmp/WordSceneVerifyReleaseMac/Build/Products/Release/Word Scene.app"
 DEVICE_LIST_FILE=""
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>] [--candidate-root <path>] [--device-list <path>]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--candidate-root <path>] [--unsigned-macos-app <Word Scene.app>] [--device-list <path>]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -26,6 +27,14 @@ while [[ $# -gt 0 ]]; do
         exit 64
       fi
       CANDIDATE_ROOT="$2"
+      shift 2
+      ;;
+    --unsigned-macos-app)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      UNSIGNED_MACOS_RELEASE_APP="$2"
       shift 2
       ;;
     --device-list)
@@ -104,6 +113,7 @@ echo
 echo "Candidate artifacts:"
 print_artifact_state "iOS release candidate app" "$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
 print_artifact_state "macOS release candidate app" "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
+print_artifact_state "unsigned macOS Release app for local-only fallback" "$UNSIGNED_MACOS_RELEASE_APP"
 echo
 echo "Physical iPhone/iPad devices reported by devicectl:"
 echo "Available:"
@@ -115,3 +125,4 @@ echo "Execution guidance:"
 echo "- READY means release evidence allows recording that row; it is not proof the smoke was run."
 echo "- Do not record PASS for iPhone/iPad rows until the target physical device has actually run the checklist."
 echo "- Do not record macOS or iCloud PASS rows until a signed macOS candidate exists."
+echo "- Do not record the local-only fallback row until both the iOS candidate is installed on a physical device and the unsigned macOS Release app has actually run the checklist."
