@@ -63,6 +63,15 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
         save(items)
     }
 
+    func deleteOrThrow(id: UUID) throws {
+        let currentItems = try loadOrThrow()
+        save(removing(id: id, from: currentItems))
+    }
+
+    func deleteAllOrThrow() throws {
+        save([])
+    }
+
     func clear() {
         defaults.removeObject(forKey: key)
     }
@@ -138,9 +147,22 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
             updatedItem.sourceLanguage = replacement.sourceLanguage
             updatedItem.targetLanguage = replacement.targetLanguage
             updatedItem.note = replacement.note.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedItem.isStarred = replacement.isStarred
             guard updatedItem != item else {
                 return item
             }
+            updatedItem.updatedAt = Date()
+            return updatedItem
+        }
+    }
+
+    func updatingStar(for id: UUID, isStarred: Bool, in items: [MemoryItem]) -> [MemoryItem] {
+        items.map { item in
+            guard item.id == id, item.isStarred != isStarred else {
+                return item
+            }
+            var updatedItem = item
+            updatedItem.isStarred = isStarred
             updatedItem.updatedAt = Date()
             return updatedItem
         }

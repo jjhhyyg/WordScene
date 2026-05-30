@@ -111,6 +111,24 @@ final class CoreDataMemoryStoreTests: XCTestCase {
         XCTAssertEqual(try store.loadActiveItems(), [item])
     }
 
+    func testSavesAndLoadsStarredMemoryItems() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "starred",
+            translatedText: "星标",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20),
+            isStarred: true
+        )
+
+        try store.upsert(item)
+
+        XCTAssertEqual(try store.loadActiveItems().first?.isStarred, true)
+    }
+
     func testDuplicateKeyNormalizesCaseInsensitiveText() throws {
         let store = try CoreDataMemoryStore(inMemory: true)
         let first = MemoryItem(
@@ -160,5 +178,105 @@ final class CoreDataMemoryStoreTests: XCTestCase {
         XCTAssertEqual(try store.loadDeletionTombstones(), [
             CoreDataDeletionTombstone(itemID: id, deletedAt: deletedAt)
         ])
+    }
+
+    func testUpsertDoesNotReviveItemWhenTombstoneIsNewerThanIncomingRecord() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let id = UUID()
+        let item = MemoryItem(
+            id: id,
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        try store.upsert(item)
+        try store.softDelete(id: id, deletedAt: Date(timeIntervalSince1970: 30))
+
+        try store.upsert(item)
+
+        XCTAssertTrue(try store.loadActiveItems().isEmpty)
+        XCTAssertEqual(try store.loadDeletionTombstones().map(\.itemID), [id])
+    }
+
+    func testUpsertAllowsRecordNewerThanTombstoneToBecomeActive() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let id = UUID()
+        let original = MemoryItem(
+            id: id,
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        let newer = MemoryItem(
+            id: id,
+            sourceText: "hello again",
+            translatedText: "再次你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 40)
+        )
+        try store.upsert(original)
+        try store.softDelete(id: id, deletedAt: Date(timeIntervalSince1970: 30))
+
+        try store.upsert(newer)
+
+        XCTAssertEqual(try store.loadActiveItems(), [newer])
+    }
+
+    func testPurgeRemovesExpiredTombstoneAndSoftDeletedItem() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let id = UUID()
+        let item = MemoryItem(
+            id: id,
+            sourceText: "old",
+            translatedText: "旧",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        try store.upsert(item)
+        try store.softDelete(id: id, deletedAt: Date(timeIntervalSince1970: 30))
+
+        let purgedCount = try store.purgeDeletedItemsAndTombstones(
+            olderThan: Date(timeIntervalSince1970: 40)
+        )
+        try store.upsert(item)
+
+        XCTAssertEqual(purgedCount, 1)
+        XCTAssertTrue(try store.loadDeletionTombstones().isEmpty)
+        XCTAssertEqual(try store.loadActiveItems(), [item])
+    }
+
+    func testPurgeKeepsUnexpiredTombstone() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let id = UUID()
+        let item = MemoryItem(
+            id: id,
+            sourceText: "recent",
+            translatedText: "最近",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        try store.upsert(item)
+        try store.softDelete(id: id, deletedAt: Date(timeIntervalSince1970: 30))
+
+        let purgedCount = try store.purgeDeletedItemsAndTombstones(
+            olderThan: Date(timeIntervalSince1970: 20)
+        )
+        try store.upsert(item)
+
+        XCTAssertEqual(purgedCount, 0)
+        XCTAssertEqual(try store.loadDeletionTombstones().map(\.itemID), [id])
+        XCTAssertTrue(try store.loadActiveItems().isEmpty)
     }
 }

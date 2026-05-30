@@ -295,6 +295,9 @@ final class AppDataControllerTests: XCTestCase {
 
         XCTAssertEqual(monitor.status.title, "最近同步成功")
         XCTAssertTrue(monitor.status.message.contains("从 iCloud 导入"))
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, "已保存")
+        XCTAssertFalse(monitor.status.hasSuccessfulCloudExport)
+        XCTAssertTrue(monitor.status.hasSuccessfulCloudImport)
     }
 
     func testCloudSyncEventStatusRecordsFailedExportEvent() {
@@ -314,6 +317,26 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(monitor.status.title, "同步出现错误")
         XCTAssertTrue(monitor.status.message.contains("向 iCloud 上传"))
         XCTAssertTrue(monitor.status.message.contains("quota exceeded"))
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, "同步未完成")
+        XCTAssertFalse(monitor.status.hasSuccessfulCloudExport)
+    }
+
+    func testCloudSyncEventStatusReportsLibraryBadgeForSuccessfulExport() {
+        let monitor = CloudKitSyncEventMonitor(
+            syncStatus: .cloudKitConfigured(containerIdentifier: "iCloud.test"),
+            eventStore: CloudKitSyncEventStore(userDefaults: temporaryDefaults)
+        )
+
+        monitor.record(CloudSyncEvent(
+            kind: .exportToCloud,
+            startDate: Date(timeIntervalSince1970: 10),
+            endDate: Date(timeIntervalSince1970: 20),
+            succeeded: true,
+            errorDescription: nil
+        ))
+
+        XCTAssertEqual(monitor.status.librarySyncBadgeText, "已同步云端")
+        XCTAssertTrue(monitor.status.hasSuccessfulCloudExport)
     }
 
     func testCloudSyncEventStatusRestoresLastRecordedEvent() {

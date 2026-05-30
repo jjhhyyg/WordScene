@@ -59,6 +59,7 @@ struct MemoryImportExportService {
     func importItems(
         from data: Data,
         existingItems: [MemoryItem],
+        deletionTombstones: [CoreDataDeletionTombstone] = [],
         conflictStrategy: MemoryImportConflictStrategy = .replaceDuplicates
     ) throws -> MemoryImportResult {
         let document: MemoryExportDocument
@@ -79,6 +80,7 @@ struct MemoryImportExportService {
         return merge(
             importedItems: document.payload.items,
             into: existingItems,
+            deletionTombstones: deletionTombstones,
             conflictStrategy: conflictStrategy
         )
     }
@@ -86,15 +88,24 @@ struct MemoryImportExportService {
     private func merge(
         importedItems: [MemoryItem],
         into existingItems: [MemoryItem],
+        deletionTombstones: [CoreDataDeletionTombstone],
         conflictStrategy: MemoryImportConflictStrategy
     ) -> MemoryImportResult {
         var mergedItems = existingItems
         var importedCount = 0
         var replacedCount = 0
         var skippedCount = 0
+        let tombstonesByID = Dictionary(
+            deletionTombstones.map { ($0.itemID, $0.deletedAt) },
+            uniquingKeysWith: max
+        )
 
         for importedItem in importedItems {
             guard let importedItem = sanitizedImportedItem(importedItem) else {
+                skippedCount += 1
+                continue
+            }
+            if let deletedAt = tombstonesByID[importedItem.id], importedItem.updatedAt <= deletedAt {
                 skippedCount += 1
                 continue
             }

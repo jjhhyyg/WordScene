@@ -41,6 +41,10 @@ struct TranslationView: View {
         }
         #endif
         .navigationTitle("翻译")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
+        #endif
         .task {
             loadHistory()
             loadMemoryItems()
@@ -80,7 +84,7 @@ struct TranslationView: View {
             content
                 .frame(maxWidth: pageMaxWidth, alignment: .leading)
                 .padding(.horizontal, pageHorizontalPadding)
-                .padding(.top, 18)
+                .padding(.top, 8)
                 .padding(.bottom, pageBottomPadding)
         }
         .scrollDismissesKeyboard(.interactively)
@@ -93,14 +97,15 @@ struct TranslationView: View {
     private var content: some View {
         if usesCompactPhoneLayout {
             VStack(alignment: .leading, spacing: 18) {
+                translationHeader
                 mobileTranslationPanel
                 persistenceWarningBanner
-                translationActionBar
             }
         } else if usesMacDesktopLayout {
             macDesktopContent
         } else {
             VStack(alignment: .leading, spacing: 18) {
+                translationHeader
                 commandBar
                 persistenceWarningBanner
 
@@ -110,18 +115,43 @@ struct TranslationView: View {
                             inputPanel
                             resultPanel
                         }
-
-                        contextPanel
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 18) {
                         inputPanel
+                        #if os(macOS)
                         translationActionBar
+                        #endif
                         resultPanel
-                        contextPanel
                     }
                 }
             }
+        }
+    }
+
+    private var translationHeader: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text("翻译")
+                .font(.largeTitle.bold())
+                .accessibilityIdentifier("translation.title")
+
+            Spacer()
+
+            #if os(iOS)
+            Button {
+                Task {
+                    await translateInput()
+                }
+            } label: {
+                Image(systemName: translationState.isTranslating ? "arrow.triangle.2.circlepath" : "arrow.right.circle.fill")
+                    .font(.headline)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+            .disabled(!hasTranslatableInput || translationState.isTranslating)
+            .accessibilityLabel("开始翻译")
+            .accessibilityIdentifier("translation.start")
+            #endif
         }
     }
 
@@ -140,7 +170,6 @@ struct TranslationView: View {
                 VStack(alignment: .leading, spacing: layout.sectionSpacing) {
                     inputPanel
                     resultPanel
-                    contextPanelView(minHeight: 180)
                 }
 
             case .regular:
@@ -151,8 +180,6 @@ struct TranslationView: View {
                         resultPanel
                             .frame(minWidth: 0, maxWidth: .infinity)
                     }
-
-                    contextPanelView(minHeight: 190)
                 }
 
             case .expanded:
@@ -161,8 +188,6 @@ struct TranslationView: View {
                         .frame(minWidth: 300, maxWidth: .infinity)
                     resultPanel
                         .frame(minWidth: 340, maxWidth: .infinity)
-                    contextPanelView(minHeight: resultPanelMinHeight)
-                        .frame(width: layout.contextColumnWidth)
                 }
             }
         }
@@ -228,25 +253,17 @@ struct TranslationView: View {
         #endif
     }
 
-    private var usesContextSidebar: Bool {
-        #if os(macOS)
-        return usesMacDesktopLayout
-        #else
-        return false
-        #endif
-    }
-
     private var putsActionInCommandBar: Bool {
+        #if os(iOS)
+        return false
+        #else
         usesTwoColumnLayout
+        #endif
     }
 
     private var pageMaxWidth: CGFloat {
         if usesCompactPhoneLayout {
             return .infinity
-        }
-
-        if usesContextSidebar {
-            return 1260
         }
 
         return usesTwoColumnLayout ? 1180 : 720
@@ -481,8 +498,6 @@ struct TranslationView: View {
     }
 
     private func actionControls(style: ActionControlStyle) -> some View {
-        let hasInput = !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
         return HStack(spacing: 12) {
             Button {
                 Task {
@@ -496,7 +511,7 @@ struct TranslationView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(!hasInput || translationState.isTranslating)
+            .disabled(!hasTranslatableInput || translationState.isTranslating)
             .accessibilityLabel("开始翻译")
             .accessibilityIdentifier("translation.start")
         }
@@ -514,40 +529,6 @@ struct TranslationView: View {
             }
 
             translationResultContent(minHeight: resultPanelMinHeight)
-        }
-        .panelStyle()
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-    }
-
-    private var contextPanel: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("翻译历史")
-                    .font(.headline)
-                Spacer()
-                Label("最近", systemImage: "clock.arrow.circlepath")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            translationHistoryContent(minHeight: usesContextSidebar ? 360 : 160)
-        }
-        .panelStyle()
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-    }
-
-    private func contextPanelView(minHeight: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("翻译历史")
-                    .font(.headline)
-                Spacer()
-                Label("最近", systemImage: "clock.arrow.circlepath")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            translationHistoryContent(minHeight: minHeight)
         }
         .panelStyle()
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -614,55 +595,6 @@ struct TranslationView: View {
         .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
-    @ViewBuilder
-    private func translationHistoryContent(minHeight: CGFloat) -> some View {
-        Group {
-            if history.isEmpty {
-                ContentUnavailableView(
-                    "暂无翻译历史",
-                    systemImage: "clock.arrow.circlepath",
-                    description: Text("翻译后会在这里显示最近记录、相关词和收藏状态。")
-                )
-            } else {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(history.prefix(6)) { record in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 6) {
-                                Text(record.sourceLanguage.title)
-                                Image(systemName: "arrow.right")
-                                    .font(.caption2)
-                                Text(record.targetLanguage.title)
-                                Spacer()
-                                Text(record.createdAt, style: .time)
-                                memoryIconButton(for: record)
-                                deleteHistoryIconButton(for: record)
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                            Text(record.sourceText)
-                                .font(.subheadline.weight(.medium))
-                                .lineLimit(2)
-
-                            Text(record.translatedText)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(3)
-                        }
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                .padding(10)
-            }
-        }
-        .frame(minHeight: minHeight, alignment: .topLeading)
-        .frame(maxWidth: .infinity)
-        .background(.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-    }
-
     private func languagePicker(
         _ title: String,
         selection: Binding<LanguageSelection>,
@@ -718,6 +650,14 @@ struct TranslationView: View {
     }
 
     private func swapLanguageDirection() {
+        if case .translated(let translatedText) = translationState {
+            translationGeneration += 1
+            inputText = translatedText
+            translationState = .idle
+            lastTranslatedRecord = nil
+            didCopyTranslation = false
+        }
+
         let swapped = currentLanguageDirection.swapped()
         sourceLanguage = swapped.source
         targetLanguage = swapped.target
@@ -731,6 +671,10 @@ struct TranslationView: View {
 
     private var canSwapLanguageDirection: Bool {
         currentLanguageDirection.canSwap
+    }
+
+    private var hasTranslatableInput: Bool {
+        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var currentLanguageDirection: TranslationLanguageDirection {
@@ -755,31 +699,6 @@ struct TranslationView: View {
         .buttonStyle(.borderless)
         .controlSize(.small)
         .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
-    }
-
-    private func memoryIconButton(for record: TranslationRecord) -> some View {
-        Button {
-            toggleMemory(for: record)
-        } label: {
-            Image(systemName: isSavedToMemory(record) ? "bookmark.fill" : "bookmark")
-                .symbolRenderingMode(.hierarchical)
-        }
-        .buttonStyle(.borderless)
-        .controlSize(.small)
-        .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
-    }
-
-    private func deleteHistoryIconButton(for record: TranslationRecord) -> some View {
-        Button(role: .destructive) {
-            deleteHistoryRecord(id: record.id)
-        } label: {
-            Image(systemName: "trash")
-                .symbolRenderingMode(.hierarchical)
-        }
-        .buttonStyle(.borderless)
-        .controlSize(.small)
-        .accessibilityLabel("删除历史")
-        .accessibilityIdentifier("translation.history.delete")
     }
 
     @MainActor
@@ -817,18 +736,6 @@ struct TranslationView: View {
             persistenceWarningMessage = nil
         } catch {
             persistenceWarningMessage = "收藏保存失败：\(error.localizedDescription)"
-        }
-    }
-
-    @MainActor
-    private func deleteHistoryRecord(id: UUID) {
-        let updatedHistory = historyStore.removing(id: id, from: history)
-        do {
-            try historyStore.saveOrThrow(updatedHistory)
-            history = updatedHistory
-            persistenceWarningMessage = nil
-        } catch {
-            persistenceWarningMessage = "翻译历史删除失败：\(error.localizedDescription)"
         }
     }
 

@@ -5,9 +5,29 @@ protocol MemoryLibraryDataStore {
     func save(_ items: [MemoryItem])
     func loadOrThrow() throws -> [MemoryItem]
     func saveOrThrow(_ items: [MemoryItem]) throws
+    func deleteOrThrow(id: UUID) throws
+    func deleteAllOrThrow() throws
 }
 
-struct MemoryLibraryRepository: MemoryLibraryDataStore {
+protocol MemoryLibraryDeletionTombstoneProviding {
+    func loadDeletionTombstones() throws -> [CoreDataDeletionTombstone]
+}
+
+enum TombstoneRetentionPolicy: Equatable {
+    case localOnly(days: Int)
+    case cloudKit(days: Int, requiresSuccessfulExport: Bool)
+
+    func cutoffDate(now: Date = Date()) -> Date {
+        let days: Int
+        switch self {
+        case .localOnly(let value), .cloudKit(let value, _):
+            days = value
+        }
+        return Calendar(identifier: .gregorian).date(byAdding: .day, value: -days, to: now) ?? now
+    }
+}
+
+struct MemoryLibraryRepository: MemoryLibraryDataStore, MemoryLibraryDeletionTombstoneProviding {
     private let coreDataStore: (any CoreDataMemoryDataStore)?
     private let legacyStore: MemoryLibraryStore
     private let maximumCount: Int
@@ -76,6 +96,83 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
         changeRecorder()
     }
 
+    func deleteOrThrow(id: UUID) throws {
+        guard let coreDataStore else {
+            let currentItems = try legacyStore.loadOrThrow()
+            let replacementItems = legacyStore.removing(id: id, from: currentItems)
+            guard currentItems != replacementItems else {
+                return
+            }
+            try legacyStore.saveOrThrow(replacementItems)
+            changeRecorder()
+            return
+        }
+
+        try migrateLegacyItemsIfNeeded(into: coreDataStore)
+        let currentItems = try loadActiveItems(from: coreDataStore)
+        guard currentItems.contains(where: { $0.id == id }) else {
+            return
+        }
+        try coreDataStore.softDelete(id: id)
+        changeRecorder()
+    }
+
+    func deleteAllOrThrow() throws {
+        guard let coreDataStore else {
+            let currentItems = try legacyStore.loadOrThrow()
+            guard !currentItems.isEmpty else {
+                return
+            }
+            try legacyStore.saveOrThrow([])
+            changeRecorder()
+            return
+        }
+
+        try migrateLegacyItemsIfNeeded(into: coreDataStore)
+        let currentItems = try loadActiveItems(from: coreDataStore)
+        guard !currentItems.isEmpty else {
+            return
+        }
+
+        for item in currentItems {
+            try coreDataStore.softDelete(id: item.id)
+        }
+        changeRecorder()
+    }
+
+    func toggleStarOrThrow(id: UUID) throws -> MemoryItem? {
+        var currentItems = try loadOrThrow()
+        guard let index = currentItems.firstIndex(where: { $0.id == id }) else {
+            return nil
+        }
+
+        currentItems[index].isStarred.toggle()
+        currentItems[index].updatedAt = Date()
+        try saveOrThrow(currentItems)
+        return currentItems[index]
+    }
+
+    func loadDeletionTombstones() throws -> [CoreDataDeletionTombstone] {
+        guard let coreDataStore else {
+            return []
+        }
+
+        return try coreDataStore.loadDeletionTombstones()
+    }
+
+    func purgeExpiredDeletionTombstones(
+        policy: TombstoneRetentionPolicy,
+        now: Date = Date()
+    ) throws -> Int {
+        guard let coreDataStore else {
+            return 0
+        }
+
+        return try coreDataStore.purgeDeletedItemsAndTombstones(
+            olderThan: policy.cutoffDate(now: now)
+        )
+    }
+
     func item(matching record: TranslationRecord, in items: [MemoryItem]) -> MemoryItem? {
         legacyStore.item(matching: record, in: items)
     }
@@ -102,6 +199,10 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
 
     func updatingItem(_ replacement: MemoryItem, in items: [MemoryItem]) -> [MemoryItem] {
         legacyStore.updatingItem(replacement, in: items)
+    }
+
+    func updatingStar(for id: UUID, isStarred: Bool, in items: [MemoryItem]) -> [MemoryItem] {
+        legacyStore.updatingStar(for: id, isStarred: isStarred, in: items)
     }
 
     private func migrateLegacyItemsIfNeeded(into coreDataStore: any CoreDataMemoryDataStore) throws {

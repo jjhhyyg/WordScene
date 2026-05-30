@@ -108,6 +108,7 @@ struct MemorySearchResult: Identifiable, Equatable {
     let sourceLanguage: LanguageSelection
     let targetLanguage: LanguageSelection
     let note: String
+    let isStarred: Bool
     let createdAt: Date
     let updatedAt: Date
 
@@ -131,7 +132,8 @@ struct MemorySearchResult: Identifiable, Equatable {
             targetLanguage: targetLanguage,
             note: note,
             createdAt: createdAt,
-            updatedAt: updatedAt
+            updatedAt: updatedAt,
+            isStarred: isStarred
         )
     }
 
@@ -144,6 +146,7 @@ struct MemorySearchResult: Identifiable, Equatable {
         self.sourceLanguage = item.sourceLanguage
         self.targetLanguage = item.targetLanguage
         self.note = item.note
+        self.isStarred = item.isStarred
         self.createdAt = item.createdAt
         self.updatedAt = item.updatedAt
     }
@@ -157,6 +160,7 @@ struct MemorySearchResult: Identifiable, Equatable {
         self.sourceLanguage = record.sourceLanguage
         self.targetLanguage = record.targetLanguage
         self.note = ""
+        self.isStarred = false
         self.createdAt = record.createdAt
         self.updatedAt = record.createdAt
     }

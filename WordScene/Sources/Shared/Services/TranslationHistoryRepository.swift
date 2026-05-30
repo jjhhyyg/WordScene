@@ -7,6 +7,7 @@ protocol TranslationHistoryDataStore {
     func saveOrThrow(_ records: [TranslationRecord]) throws
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord]
     func removing(id: UUID, from records: [TranslationRecord]) -> [TranslationRecord]
+    func deleteAllOrThrow() throws
 }
 
 struct TranslationHistoryRepository: TranslationHistoryDataStore {
@@ -18,7 +19,7 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     init(
         coreDataStore: (any CoreDataTranslationHistoryDataStore)? = try? CoreDataMemoryStore(),
         legacyStore: TranslationHistoryStore = TranslationHistoryStore(),
-        maximumCount: Int = 50,
+        maximumCount: Int = 100,
         changeRecorder: @escaping () -> Void = {}
     ) {
         self.coreDataStore = coreDataStore
@@ -76,6 +77,10 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
 
     func removing(id: UUID, from records: [TranslationRecord]) -> [TranslationRecord] {
         records.filter { $0.id != id }
+    }
+
+    func deleteAllOrThrow() throws {
+        try saveOrThrow([])
     }
 
     private func migrateLegacyRecordsIfNeeded(into coreDataStore: any CoreDataTranslationHistoryDataStore) throws {

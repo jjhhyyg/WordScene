@@ -28,6 +28,23 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertEqual(imported.items, [item])
     }
 
+    func testPrepareExportCountsOnlyActiveMemoryItems() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let service = MemoryImportExportService()
+        let controller = SettingsImportExportController(memoryStore: repository, importExportService: service)
+        let activeItem = MemoryItem(sourceText: "active", translatedText: "可见", sourceLanguage: .en, targetLanguage: .zh)
+        let deletedItem = MemoryItem(sourceText: "deleted", translatedText: "已删除", sourceLanguage: .en, targetLanguage: .zh)
+
+        try repository.saveOrThrow([activeItem, deletedItem])
+        try repository.deleteOrThrow(id: deletedItem.id)
+        let export = try controller.prepareExport()
+        let imported = try service.importItems(from: export.data, existingItems: [])
+
+        XCTAssertEqual(export.itemCount, 1)
+        XCTAssertEqual(imported.items, [activeItem])
+    }
+
     func testImportMemoryPersistsMergedItemsAndReportsCounts() throws {
         let suiteName = "SettingsImportExportControllerTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -164,14 +181,85 @@ final class SettingsImportExportControllerTests: XCTestCase {
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(store.items, [existingItem])
     }
+
+    func testImportMemorySkipsOldItemsBlockedByTombstoneWithoutSavingOrRecordingChange() throws {
+        let itemID = UUID()
+        let deletedAt = Date(timeIntervalSince1970: 40)
+        let incomingItem = MemoryItem(
+            id: itemID,
+            sourceText: "removed",
+            translatedText: "已移除",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 30)
+        )
+        let store = SpyMemoryLibraryDataStore(
+            items: [],
+            deletionTombstones: [
+                CoreDataDeletionTombstone(itemID: itemID, deletedAt: deletedAt)
+            ]
+        )
+        let service = MemoryImportExportService()
+        var changeCount = 0
+        let controller = SettingsImportExportController(
+            memoryStore: store,
+            importExportService: service,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let data = try service.exportData(items: [incomingItem])
+
+        let summary = try controller.importMemory(from: data)
+
+        XCTAssertEqual(summary.importedCount, 0)
+        XCTAssertEqual(summary.replacedCount, 0)
+        XCTAssertEqual(summary.skippedCount, 1)
+        XCTAssertEqual(summary.totalCount, 0)
+        XCTAssertEqual(store.saveCount, 0)
+        XCTAssertEqual(changeCount, 0)
+        XCTAssertTrue(store.items.isEmpty)
+    }
+
+    func testImportMemoryAllowsItemNewerThanTombstoneToRestore() throws {
+        let itemID = UUID()
+        let incomingItem = MemoryItem(
+            id: itemID,
+            sourceText: "restored",
+            translatedText: "已恢复",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 50)
+        )
+        let store = SpyMemoryLibraryDataStore(
+            items: [],
+            deletionTombstones: [
+                CoreDataDeletionTombstone(itemID: itemID, deletedAt: Date(timeIntervalSince1970: 40))
+            ]
+        )
+        let service = MemoryImportExportService()
+        let controller = SettingsImportExportController(memoryStore: store, importExportService: service)
+        let data = try service.exportData(items: [incomingItem])
+
+        let summary = try controller.importMemory(from: data)
+
+        XCTAssertEqual(summary.importedCount, 1)
+        XCTAssertEqual(summary.replacedCount, 0)
+        XCTAssertEqual(summary.skippedCount, 0)
+        XCTAssertEqual(store.items, [incomingItem])
+    }
 }
 
-private final class SpyMemoryLibraryDataStore: MemoryLibraryDataStore {
+private final class SpyMemoryLibraryDataStore: MemoryLibraryDataStore, MemoryLibraryDeletionTombstoneProviding {
     var items: [MemoryItem]
+    var deletionTombstones: [CoreDataDeletionTombstone]
     private(set) var saveCount = 0
 
-    init(items: [MemoryItem]) {
+    init(items: [MemoryItem], deletionTombstones: [CoreDataDeletionTombstone] = []) {
         self.items = items
+        self.deletionTombstones = deletionTombstones
     }
 
     func load() -> [MemoryItem] {
@@ -190,5 +278,26 @@ private final class SpyMemoryLibraryDataStore: MemoryLibraryDataStore {
     func saveOrThrow(_ items: [MemoryItem]) throws {
         saveCount += 1
         self.items = items
+    }
+
+    func deleteOrThrow(id: UUID) throws {
+        let replacementItems = items.filter { $0.id != id }
+        guard replacementItems != items else {
+            return
+        }
+        saveCount += 1
+        items = replacementItems
+    }
+
+    func deleteAllOrThrow() throws {
+        guard !items.isEmpty else {
+            return
+        }
+        saveCount += 1
+        items = []
+    }
+
+    func loadDeletionTombstones() throws -> [CoreDataDeletionTombstone] {
+        deletionTombstones
     }
 }

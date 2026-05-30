@@ -72,22 +72,12 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["seeded note"].waitForExistence(timeout: 8))
         XCTAssertFalse(app.textFields["library.note.editor"].firstMatch.exists)
 
-        let editButton = app.buttons["library.note.edit"].firstMatch
+        let editButton = app.buttons["编辑收藏"].firstMatch
         XCTAssertTrue(editButton.waitForExistence(timeout: 4))
         editButton.tap()
 
-        let noteField = app.textFields["library.note.editor"].firstMatch
-        XCTAssertTrue(noteField.waitForExistence(timeout: 4))
-        noteField.tap()
-        noteField.typeText(" updated")
-
-        let saveButton = app.buttons["library.note.save"].firstMatch
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 4))
-        saveButton.tap()
-
-        XCTAssertFalse(noteField.waitForExistence(timeout: 1))
-        XCTAssertTrue(app.staticTexts["seeded note updated"].waitForExistence(timeout: 4))
-        XCTAssertTrue(app.buttons["library.note.edit"].firstMatch.waitForExistence(timeout: 4))
+        XCTAssertTrue(app.navigationBars["编辑收藏"].firstMatch.waitForExistence(timeout: 4))
+        XCTAssertTrue(app.textFields["可选"].firstMatch.waitForExistence(timeout: 4))
     }
 
     func testLanguageControlsEnableSwapOnlyForConcreteSource() throws {
@@ -111,6 +101,8 @@ final class WordSceneLaunchUITests: XCTestCase {
 
         openTab("收藏")
         XCTAssertTrue(app.staticTexts["还没有收藏"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["已保存"].waitForExistence(timeout: 4))
+        XCTAssertFalse(app.staticTexts["本机保存"].exists)
         let emptyManualAddButton = app.buttons["library.empty.manualAdd"].firstMatch
         XCTAssertTrue(emptyManualAddButton.waitForExistence(timeout: 4))
         let tabBar = app.tabBars.firstMatch
@@ -122,13 +114,13 @@ final class WordSceneLaunchUITests: XCTestCase {
             )
         }
 
-        openTab("搜索")
-        XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout: 8))
-
         openTab("设置")
         XCTAssertTrue(app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["settings.deepSeek.save"].firstMatch.exists)
         XCTAssertTrue(app.buttons["settings.deepSeek.test"].firstMatch.exists)
+
+        openTab("翻译历史")
+        XCTAssertTrue(app.staticTexts["还没有翻译历史"].waitForExistence(timeout: 8))
 
         openTab("翻译")
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 8))
@@ -141,15 +133,44 @@ final class WordSceneLaunchUITests: XCTestCase {
         openTab("收藏")
         XCTAssertTrue(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["种子收藏短语"].waitForExistence(timeout: 4))
+        let starIcon = app.images["library.item.star"].firstMatch
+        XCTAssertTrue(starIcon.waitForExistence(timeout: 4))
+        confirmSwipeLeft(on: app.staticTexts["seeded library phrase"].firstMatch)
+        XCTAssertFalse(starIcon.waitForExistence(timeout: 2))
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
 
-        openTab("搜索")
-        let searchField = app.searchFields.firstMatch
+        let searchField = app.textFields["library.search.field"].firstMatch
         XCTAssertTrue(searchField.waitForExistence(timeout: 8))
         searchField.tap()
         searchField.typeText("seeded")
 
         XCTAssertTrue(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.staticTexts["seeded history phrase"].waitForExistence(timeout: 2))
+
+        dismissKeyboardIfNeeded()
+        openTab("翻译历史")
         XCTAssertTrue(app.staticTexts["seeded history phrase"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 2))
+    }
+
+    private func dismissKeyboardIfNeeded() {
+        guard app.keyboards.firstMatch.exists else {
+            return
+        }
+
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+        _ = app.keyboards.firstMatch.waitForNonExistence(timeout: 2)
+    }
+
+    private func confirmSwipeLeft(on element: XCUIElement) {
+        let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
+        let end = element.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5))
+        start.press(
+            forDuration: 0.08,
+            thenDragTo: end,
+            withVelocity: .slow,
+            thenHoldForDuration: 0.5
+        )
     }
 
     private func openTab(_ title: String) {

@@ -8,6 +8,8 @@ protocol CoreDataMemoryDataStore {
     func upsert(_ item: MemoryItem) throws
     func loadActiveItems() throws -> [MemoryItem]
     func softDelete(id: UUID, deletedAt: Date) throws
+    func loadDeletionTombstones() throws -> [CoreDataDeletionTombstone]
+    func purgeDeletedItemsAndTombstones(olderThan cutoff: Date) throws -> Int
 }
 
 protocol CoreDataTranslationHistoryDataStore {
@@ -232,6 +234,17 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
 
     func upsert(_ item: MemoryItem) throws {
         let context = container.viewContext
+
+        if let tombstone = try fetchTombstone(itemID: item.id, in: context),
+           let deletedAt = tombstone.value(forKey: "deletedAt") as? Date,
+           deletedAt >= item.updatedAt {
+            if let object = try fetchTranslationItem(id: item.id, in: context) {
+                markDeleted(object, deletedAt: deletedAt)
+            }
+            try saveIfNeeded(context)
+            return
+        }
+
         let object = try fetchTranslationItem(id: item.id, in: context) ??
             fetchActiveTranslationItem(duplicateKey: Self.duplicateKey(for: item), in: context) ??
             Self.insertObject(
@@ -247,6 +260,7 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
         object.setValue(item.note, forKey: "note")
         object.setValue(item.createdAt, forKey: "createdAt")
         object.setValue(item.updatedAt, forKey: "updatedAt")
+        object.setValue(item.isStarred, forKey: "isStarred")
         object.setValue(false, forKey: "isDeleted")
         object.setValue(nil, forKey: "deletedAt")
         object.setValue(Self.schemaVersion, forKey: "schemaVersion")
@@ -264,16 +278,26 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
             NSSortDescriptor(key: "sourceText", ascending: true)
         ]
 
-        return try context.fetch(request).map(Self.makeMemoryItem)
+        let tombstones = try fetchTombstonesByItemID(in: context)
+        var activeItems: [MemoryItem] = []
+        for object in try context.fetch(request) {
+            let item = Self.makeMemoryItem(from: object)
+            if let deletedAt = tombstones[item.id], deletedAt >= item.updatedAt {
+                markDeleted(object, deletedAt: deletedAt)
+                continue
+            }
+            activeItems.append(item)
+        }
+
+        try saveIfNeeded(context)
+        return activeItems
     }
 
     func softDelete(id: UUID, deletedAt: Date = Date()) throws {
         let context = container.viewContext
 
         if let object = try fetchTranslationItem(id: id, in: context) {
-            object.setValue(true, forKey: "isDeleted")
-            object.setValue(deletedAt, forKey: "deletedAt")
-            object.setValue(deletedAt, forKey: "updatedAt")
+            markDeleted(object, deletedAt: deletedAt)
         }
 
         let tombstone = try fetchTombstone(itemID: id, in: context) ?? Self.insertObject(
@@ -300,6 +324,29 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
                 deletedAt: object.value(forKey: "deletedAt") as? Date ?? .distantPast
             )
         }
+    }
+
+    func purgeDeletedItemsAndTombstones(olderThan cutoff: Date) throws -> Int {
+        let context = container.viewContext
+        let tombstoneRequest = NSFetchRequest<NSManagedObject>(entityName: Self.tombstoneEntityName)
+        tombstoneRequest.predicate = NSPredicate(format: "deletedAt < %@", cutoff as NSDate)
+
+        let expiredTombstones = try context.fetch(tombstoneRequest)
+        guard !expiredTombstones.isEmpty else {
+            return 0
+        }
+
+        for tombstone in expiredTombstones {
+            if let itemID = tombstone.value(forKey: "itemID") as? UUID,
+               let object = try fetchTranslationItem(id: itemID, in: context),
+               (object.value(forKey: "isDeleted") as? Bool) == true {
+                context.delete(object)
+            }
+            context.delete(tombstone)
+        }
+
+        try saveIfNeeded(context)
+        return expiredTombstones.count
     }
 
     func replaceHistoryRecords(_ records: [TranslationRecord]) throws {
@@ -355,6 +402,27 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
         return try context.fetch(request).first
     }
 
+    private func fetchTombstonesByItemID(in context: NSManagedObjectContext) throws -> [UUID: Date] {
+        let request = NSFetchRequest<NSManagedObject>(entityName: Self.tombstoneEntityName)
+        var tombstones: [UUID: Date] = [:]
+        for object in try context.fetch(request) {
+            guard
+                let itemID = object.value(forKey: "itemID") as? UUID,
+                let deletedAt = object.value(forKey: "deletedAt") as? Date
+            else {
+                continue
+            }
+            tombstones[itemID] = max(tombstones[itemID] ?? .distantPast, deletedAt)
+        }
+        return tombstones
+    }
+
+    private func markDeleted(_ object: NSManagedObject, deletedAt: Date) {
+        object.setValue(true, forKey: "isDeleted")
+        object.setValue(deletedAt, forKey: "deletedAt")
+        object.setValue(deletedAt, forKey: "updatedAt")
+    }
+
     private func saveIfNeeded(_ context: NSManagedObjectContext) throws {
         guard context.hasChanges else {
             return
@@ -380,7 +448,8 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
             targetLanguage: LanguageSelection(rawValue: object.value(forKey: "targetLanguage") as? String ?? "") ?? .zh,
             note: object.value(forKey: "note") as? String ?? "",
             createdAt: object.value(forKey: "createdAt") as? Date ?? .distantPast,
-            updatedAt: object.value(forKey: "updatedAt") as? Date ?? .distantPast
+            updatedAt: object.value(forKey: "updatedAt") as? Date ?? .distantPast,
+            isStarred: object.value(forKey: "isStarred") as? Bool ?? false
         )
     }
 
@@ -443,6 +512,7 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
             attribute("note", type: .stringAttributeType, defaultValue: ""),
             attribute("createdAt", type: .dateAttributeType),
             attribute("updatedAt", type: .dateAttributeType),
+            attribute("isStarred", type: .booleanAttributeType, defaultValue: false),
             attribute("isDeleted", type: .booleanAttributeType, defaultValue: false),
             attribute("deletedAt", type: .dateAttributeType, isOptional: true),
             attribute("schemaVersion", type: .integer64AttributeType, defaultValue: schemaVersion),

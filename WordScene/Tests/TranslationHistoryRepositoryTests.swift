@@ -56,6 +56,44 @@ final class TranslationHistoryRepositoryTests: XCTestCase {
         XCTAssertEqual(repository.load(), [third, second])
     }
 
+    func testDefaultMaximumCountKeepsRecentOneHundredRecords() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = TranslationHistoryRepository(coreDataStore: coreDataStore)
+        let records = (0..<101).map { index in
+            TranslationRecord(
+                sourceText: "source \(index)",
+                translatedText: "译文 \(index)",
+                sourceLanguage: .en,
+                targetLanguage: .zh,
+                createdAt: Date(timeIntervalSince1970: TimeInterval(index))
+            )
+        }
+
+        try repository.saveOrThrow(Array(records.reversed()))
+
+        XCTAssertEqual(try repository.loadOrThrow().count, 100)
+        XCTAssertEqual(try repository.loadOrThrow().first?.sourceText, "source 100")
+        XCTAssertEqual(try repository.loadOrThrow().last?.sourceText, "source 1")
+    }
+
+    func testDeleteAllOrThrowClearsHistoryAndRecordsChange() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        var changeCount = 0
+        let repository = TranslationHistoryRepository(
+            coreDataStore: coreDataStore,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let record = TranslationRecord(sourceText: "hello", translatedText: "你好", sourceLanguage: .en, targetLanguage: .zh)
+
+        try repository.saveOrThrow([record])
+        try repository.deleteAllOrThrow()
+
+        XCTAssertEqual(try repository.loadOrThrow(), [])
+        XCTAssertEqual(changeCount, 2)
+    }
+
     func testAddingPrependsAndCapsRecentRecords() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let repository = TranslationHistoryRepository(coreDataStore: coreDataStore, maximumCount: 2)

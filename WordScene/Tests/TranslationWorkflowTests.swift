@@ -25,8 +25,13 @@ final class TranslationWorkflowTests: XCTestCase {
         func delete(account: String) throws {}
     }
 
-    private struct StubTranslationClient: TranslationClienting {
+    private final class StubTranslationClient: TranslationClienting, @unchecked Sendable {
         let translatedText: String
+        private(set) var callCount = 0
+
+        init(translatedText: String) {
+            self.translatedText = translatedText
+        }
 
         func translate(
             text: String,
@@ -34,6 +39,7 @@ final class TranslationWorkflowTests: XCTestCase {
             target: LanguageSelection,
             apiToken: String
         ) async throws -> String {
+            callCount += 1
             XCTAssertEqual(text, "hello world")
             XCTAssertEqual(source, .auto)
             XCTAssertEqual(target, .zh)
@@ -55,9 +61,10 @@ final class TranslationWorkflowTests: XCTestCase {
     func testSuccessfulTranslationWritesRecentHistory() async throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let historyRepository = TranslationHistoryRepository(coreDataStore: coreDataStore)
+        let translationClient = StubTranslationClient(translatedText: "你好，世界。")
         let workflow = TranslationWorkflow(
             credentialStore: StubCredentialStore(token: "test-token"),
-            translationClient: StubTranslationClient(translatedText: "你好，世界。"),
+            translationClient: translationClient,
             historyStore: historyRepository
         )
 
@@ -74,6 +81,7 @@ final class TranslationWorkflowTests: XCTestCase {
         XCTAssertEqual(result.record.translatedText, "你好，世界。")
         XCTAssertEqual(result.updatedHistory.map(\.sourceText), ["hello world"])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords().map(\.sourceText), ["hello world"])
+        XCTAssertEqual(translationClient.callCount, 1)
     }
 
     func testTranslationStillSucceedsWhenHistoryPersistenceFails() async throws {
@@ -115,6 +123,60 @@ final class TranslationWorkflowTests: XCTestCase {
         )
 
         XCTAssertEqual(result.translatedText, "你好，世界。")
+    }
+
+    func testAutoDetectedSameLanguageCopiesInputWithoutProviderOrToken() async throws {
+        try await assertAutoDetectedSameLanguageCopiesInput(
+            text: "  我喜欢你  ",
+            expectedText: "我喜欢你",
+            target: .zh
+        )
+    }
+
+    func testAutoDetectedEnglishTargetCopiesEnglishInputWithoutProviderOrToken() async throws {
+        try await assertAutoDetectedSameLanguageCopiesInput(
+            text: "  I like you  ",
+            expectedText: "I like you",
+            target: .en
+        )
+    }
+
+    func testAutoDetectedSpanishTargetCopiesSpanishInputWithoutProviderOrToken() async throws {
+        try await assertAutoDetectedSameLanguageCopiesInput(
+            text: "  Me gusta el café  ",
+            expectedText: "Me gusta el café",
+            target: .es
+        )
+    }
+
+    private func assertAutoDetectedSameLanguageCopiesInput(
+        text: String,
+        expectedText: String,
+        target: LanguageSelection
+    ) async throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let translationClient = StubTranslationClient(translatedText: "不应调用")
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: nil),
+            translationClient: translationClient,
+            historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
+        )
+
+        let result = try await workflow.translate(
+            text: text,
+            source: .auto,
+            target: target,
+            currentHistory: []
+        )
+
+        XCTAssertEqual(result.translatedText, expectedText)
+        XCTAssertEqual(result.record.sourceText, expectedText)
+        XCTAssertEqual(result.record.translatedText, expectedText)
+        XCTAssertEqual(result.record.sourceLanguage, target)
+        XCTAssertEqual(result.record.targetLanguage, target)
+        XCTAssertEqual(result.updatedHistory, [result.record])
+        XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [result.record])
+        XCTAssertEqual(translationClient.callCount, 0)
     }
 
     func testMissingTokenFailsBeforeCallingProvider() async {

@@ -30,6 +30,17 @@ final class MemoryLibraryRepositoryTests: XCTestCase {
                 throw writeError
             }
         }
+
+        func loadDeletionTombstones() throws -> [CoreDataDeletionTombstone] {
+            []
+        }
+
+        func purgeDeletedItemsAndTombstones(olderThan cutoff: Date) throws -> Int {
+            if let writeError {
+                throw writeError
+            }
+            return 0
+        }
     }
 
     func testSavesAndLoadsItemsFromCoreData() throws {
@@ -68,6 +79,77 @@ final class MemoryLibraryRepositoryTests: XCTestCase {
 
         XCTAssertTrue(repository.load().isEmpty)
         XCTAssertEqual(try coreDataStore.loadDeletionTombstones().map(\.itemID), [item.id])
+    }
+
+    func testDeleteOrThrowSoftDeletesItemFromCoreData() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "delete me",
+            translatedText: "删除我",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 10)
+        )
+
+        try repository.saveOrThrow([item])
+        try repository.deleteOrThrow(id: item.id)
+
+        XCTAssertTrue(try repository.loadOrThrow().isEmpty)
+        XCTAssertEqual(try coreDataStore.loadDeletionTombstones().map(\.itemID), [item.id])
+    }
+
+    func testDeleteAllOrThrowSoftDeletesAllItemsFromCoreData() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let first = MemoryItem(sourceText: "one", translatedText: "一", sourceLanguage: .en, targetLanguage: .zh)
+        let second = MemoryItem(sourceText: "two", translatedText: "二", sourceLanguage: .en, targetLanguage: .zh)
+
+        try repository.saveOrThrow([first, second])
+        try repository.deleteAllOrThrow()
+
+        XCTAssertTrue(try repository.loadOrThrow().isEmpty)
+        XCTAssertEqual(Set(try coreDataStore.loadDeletionTombstones().map(\.itemID)), Set([first.id, second.id]))
+    }
+
+    func testToggleStarPersistsStarredState() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let item = MemoryItem(sourceText: "star", translatedText: "星", sourceLanguage: .en, targetLanguage: .zh)
+
+        try repository.saveOrThrow([item])
+        let updatedItem = try XCTUnwrap(repository.toggleStarOrThrow(id: item.id))
+
+        XCTAssertTrue(updatedItem.isStarred)
+        XCTAssertEqual(try repository.loadOrThrow().first?.isStarred, true)
+    }
+
+    func testDeleteOrThrowRemovesItemFromLegacyFallbackStore() throws {
+        let suiteName = "MemoryLibraryRepositoryTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "legacy delete",
+            translatedText: "旧删除",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+        let legacyStore = MemoryLibraryStore(defaults: defaults)
+        legacyStore.save([item])
+        let repository = MemoryLibraryRepository(
+            coreDataStore: nil,
+            legacyStore: legacyStore
+        )
+
+        try repository.deleteOrThrow(id: item.id)
+
+        XCTAssertTrue(try repository.loadOrThrow().isEmpty)
     }
 
     func testSaveOrThrowDoesNotRecordChangeForIdenticalSnapshot() throws {
@@ -154,5 +236,55 @@ final class MemoryLibraryRepositoryTests: XCTestCase {
         ])) { error in
             XCTAssertEqual(error as? RepositoryTestError, .writeFailed)
         }
+    }
+
+    func testPurgeExpiredDeletionTombstonesUsesLocalRetentionCutoff() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let now = Date(timeIntervalSince1970: 10_000_000)
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "old delete",
+            translatedText: "旧删除",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: now.addingTimeInterval(-40 * 24 * 60 * 60),
+            updatedAt: now.addingTimeInterval(-40 * 24 * 60 * 60)
+        )
+
+        try repository.saveOrThrow([item])
+        try coreDataStore.softDelete(id: item.id, deletedAt: now.addingTimeInterval(-31 * 24 * 60 * 60))
+        let purgedCount = try repository.purgeExpiredDeletionTombstones(
+            policy: .localOnly(days: 30),
+            now: now
+        )
+
+        XCTAssertEqual(purgedCount, 1)
+        XCTAssertTrue(try repository.loadDeletionTombstones().isEmpty)
+    }
+
+    func testPurgeExpiredDeletionTombstonesKeepsUnexpiredCloudKitTombstones() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let repository = MemoryLibraryRepository(coreDataStore: coreDataStore)
+        let now = Date(timeIntervalSince1970: 10_000_000)
+        let item = MemoryItem(
+            id: UUID(),
+            sourceText: "recent delete",
+            translatedText: "近期删除",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: now.addingTimeInterval(-20 * 24 * 60 * 60),
+            updatedAt: now.addingTimeInterval(-20 * 24 * 60 * 60)
+        )
+
+        try repository.saveOrThrow([item])
+        try coreDataStore.softDelete(id: item.id, deletedAt: now.addingTimeInterval(-89 * 24 * 60 * 60))
+        let purgedCount = try repository.purgeExpiredDeletionTombstones(
+            policy: .cloudKit(days: 90, requiresSuccessfulExport: true),
+            now: now
+        )
+
+        XCTAssertEqual(purgedCount, 0)
+        XCTAssertEqual(try repository.loadDeletionTombstones().map(\.itemID), [item.id])
     }
 }

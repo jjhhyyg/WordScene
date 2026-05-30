@@ -3,6 +3,8 @@ import UniformTypeIdentifiers
 
 #if os(macOS)
 import AppKit
+#elseif os(iOS)
+import UIKit
 #endif
 
 struct SettingsView: View {
@@ -17,6 +19,9 @@ struct SettingsView: View {
     @State private var exportDocument = MemoryExportFileDocument()
     @State private var exportFileName = "memory-book-export.json"
     @State private var isExportingMemory = false
+    #if os(iOS)
+    @State private var documentExportRequest: SettingsDocumentExportRequest?
+    #endif
     @State private var isImportingMemory = false
     @State private var recoveryStatus: SettingsLocalRecoveryStatus = .idle
     @State private var recoveryBackupDocument = MemoryExportFileDocument()
@@ -67,6 +72,13 @@ struct SettingsView: View {
         ) { result in
             handleImportSelection(result)
         }
+        #if os(iOS)
+        .sheet(item: $documentExportRequest) { request in
+            SettingsDocumentExporter(fileURL: request.fileURL) { result in
+                completeDocumentExport(request, result: result)
+            }
+        }
+        #endif
         .confirmationDialog(
             "重置旧缓存？",
             isPresented: $isConfirmingLegacyReset,
@@ -108,12 +120,17 @@ struct SettingsView: View {
             }
             .frame(maxWidth: settingsContentMaxWidth, alignment: .leading)
             .padding(.horizontal, settingsHorizontalPadding)
-            .padding(.vertical, settingsVerticalPadding)
+            .padding(.top, settingsTopPadding)
+            .padding(.bottom, settingsBottomPadding)
         }
         .scrollDismissesKeyboard(.interactively)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(settingsBackground.ignoresSafeArea())
         .navigationTitle("设置")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
+        #endif
         .onAppear {
             loadSavedToken()
         }
@@ -215,14 +232,9 @@ struct SettingsView: View {
     #endif
 
     private var settingsHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("设置")
-                .font(.largeTitle.bold())
-
-            Text("管理模型连接、隐私和数据迁移。")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        Text("设置")
+            .font(.largeTitle.bold())
+            .accessibilityIdentifier("settings.title")
         #if os(macOS)
         .padding(.top, 4)
         #endif
@@ -513,7 +525,7 @@ struct SettingsView: View {
         #if os(macOS)
         return true
         #else
-        return !adaptiveLayout.usesTabNavigation
+        return true
         #endif
     }
 
@@ -540,7 +552,15 @@ struct SettingsView: View {
         #endif
     }
 
-    private var settingsVerticalPadding: CGFloat {
+    private var settingsTopPadding: CGFloat {
+        #if os(macOS)
+        return 24
+        #else
+        return 8
+        #endif
+    }
+
+    private var settingsBottomPadding: CGFloat {
         #if os(macOS)
         return 24
         #else
@@ -616,7 +636,15 @@ struct SettingsView: View {
             exportDocument = MemoryExportFileDocument(data: export.data)
             exportFileName = export.fileName
             importExportStatus = .notice("已准备 \(export.itemCount) 条记忆，请在系统面板中选择保存位置。\(export.privacyNotice)")
+            #if os(iOS)
+            documentExportRequest = try makeDocumentExportRequest(
+                kind: .memory,
+                fileName: export.fileName,
+                data: export.data
+            )
+            #else
             isExportingMemory = true
+            #endif
         } catch {
             importExportStatus = .failed(importExportErrorMessage(for: error))
         }
@@ -645,7 +673,15 @@ struct SettingsView: View {
             recoveryBackupDocument = MemoryExportFileDocument(data: backup.data)
             recoveryBackupFileName = backup.fileName
             recoveryStatus = .notice("已准备 \(backup.documentCount) 个旧缓存文档，请在系统面板中选择保存位置。")
+            #if os(iOS)
+            documentExportRequest = try makeDocumentExportRequest(
+                kind: .recoveryBackup,
+                fileName: backup.fileName,
+                data: backup.data
+            )
+            #else
             isExportingRecoveryBackup = true
+            #endif
         } catch {
             recoveryStatus = .failed(importExportErrorMessage(for: error))
         }
@@ -739,6 +775,41 @@ struct SettingsView: View {
     private func importExportErrorMessage(for error: Error) -> String {
         SettingsErrorMessageFactory.importExportMessage(for: error)
     }
+
+    #if os(iOS)
+    @MainActor
+    private func makeDocumentExportRequest(
+        kind: SettingsDocumentExportKind,
+        fileName: String,
+        data: Data
+    ) throws -> SettingsDocumentExportRequest {
+        let rootDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WordSceneExports", isDirectory: true)
+        let exportDirectory = rootDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: exportDirectory,
+            withIntermediateDirectories: true
+        )
+        let fileURL = exportDirectory.appendingPathComponent(fileName)
+        try data.write(to: fileURL, options: .atomic)
+        return SettingsDocumentExportRequest(kind: kind, fileURL: fileURL)
+    }
+
+    @MainActor
+    private func completeDocumentExport(
+        _ request: SettingsDocumentExportRequest,
+        result: Result<URL, Error>
+    ) {
+        documentExportRequest = nil
+        try? FileManager.default.removeItem(at: request.fileURL.deletingLastPathComponent())
+        switch request.kind {
+        case .memory:
+            handleExportCompletion(result)
+        case .recoveryBackup:
+            handleRecoveryBackupCompletion(result)
+        }
+    }
+    #endif
 
     private func isUserCancelled(_ error: Error) -> Bool {
         let nsError = error as NSError
@@ -986,6 +1057,58 @@ private struct MemoryExportFileDocument: FileDocument {
         FileWrapper(regularFileWithContents: data)
     }
 }
+
+#if os(iOS)
+private enum SettingsDocumentExportKind {
+    case memory
+    case recoveryBackup
+}
+
+private struct SettingsDocumentExportRequest: Identifiable {
+    let id = UUID()
+    let kind: SettingsDocumentExportKind
+    let fileURL: URL
+}
+
+private struct SettingsDocumentExporter: UIViewControllerRepresentable {
+    let fileURL: URL
+    let onCompletion: (Result<URL, Error>) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(fallbackURL: fileURL, onCompletion: onCompletion)
+    }
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
+        picker.delegate = context.coordinator
+        picker.shouldShowFileExtensions = true
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    final class Coordinator: NSObject, UIDocumentPickerDelegate {
+        private let fallbackURL: URL
+        private let onCompletion: (Result<URL, Error>) -> Void
+
+        init(fallbackURL: URL, onCompletion: @escaping (Result<URL, Error>) -> Void) {
+            self.fallbackURL = fallbackURL
+            self.onCompletion = onCompletion
+        }
+
+        func documentPicker(
+            _ controller: UIDocumentPickerViewController,
+            didPickDocumentsAt urls: [URL]
+        ) {
+            onCompletion(.success(urls.first ?? controller.directoryURL ?? fallbackURL))
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            onCompletion(.failure(NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError)))
+        }
+    }
+}
+#endif
 
 private struct SettingsCard<Content: View>: View {
     let title: String

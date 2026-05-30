@@ -10,7 +10,7 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
     init(
         defaults: UserDefaults = .standard,
         key: String = "translationHistory",
-        maximumCount: Int = 50
+        maximumCount: Int = 100
     ) {
         self.defaults = defaults
         self.key = key
@@ -65,6 +65,10 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
 
     func clear() {
         defaults.removeObject(forKey: key)
+    }
+
+    func deleteAllOrThrow() throws {
+        save([])
     }
 
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {

@@ -32,6 +32,7 @@ struct SettingsImportExportController {
         let result = try importExportService.importItems(
             from: data,
             existingItems: try memoryStore.loadOrThrow(),
+            deletionTombstones: try (memoryStore as? any MemoryLibraryDeletionTombstoneProviding)?.loadDeletionTombstones() ?? [],
             conflictStrategy: conflictPolicy.conflictStrategy
         )
         if result.importedCount > 0 || result.replacedCount > 0 {

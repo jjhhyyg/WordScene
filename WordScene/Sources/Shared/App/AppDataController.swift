@@ -183,7 +183,8 @@ struct AppDataController {
             translatedText: "种子收藏短语",
             sourceLanguage: .en,
             targetLanguage: .zh,
-            note: "seeded note"
+            note: "seeded note",
+            isStarred: true
         )
         let historyRecord = TranslationRecord(
             sourceText: "seeded history phrase",
@@ -578,6 +579,33 @@ enum AppSyncEventStatus: Equatable {
         case .lastFailure(let kind, let completedAt, let reason):
             return "\(kind.actionLabel)失败：\(Self.format(completedAt))。\(reason)"
         }
+    }
+
+    var librarySyncBadgeText: String {
+        switch self {
+        case .inProgress:
+            return "正在同步"
+        case .lastSuccess(kind: .exportToCloud, completedAt: _):
+            return "已同步云端"
+        case .lastFailure:
+            return "同步未完成"
+        default:
+            return "已保存"
+        }
+    }
+
+    var hasSuccessfulCloudExport: Bool {
+        if case .lastSuccess(kind: .exportToCloud, completedAt: _) = self {
+            return true
+        }
+        return false
+    }
+
+    var hasSuccessfulCloudImport: Bool {
+        if case .lastSuccess(kind: .importFromCloud, completedAt: _) = self {
+            return true
+        }
+        return false
     }
 
     var systemImage: String {

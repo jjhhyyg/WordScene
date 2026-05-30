@@ -37,9 +37,13 @@ struct RootView: View {
                         selectedSection = section
                     } label: {
                         Label(section.title, systemImage: section.systemImage)
+                            .padding(.vertical, 4)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                     .listRowBackground(selectedSection == section ? Color.accentColor.opacity(0.14) : Color.clear)
                     .accessibilityLabel(section.title)
                     .accessibilityIdentifier("navigation.\(section.rawValue)")
@@ -88,8 +92,8 @@ struct RootView: View {
             TranslationView()
         case .library:
             LibraryView()
-        case .search:
-            SearchView()
+        case .history:
+            HistoryView()
         case .settings:
             SettingsView()
         }
