@@ -90,6 +90,18 @@ print_device_rows() {
   fi
 }
 
+print_environment_state() {
+  local label="$1"
+  local ready="$2"
+  local detail="$3"
+
+  if [[ "$ready" -eq 1 ]]; then
+    printf -- '- %s: READY - %s\n' "$label" "$detail"
+  else
+    printf -- '- %s: WAIT - %s\n' "$label" "$detail"
+  fi
+}
+
 readiness="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 ready_count="$(printf '%s\n' "$readiness" | sed -n 's/^Ready rows: //p' | tail -n 1)"
 waiting_count="$(printf '%s\n' "$readiness" | sed -n 's/^Waiting rows: //p' | tail -n 1)"
@@ -103,6 +115,38 @@ unavailable_mobile="$(
   printf '%s\n' "$devices" |
     awk 'NR > 2 && $0 ~ /(iPhone|iPad)/ && $0 ~ /[[:space:]]unavailable[[:space:]]/ { print }'
 )"
+ios_candidate_app="$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
+macos_candidate_app="$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
+has_available_mobile=0
+has_ios_candidate=0
+has_macos_candidate=0
+has_unsigned_macos=0
+
+[[ -n "$available_mobile" ]] && has_available_mobile=1
+[[ -d "$ios_candidate_app" ]] && has_ios_candidate=1
+[[ -d "$macos_candidate_app" ]] && has_macos_candidate=1
+[[ -d "$UNSIGNED_MACOS_RELEASE_APP" ]] && has_unsigned_macos=1
+
+ios_device_ready=0
+macos_ready=0
+cross_platform_ready=0
+local_only_ready=0
+
+if [[ "$has_available_mobile" -eq 1 && "$has_ios_candidate" -eq 1 ]]; then
+  ios_device_ready=1
+fi
+
+if [[ "$has_macos_candidate" -eq 1 ]]; then
+  macos_ready=1
+fi
+
+if [[ "$has_available_mobile" -eq 1 && "$has_ios_candidate" -eq 1 && "$has_macos_candidate" -eq 1 ]]; then
+  cross_platform_ready=1
+fi
+
+if [[ "$has_available_mobile" -eq 1 && "$has_ios_candidate" -eq 1 && "$has_unsigned_macos" -eq 1 ]]; then
+  local_only_ready=1
+fi
 
 echo "Manual Smoke Environment Preflight"
 echo
@@ -111,8 +155,8 @@ printf -- '- Ready rows: %s\n' "${ready_count:-unknown}"
 printf -- '- Waiting rows: %s\n' "${waiting_count:-unknown}"
 echo
 echo "Candidate artifacts:"
-print_artifact_state "iOS release candidate app" "$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
-print_artifact_state "macOS release candidate app" "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
+print_artifact_state "iOS release candidate app" "$ios_candidate_app"
+print_artifact_state "macOS release candidate app" "$macos_candidate_app"
 print_artifact_state "unsigned macOS Release app for local-only fallback" "$UNSIGNED_MACOS_RELEASE_APP"
 echo
 echo "Physical iPhone/iPad devices reported by devicectl:"
@@ -120,6 +164,12 @@ echo "Available:"
 print_device_rows "available" "$available_mobile"
 echo "Unavailable:"
 print_device_rows "unavailable" "$unavailable_mobile"
+echo
+echo "Executable smoke environments:"
+print_environment_state "iOS/iPadOS device smoke" "$ios_device_ready" "requires an available physical iPhone/iPad and the iOS candidate app"
+print_environment_state "macOS signed-candidate smoke" "$macos_ready" "requires the signed macOS candidate app"
+print_environment_state "Cross-platform iCloud smoke" "$cross_platform_ready" "requires an available physical iPhone/iPad plus signed iOS and macOS candidates"
+print_environment_state "Local-only fallback smoke" "$local_only_ready" "requires an available physical iPhone/iPad, the iOS candidate app, and the unsigned macOS Release app"
 echo
 echo "Execution guidance:"
 echo "- READY means release evidence allows recording that row; it is not proof the smoke was run."

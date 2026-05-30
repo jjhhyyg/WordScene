@@ -61,5 +61,23 @@ grep -qF -- '- macOS release candidate app: MISSING' "$TMPDIR/preflight.out"
 grep -qF -- '- unsigned macOS Release app for local-only fallback: MISSING' "$TMPDIR/preflight.out"
 grep -qF 'Moses iPhone' "$TMPDIR/preflight.out"
 grep -qF 'Lab iPad' "$TMPDIR/preflight.out"
+grep -qF -- '- iOS/iPadOS device smoke: READY - requires an available physical iPhone/iPad and the iOS candidate app' "$TMPDIR/preflight.out"
+grep -qF -- '- macOS signed-candidate smoke: WAIT - requires the signed macOS candidate app' "$TMPDIR/preflight.out"
+grep -qF -- '- Cross-platform iCloud smoke: WAIT - requires an available physical iPhone/iPad plus signed iOS and macOS candidates' "$TMPDIR/preflight.out"
+grep -qF -- '- Local-only fallback smoke: WAIT - requires an available physical iPhone/iPad, the iOS candidate app, and the unsigned macOS Release app' "$TMPDIR/preflight.out"
 grep -qF 'Do not record PASS for iPhone/iPad rows until the target physical device has actually run the checklist.' "$TMPDIR/preflight.out"
 grep -qF 'Do not record the local-only fallback row until both the iOS candidate is installed on a physical device and the unsigned macOS Release app has actually run the checklist.' "$TMPDIR/preflight.out"
+
+mkdir -p "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
+mkdir -p "$UNSIGNED_MAC_APP"
+
+"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --unsigned-macos-app "$UNSIGNED_MAC_APP" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/preflight-all-ready.out"
+
+grep -qF -- '- iOS/iPadOS device smoke: READY - requires an available physical iPhone/iPad and the iOS candidate app' "$TMPDIR/preflight-all-ready.out"
+grep -qF -- '- macOS signed-candidate smoke: READY - requires the signed macOS candidate app' "$TMPDIR/preflight-all-ready.out"
+grep -qF -- '- Cross-platform iCloud smoke: READY - requires an available physical iPhone/iPad plus signed iOS and macOS candidates' "$TMPDIR/preflight-all-ready.out"
+grep -qF -- '- Local-only fallback smoke: READY - requires an available physical iPhone/iPad, the iOS candidate app, and the unsigned macOS Release app' "$TMPDIR/preflight-all-ready.out"

@@ -50,9 +50,10 @@ and pass/fail notes for each run.
   signing recovery step, READY manual rows, and the final completion gate.
 - Run `scripts/manual_smoke_environment_preflight.sh` before recording PASS
   rows. It checks the current evidence readiness, candidate app bundle paths,
-  and physical iPhone/iPad availability reported by `devicectl`. READY rows are
-  only permission to run and record a row; they are not proof that the target
-  device checklist has been executed.
+  physical iPhone/iPad availability reported by `devicectl`, and the resulting
+  executable smoke environments. READY rows are only permission to run and
+  record a row; they are not proof that the target device checklist has been
+  executed.
 - When a target iPhone or iPad is available, install the current iOS candidate
   with `scripts/install_ios_release_candidate.sh`. Add `--device <identifier>`
   to target a specific device, or `--dry-run` to print the `devicectl` command
