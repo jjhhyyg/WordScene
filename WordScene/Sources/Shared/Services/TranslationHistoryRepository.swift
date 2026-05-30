@@ -49,14 +49,22 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     }
 
     func saveOrThrow(_ records: [TranslationRecord]) throws {
+        let replacementRecords = Array(records.prefix(maximumCount))
         guard let coreDataStore else {
-            legacyStore.save(records)
+            if (try? legacyStore.loadOrThrow()) == replacementRecords {
+                return
+            }
+            legacyStore.save(replacementRecords)
             changeRecorder()
             return
         }
 
         try migrateLegacyRecordsIfNeeded(into: coreDataStore)
-        try coreDataStore.replaceHistoryRecords(Array(records.prefix(maximumCount)))
+        let currentRecords = try loadRecentRecords(from: coreDataStore)
+        guard currentRecords != replacementRecords else {
+            return
+        }
+        try coreDataStore.replaceHistoryRecords(replacementRecords)
         changeRecorder()
     }
 

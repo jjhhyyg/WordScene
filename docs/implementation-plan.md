@@ -31,6 +31,7 @@ Baseline already completed:
 - Translation provider abstraction with an OpenAI-compatible Chat Completions adapter and a DeepSeek provider wrapper.
 - Local recent translation history backed by `UserDefaults`.
 - Recent translation history deduplicates repeated translations by normalized source text, translated text, and language direction.
+- Recent translation history skips repository writes and local change notifications when the saved snapshot is unchanged.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
 - Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
@@ -535,6 +536,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the memory note no-op guard plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b40f35397841`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `91693d062ffe` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Skipped `TranslationHistoryRepository` writes and local change notifications when the replacement recent-history snapshot matches the current store state, covering both Core Data and legacy local-only paths.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/TranslationHistoryRepositoryTests -derivedDataPath /tmp/WordSceneHistoryNoopGreen CODE_SIGNING_ALLOWED=NO`; the 8 translation-history repository tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the recent-history no-op guard plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

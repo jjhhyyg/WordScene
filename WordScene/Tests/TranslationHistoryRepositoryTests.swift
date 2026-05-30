@@ -163,4 +163,59 @@ final class TranslationHistoryRepositoryTests: XCTestCase {
             XCTAssertEqual(error as? RepositoryTestError, .writeFailed)
         }
     }
+
+    func testSaveOrThrowDoesNotRecordChangeForIdenticalSnapshot() throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        var changeCount = 0
+        let repository = TranslationHistoryRepository(
+            coreDataStore: coreDataStore,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let record = TranslationRecord(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10)
+        )
+
+        try repository.saveOrThrow([record])
+        try repository.saveOrThrow([record])
+
+        XCTAssertEqual(changeCount, 1)
+        XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [record])
+    }
+
+    func testSaveOrThrowDoesNotRecordChangeForIdenticalLegacySnapshot() throws {
+        let suiteName = "TranslationHistoryRepositoryTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        var changeCount = 0
+        let legacyStore = TranslationHistoryStore(defaults: defaults)
+        let repository = TranslationHistoryRepository(
+            coreDataStore: nil,
+            legacyStore: legacyStore,
+            changeRecorder: {
+                changeCount += 1
+            }
+        )
+        let record = TranslationRecord(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10)
+        )
+
+        try repository.saveOrThrow([record])
+        try repository.saveOrThrow([record])
+
+        XCTAssertEqual(changeCount, 1)
+        XCTAssertEqual(try legacyStore.loadOrThrow(), [record])
+    }
 }
