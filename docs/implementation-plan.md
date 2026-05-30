@@ -545,6 +545,7 @@ Verification:
 - Added a Translate-history delete action backed by `TranslationHistoryRepository.removing(id:from:)`, so users can remove individual recent records while saved memory remains separate.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/TranslationHistoryRepositoryTests -derivedDataPath /tmp/WordSceneHistoryRemoveGreen CODE_SIGNING_ALLOWED=NO`; the 9 translation-history repository tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the history deletion UI and repository change plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `29aa943e7604`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
