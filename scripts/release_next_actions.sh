@@ -3,9 +3,12 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
+CANDIDATE_ROOT="/tmp/WordSceneReleaseCandidates"
+UNSIGNED_MACOS_RELEASE_APP="/tmp/WordSceneVerifyReleaseMac/Build/Products/Release/Word Scene.app"
+DEVICE_LIST_FILE=""
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--candidate-root <path>] [--unsigned-macos-app <Word Scene.app>] [--device-list <path>]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -16,6 +19,30 @@ while [[ $# -gt 0 ]]; do
         exit 64
       fi
       EVIDENCE_FILE="$2"
+      shift 2
+      ;;
+    --candidate-root)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      CANDIDATE_ROOT="$2"
+      shift 2
+      ;;
+    --unsigned-macos-app)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      UNSIGNED_MACOS_RELEASE_APP="$2"
+      shift 2
+      ;;
+    --device-list)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      DEVICE_LIST_FILE="$2"
       shift 2
       ;;
     *)
@@ -31,12 +58,36 @@ if [[ ! -f "$EVIDENCE_FILE" ]]; then
 fi
 
 readiness="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
+preflight_args=(
+  --evidence "$EVIDENCE_FILE"
+  --candidate-root "$CANDIDATE_ROOT"
+  --unsigned-macos-app "$UNSIGNED_MACOS_RELEASE_APP"
+)
+if [[ -n "$DEVICE_LIST_FILE" ]]; then
+  preflight_args+=(--device-list "$DEVICE_LIST_FILE")
+fi
+preflight="$("$ROOT/scripts/manual_smoke_environment_preflight.sh" "${preflight_args[@]}")"
 ready_rows="$(
   printf '%s\n' "$readiness" |
     awk '/^READY / {
       sub(/^READY /, "")
       print
     }'
+)"
+executable_environments="$(
+  printf '%s\n' "$preflight" |
+    awk '
+      /^Executable smoke environments:$/ {
+        capture = 1
+        next
+      }
+      capture == 1 && /^$/ {
+        exit
+      }
+      capture == 1 {
+        print
+      }
+    '
 )"
 
 echo "Release Next Actions"
@@ -60,10 +111,16 @@ else
   echo "   - none"
 fi
 
-echo "3. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
-echo "4. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
-echo "5. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place."
-echo "6. Do not call the release complete until scripts/check_release_completion.sh passes."
+echo "3. Executable smoke environments right now:"
+if [[ -n "$executable_environments" ]]; then
+  printf '%s\n' "$executable_environments" | sed 's/^/   /'
+else
+  echo "   - unknown; rerun scripts/manual_smoke_environment_preflight.sh"
+fi
+echo "4. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
+echo "5. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
+echo "6. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place."
+echo "7. Do not call the release complete until scripts/check_release_completion.sh passes."
 echo
 echo "Current readiness:"
 printf '%s\n' "$readiness"
