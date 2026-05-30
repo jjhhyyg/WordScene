@@ -189,6 +189,7 @@ struct SettingsView: View {
                     } label: {
                         Label("导入", systemImage: "square.and.arrow.down")
                     }
+                    .accessibilityIdentifier("settings.import.button")
                     .disabled(importExportStatus.isWorking)
 
                     Button {
@@ -196,6 +197,7 @@ struct SettingsView: View {
                     } label: {
                         Label("导出", systemImage: "square.and.arrow.up")
                     }
+                    .accessibilityIdentifier("settings.export.button")
                     .disabled(importExportStatus.isWorking)
                 }
             }
@@ -262,6 +264,7 @@ struct SettingsView: View {
             .font(.footnote)
             .foregroundStyle(importExportStatus.tint)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityIdentifier("settings.importExport.status")
     }
 
     private var recoveryStatusView: some View {
@@ -449,6 +452,7 @@ struct SettingsView: View {
                         Label("导入", systemImage: "square.and.arrow.down")
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityIdentifier("settings.import.button")
                     .disabled(importExportStatus.isWorking)
 
                     Button {
@@ -457,6 +461,7 @@ struct SettingsView: View {
                         Label("导出", systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityIdentifier("settings.export.button")
                     .disabled(importExportStatus.isWorking)
                 }
                 .controlSize(.large)
@@ -610,7 +615,7 @@ struct SettingsView: View {
             let export = try importExportController.prepareExport()
             exportDocument = MemoryExportFileDocument(data: export.data)
             exportFileName = export.fileName
-            importExportStatus = .working("准备导出 \(export.itemCount) 条记忆。\(export.privacyNotice)")
+            importExportStatus = .notice("已准备 \(export.itemCount) 条记忆，请在系统面板中选择保存位置。\(export.privacyNotice)")
             isExportingMemory = true
         } catch {
             importExportStatus = .failed(importExportErrorMessage(for: error))
@@ -620,10 +625,10 @@ struct SettingsView: View {
     @MainActor
     private func handleExportCompletion(_ result: Result<URL, Error>) {
         switch result {
-        case .success:
-            importExportStatus = .success("导出文件已生成。导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。")
+        case .success(let url):
+            importExportStatus = .success("已导出 \(url.lastPathComponent)。导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。")
         case .failure(let error):
-            importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+            importExportStatus = isUserCancelled(error) ? .notice("已取消导出，未写入文件。") : .failed(importExportErrorMessage(for: error))
         }
     }
 
@@ -639,7 +644,7 @@ struct SettingsView: View {
             let backup = try recoveryController.prepareBackup()
             recoveryBackupDocument = MemoryExportFileDocument(data: backup.data)
             recoveryBackupFileName = backup.fileName
-            recoveryStatus = .working("准备导出 \(backup.documentCount) 个旧缓存文档。")
+            recoveryStatus = .notice("已准备 \(backup.documentCount) 个旧缓存文档，请在系统面板中选择保存位置。")
             isExportingRecoveryBackup = true
         } catch {
             recoveryStatus = .failed(importExportErrorMessage(for: error))
@@ -649,10 +654,10 @@ struct SettingsView: View {
     @MainActor
     private func handleRecoveryBackupCompletion(_ result: Result<URL, Error>) {
         switch result {
-        case .success:
-            recoveryStatus = .success("旧缓存原始备份已生成。")
+        case .success(let url):
+            recoveryStatus = .success("已导出旧缓存原始备份 \(url.lastPathComponent)。")
         case .failure(let error):
-            recoveryStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+            recoveryStatus = isUserCancelled(error) ? .notice("已取消旧缓存原始备份导出，未写入文件。") : .failed(importExportErrorMessage(for: error))
         }
     }
 
@@ -668,7 +673,7 @@ struct SettingsView: View {
 
     @MainActor
     private func presentImport() {
-        importExportStatus = .working("请选择要导入的 JSON 文件。")
+        importExportStatus = .notice("请选择要导入的 JSON 文件。")
         isImportingMemory = true
     }
 
@@ -682,7 +687,7 @@ struct SettingsView: View {
             }
             importMemory(from: url)
         case .failure(let error):
-            importExportStatus = isUserCancelled(error) ? .idle : .failed(importExportErrorMessage(for: error))
+            importExportStatus = isUserCancelled(error) ? .notice("已取消导入，未读取文件。") : .failed(importExportErrorMessage(for: error))
         }
     }
 
@@ -858,6 +863,7 @@ private enum SettingsTokenStatus: Equatable {
 
 private enum SettingsImportExportStatus: Equatable {
     case idle
+    case notice(String)
     case working(String)
     case success(String)
     case failed(String)
@@ -866,7 +872,7 @@ private enum SettingsImportExportStatus: Equatable {
         switch self {
         case .idle:
             return "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。"
-        case .working(let message), .success(let message), .failed(let message):
+        case .notice(let message), .working(let message), .success(let message), .failed(let message):
             return message
         }
     }
@@ -875,6 +881,8 @@ private enum SettingsImportExportStatus: Equatable {
         switch self {
         case .idle:
             return "lock.doc"
+        case .notice:
+            return "info.circle"
         case .working:
             return "arrow.triangle.2.circlepath"
         case .success:
@@ -886,7 +894,7 @@ private enum SettingsImportExportStatus: Equatable {
 
     var tint: Color {
         switch self {
-        case .idle:
+        case .idle, .notice:
             return .secondary
         case .working:
             return .accentColor
