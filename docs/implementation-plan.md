@@ -489,6 +489,9 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `b0358bc5d2b2` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Aligned local-memory duplicate detection with import/search behavior by making saved source/translation matching case-insensitive in both UserDefaults and Core Data paths.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -only-testing:WordSceneMacTests/CoreDataMemoryStoreTests -only-testing:WordSceneMacTests/MemoryLibraryRepositoryTests -derivedDataPath /tmp/WordSceneMemoryDedupeMac CODE_SIGNING_ALLOWED=NO`; the 23 memory-store tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the case-insensitive memory dedupe change plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `ec76491b14b8`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `3d6284d280b5` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
