@@ -36,6 +36,7 @@ cat >"$EVIDENCE" <<EVIDENCE_MD
 | Git commit | $CURRENT_COMMIT |
 EVIDENCE_MD
 
+set +e
 "$ROOT/scripts/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Translation loop" \
@@ -43,6 +44,25 @@ EVIDENCE_MD
   --device "MacBook Pro / macOS 26.5" \
   --build "1" \
   --result "PASS" \
+  --notes "Should require explicit execution confirmation." >"$TMPDIR/missing-confirm.out" 2>"$TMPDIR/missing-confirm.err"
+status=$?
+set -e
+
+test "$status" -eq 64
+grep -qF 'Manual PASS/FAIL smoke evidence requires --confirm-executed' "$TMPDIR/missing-confirm.err"
+if grep -qF '## Manual Smoke Evidence' "$EVIDENCE"; then
+  echo "record_release_smoke_result should not write PASS rows without explicit execution confirmation" >&2
+  exit 1
+fi
+
+"$ROOT/scripts/record_release_smoke_result.sh" \
+  --evidence "$EVIDENCE" \
+  --area "Translation loop" \
+  --platform "macOS" \
+  --device "MacBook Pro / macOS 26.5" \
+  --build "1" \
+  --result "PASS" \
+  --confirm-executed \
   --notes "Saved token, translated hello world, history survived relaunch."
 
 grep -qF '## Manual Smoke Evidence' "$EVIDENCE"
@@ -67,6 +87,7 @@ test "$(grep -cF '## Manual Smoke Evidence' "$EVIDENCE")" -eq 1
   --device "iPad Pro 11-inch / iPadOS 26.0" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Retested export and import on the current candidate."
 
 grep -qF '| Import/export | iOS/iPadOS | iPad Pro 11-inch / iPadOS 26.0 | 1 | PASS | Retested export and import on the current candidate. |' "$EVIDENCE"
@@ -84,6 +105,7 @@ set +e
   --device "MacBook Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Typo should be rejected" >"$TMPDIR/invalid-area.out" 2>"$TMPDIR/invalid-area.err"
 status=$?
 set -e
@@ -99,6 +121,7 @@ set +e
   --device "iPad Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Non-canonical platform should be rejected" >"$TMPDIR/invalid-platform.out" 2>"$TMPDIR/invalid-platform.err"
 status=$?
 set -e
@@ -120,6 +143,7 @@ set +e
   --device "MacBook Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should require candidate evidence first" >"$TMPDIR/missing-candidate.out" 2>"$TMPDIR/missing-candidate.err"
 status=$?
 set -e
@@ -141,6 +165,7 @@ set +e
   --device "MacBook Pro" \
   --build "2" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should require the current candidate build number" >"$TMPDIR/mismatched-build.out" 2>"$TMPDIR/mismatched-build.err"
 status=$?
 set -e
@@ -175,6 +200,7 @@ set +e
   --device "MacBook Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should require live API smoke first" >"$TMPDIR/missing-live-smoke.out" 2>"$TMPDIR/missing-live-smoke.err"
 status=$?
 set -e
@@ -201,6 +227,7 @@ WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/
   --device "MacBook Pro / macOS 26.5" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Manual smoke can be recorded after evidence-only commits."
 
 grep -qF '| Translation loop | macOS | MacBook Pro / macOS 26.5 | 1 | PASS | Manual smoke can be recorded after evidence-only commits. |' "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE"
@@ -221,6 +248,7 @@ WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/
   --device "MacBook Pro / macOS 26.5" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should reject candidate drift across script changes" >"$TMPDIR/ancestor-product-change.out" 2>"$TMPDIR/ancestor-product-change.err"
 status=$?
 set -e
@@ -258,6 +286,7 @@ WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\nscrip
   --device "MacBook Pro / macOS 26.5" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should reject live API drift across script changes" >"$TMPDIR/stale-live-smoke.out" 2>"$TMPDIR/stale-live-smoke.err"
 status=$?
 set -e
@@ -276,6 +305,7 @@ set +e
   --device "MacBook Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Should reject stale candidate evidence" >"$TMPDIR/stale-candidate.out" 2>"$TMPDIR/stale-candidate.err"
 status=$?
 set -e
@@ -309,6 +339,7 @@ IOS_ONLY_MD
   --device "iPhone 17 Pro Max / iOS 26.0" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "iPhone smoke can use the iOS candidate."
 
 grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | iPhone smoke can use the iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
@@ -320,6 +351,7 @@ grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS 
   --device "Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Local-only fallback uses the readiness-covered unsigned Mac build and the signed iOS candidate."
 
 grep -qF '| Local-only fallback | macOS/iOS | Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | Local-only fallback uses the readiness-covered unsigned Mac build and the signed iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
@@ -332,6 +364,7 @@ set +e
   --device "MacBook Pro" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "macOS smoke should require a macOS candidate." >"$TMPDIR/missing-macos-build.out" 2>"$TMPDIR/missing-macos-build.err"
 status=$?
 set -e

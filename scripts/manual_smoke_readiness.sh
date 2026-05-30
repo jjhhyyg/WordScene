@@ -374,6 +374,7 @@ scripts/record_release_smoke_result.sh \\
   --device "$device" \\
   --build "$build_number" \\
   --result "PASS" \\
+  --confirm-executed \\
   --notes "<manual smoke notes>"
 COMMAND
 }

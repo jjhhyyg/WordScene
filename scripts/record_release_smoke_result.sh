@@ -11,9 +11,10 @@ DEVICE=""
 BUILD=""
 RESULT=""
 NOTES=""
+CONFIRM_EXECUTED=0
 
 usage() {
-  echo "Usage: $0 --evidence <markdown> --area <name> --platform <name> --device <name> --build <number> --result PASS|FAIL|BLOCKED --notes <text>" >&2
+  echo "Usage: $0 --evidence <markdown> --area <name> --platform <name> --device <name> --build <number> --result PASS|FAIL|BLOCKED --notes <text> [--confirm-executed]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -73,6 +74,10 @@ while [[ $# -gt 0 ]]; do
       fi
       NOTES="$2"
       shift 2
+      ;;
+    --confirm-executed)
+      CONFIRM_EXECUTED=1
+      shift
       ;;
     *)
       usage
@@ -424,6 +429,11 @@ Use one of the canonical pairs from docs/release-smoke-test.md:
   iCloud delete sync / iPhone + macOS
   Local-only fallback / macOS/iOS
 ERROR
+  exit 64
+fi
+
+if [[ "$RESULT_CELL" != "BLOCKED" && "$CONFIRM_EXECUTED" -ne 1 ]]; then
+  echo "Manual PASS/FAIL smoke evidence requires --confirm-executed after the checklist was actually run on the stated device/environment." >&2
   exit 64
 fi
 

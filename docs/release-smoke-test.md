@@ -226,6 +226,8 @@ candidate, and iCloud cross-platform rows require both. The local-only fallback
 row may be recorded with PASS iOS candidate evidence plus the readiness-covered
 unsigned macOS Release build, because that scenario intentionally verifies
 unsigned/local-only behavior on Mac.
+Recording `PASS` or `FAIL` also requires `--confirm-executed`; only add it
+after the checklist was actually run on the stated device or environment.
 Recording the same `Area` and `Platform` again replaces the stale manual row,
 so a retest can move a row from `BLOCKED` or `FAIL` to the current result
 without leaving contradictory evidence behind:
@@ -238,6 +240,7 @@ scripts/record_release_smoke_result.sh \
   --device "MacBook Pro / macOS 26.5" \
   --build "1" \
   --result "PASS" \
+  --confirm-executed \
   --notes "Saved token, translated hello world, history survived relaunch."
 ```
 

@@ -67,6 +67,7 @@ Baseline already completed:
 - Manual smoke recording rejects non-canonical Area/Platform pairs so typos cannot create evidence rows ignored by release completion.
 - Manual smoke recording requires current release candidate Git metadata before writing evidence rows.
 - Manual smoke recording requires PASS release candidate build evidence for the platform being tested.
+- Manual smoke recording requires `--confirm-executed` before writing PASS or FAIL rows, so command templates cannot be mistaken for evidence from a checklist that was not actually run.
 - Manual smoke readiness can be listed through `scripts/manual_smoke_readiness.sh`, with optional command templates, so eligible rows are explicit before recording evidence.
 - Manual smoke readiness can append a summary of READY/WAITING counts and grouped WAITING reasons for release triage.
 - Release next actions can be listed through `scripts/release_next_actions.sh` so signing recovery, READY manual smoke rows, and completion gating are visible without manually interpreting multiple scripts.
@@ -469,6 +470,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the executable smoke environment preflight update plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1db324957ecb`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `7e5012b6b8a7` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Hardened `scripts/record_release_smoke_result.sh` so PASS/FAIL manual rows require `--confirm-executed`, while BLOCKED rows can still be recorded without execution confirmation.
+- Updated `scripts/manual_smoke_readiness.sh --commands` and `docs/release-smoke-test.md` so generated PASS record templates include `--confirm-executed`.
+- Reran `scripts/test_record_release_smoke_result.sh`, `scripts/test_manual_smoke_readiness.sh`, `scripts/test_manual_smoke_session_guide.sh`, and `scripts/test_verify_release_readiness.sh`; the confirmation guard is covered by targeted script tests and the full non-manual gate.
 
 Next:
 
