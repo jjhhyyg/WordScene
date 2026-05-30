@@ -2,9 +2,9 @@
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
-| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-30T00:15:47Z using the ignored local token file. Git commit `33294c9bcb83`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, CloudKit background-mode validation, XcodeGen version-marker scan, macOS tests, iOS simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles. |
 | Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | scripts/run_release_candidate_gate.sh recorded release readiness, candidate build evidence, and signing blockers; rerun after resolving the blocked platform. |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-30T00:52:38Z using the ignored local token file. Git commit `f1ba36092ab3`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 
 ## Release Candidate Build Blocker
 
