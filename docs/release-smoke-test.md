@@ -44,6 +44,11 @@ and pass/fail notes for each run.
 - Run `scripts/release_next_actions.sh` when deciding what to do next. It wraps
   the same readiness rules into an ordered action list, including the macOS
   signing recovery step, READY manual rows, and the final completion gate.
+- Run `scripts/manual_smoke_environment_preflight.sh` before recording PASS
+  rows. It checks the current evidence readiness, candidate app bundle paths,
+  and physical iPhone/iPad availability reported by `devicectl`. READY rows are
+  only permission to run and record a row; they are not proof that the target
+  device checklist has been executed.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

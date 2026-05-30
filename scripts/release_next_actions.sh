@@ -51,7 +51,7 @@ else
   echo "1. macOS candidate blocker is not reported by readiness."
 fi
 
-echo "2. READY manual smoke rows that can be run now:"
+echo "2. READY manual smoke rows allowed by current evidence:"
 if [[ -n "$ready_rows" ]]; then
   while IFS= read -r row; do
     [[ -n "$row" ]] && printf '   - %s\n' "$row"
@@ -60,7 +60,8 @@ else
   echo "   - none"
 fi
 
-echo "3. Do not call the release complete until scripts/check_release_completion.sh passes."
+echo "3. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
+echo "4. Do not call the release complete until scripts/check_release_completion.sh passes."
 echo
 echo "Current readiness:"
 printf '%s\n' "$readiness"
