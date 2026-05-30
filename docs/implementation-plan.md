@@ -450,6 +450,9 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `002cbf3c5ea4`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `8487f8f8c359` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Narrowed `scripts/manual_smoke_readiness.sh --scope ios` to iPhone/iPad-only rows, leaving the unsigned Mac plus signed iOS fallback row under `--scope local-only`.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the iOS/local-only scope split plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fc895cd7f14e`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `2781980d190c` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
