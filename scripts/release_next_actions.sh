@@ -89,6 +89,21 @@ executable_environments="$(
       }
     '
 )"
+environment_actions="$(
+  printf '%s\n' "$preflight" |
+    awk '
+      /^Next environment actions:$/ {
+        capture = 1
+        next
+      }
+      capture == 1 && /^$/ {
+        exit
+      }
+      capture == 1 {
+        print
+      }
+    '
+)"
 
 echo "Release Next Actions"
 
@@ -117,10 +132,16 @@ if [[ -n "$executable_environments" ]]; then
 else
   echo "   - unknown; rerun scripts/manual_smoke_environment_preflight.sh"
 fi
-echo "4. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
-echo "5. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
-echo "6. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place."
-echo "7. Do not call the release complete until scripts/check_release_completion.sh passes."
+echo "4. Environment actions before smoke:"
+if [[ -n "$environment_actions" ]]; then
+  printf '%s\n' "$environment_actions" | sed 's/^/   /'
+else
+  echo "   - unknown; rerun scripts/manual_smoke_environment_preflight.sh"
+fi
+echo "5. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
+echo "6. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
+echo "7. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place."
+echo "8. Do not call the release complete until scripts/check_release_completion.sh passes."
 echo
 echo "Current readiness:"
 printf '%s\n' "$readiness"
