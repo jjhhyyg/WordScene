@@ -111,6 +111,16 @@ final class WordSceneLaunchUITests: XCTestCase {
 
         openTab("收藏")
         XCTAssertTrue(app.staticTexts["还没有收藏"].waitForExistence(timeout: 8))
+        let emptyManualAddButton = app.buttons["library.empty.manualAdd"].firstMatch
+        XCTAssertTrue(emptyManualAddButton.waitForExistence(timeout: 4))
+        let tabBar = app.tabBars.firstMatch
+        if tabBar.exists {
+            XCTAssertGreaterThan(
+                tabBar.frame.minY - emptyManualAddButton.frame.maxY,
+                24,
+                "Empty library add button should leave visual spacing above the tab bar"
+            )
+        }
 
         openTab("搜索")
         XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout: 8))

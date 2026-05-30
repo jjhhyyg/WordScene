@@ -26,22 +26,7 @@ struct LibraryView: View {
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if items.isEmpty {
-                VStack(spacing: 16) {
-                    ContentUnavailableView(
-                        "还没有收藏",
-                        systemImage: "bookmark",
-                        description: Text("翻译后点收藏，或手动新增一条本机记忆。")
-                    )
-
-                    Button {
-                        isShowingManualAdd = true
-                    } label: {
-                        Label("手动新增", systemImage: "plus")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canAddManualItem)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                emptyLibraryState
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -98,6 +83,7 @@ struct LibraryView: View {
                 Label("手动新增", systemImage: "plus")
             }
             .disabled(!canAddManualItem)
+            .accessibilityIdentifier("library.toolbar.manualAdd")
         }
         .sheet(isPresented: $isShowingManualAdd) {
             MemoryItemEditorSheet(title: "手动新增") { draft in
@@ -137,6 +123,10 @@ struct LibraryView: View {
         adaptiveLayout.pageHorizontalPadding
     }
 
+    private var emptyStateBottomPadding: CGFloat {
+        adaptiveLayout.pageBottomPadding + 28
+    }
+
     private var pageBackground: Color {
         #if os(macOS)
         return Color(nsColor: .windowBackgroundColor)
@@ -147,6 +137,29 @@ struct LibraryView: View {
 
     private var canAddManualItem: Bool {
         hasLoaded && !(persistenceErrorMessage != nil && items.isEmpty)
+    }
+
+    private var emptyLibraryState: some View {
+        VStack(spacing: 16) {
+            ContentUnavailableView(
+                "还没有收藏",
+                systemImage: "bookmark",
+                description: Text("翻译后点收藏，或手动新增一条本机记忆。")
+            )
+            .fixedSize(horizontal: false, vertical: true)
+
+            Button {
+                isShowingManualAdd = true
+            } label: {
+                Label("手动新增", systemImage: "plus")
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(!canAddManualItem)
+            .accessibilityIdentifier("library.empty.manualAdd")
+        }
+        .padding(.horizontal, pageHorizontalPadding)
+        .padding(.bottom, emptyStateBottomPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func loadItems() {
