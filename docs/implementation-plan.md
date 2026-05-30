@@ -533,6 +533,7 @@ Verification:
 - Skipped `MemoryLibraryRepository` writes and local change notifications when the replacement memory snapshot matches the current store state.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -only-testing:WordSceneMacTests/MemoryLibraryRepositoryTests -derivedDataPath /tmp/WordSceneMemoryNoopGreen CODE_SIGNING_ALLOWED=NO`; the 18 memory library tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the memory note no-op guard plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `b40f35397841`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
