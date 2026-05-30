@@ -71,3 +71,8 @@ DEVICES
   --device-list "$DEVICE_LIST" >"$TMPDIR/waiting-guide.out"
 
 grep -qF 'WAIT: An available physical iPhone/iPad and iOS candidate app are required before install.' "$TMPDIR/waiting-guide.out"
+grep -qF 'PASS record commands are hidden until an installable physical device is available.' "$TMPDIR/waiting-guide.out"
+if grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/waiting-guide.out"; then
+  echo "Waiting guide must not print PASS record commands." >&2
+  exit 1
+fi

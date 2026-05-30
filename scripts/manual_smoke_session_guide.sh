@@ -73,9 +73,10 @@ first_available_mobile_device() {
     '
 }
 
-ready_commands="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary)"
+readiness_summary="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 candidate_app="$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
 device="$(first_available_mobile_device)"
+can_install=0
 preflight_args=(
   --evidence "$EVIDENCE_FILE"
   --candidate-root "$CANDIDATE_ROOT"
@@ -93,6 +94,7 @@ echo "1. Environment preflight:"
 echo
 echo "2. Install current iOS candidate:"
 if [[ -d "$candidate_app" && -n "$device" ]]; then
+  can_install=1
   printf 'scripts/install_ios_release_candidate.sh --device %q --app %q\n' "$device" "$candidate_app"
 else
   echo "WAIT: An available physical iPhone/iPad and iOS candidate app are required before install."
@@ -100,5 +102,10 @@ fi
 
 echo
 echo "3. Run the relevant checklist sections in docs/release-smoke-test.md."
-echo "4. Record only smoke rows that were actually executed and passed:"
-printf '%s\n' "$ready_commands"
+if [[ "$can_install" -eq 1 ]]; then
+  echo "4. Record only smoke rows that were actually executed and passed:"
+  "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary
+else
+  echo "4. PASS record commands are hidden until an installable physical device is available."
+  printf '%s\n' "$readiness_summary"
+fi
