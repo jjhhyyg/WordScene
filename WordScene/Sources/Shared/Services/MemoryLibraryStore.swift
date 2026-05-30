@@ -28,6 +28,12 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
 
         let decoder = JSONDecoder()
         if let document = try? decoder.decode(MemoryLibraryDocument.self, from: data) {
+            guard document.schemaVersion == Self.schemaVersion else {
+                throw LocalPersistenceStoreError.unsupportedSchemaVersion(
+                    key: key,
+                    version: document.schemaVersion
+                )
+            }
             return Array(document.items.prefix(maximumCount))
         }
 

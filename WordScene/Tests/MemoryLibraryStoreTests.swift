@@ -77,6 +77,26 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(defaults.data(forKey: "memoryLibrary"), corruptData)
     }
 
+    func testLoadOrThrowRejectsUnsupportedSchemaVersionWithoutClearingData() throws {
+        let suiteName = "MemoryLibraryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = MemoryLibraryStore(defaults: defaults)
+        let futureDocument = Data(#"{"schema_version":99,"items":[]}"#.utf8)
+        defaults.set(futureDocument, forKey: "memoryLibrary")
+
+        XCTAssertThrowsError(try store.loadOrThrow()) { error in
+            XCTAssertEqual(
+                error as? LocalPersistenceStoreError,
+                .unsupportedSchemaVersion(key: "memoryLibrary", version: 99)
+            )
+        }
+        XCTAssertEqual(defaults.data(forKey: "memoryLibrary"), futureDocument)
+    }
+
     func testAddingSameTranslationDoesNotCreateDuplicate() {
         let store = MemoryLibraryStore(defaults: UserDefaults.standard)
         let record = TranslationRecord(

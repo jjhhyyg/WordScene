@@ -36,6 +36,7 @@ Baseline already completed:
 - Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
+- Versioned local persistence rejects unsupported future schema versions without clearing the original local data.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
@@ -492,6 +493,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the case-insensitive memory dedupe change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `ec76491b14b8`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `3d6284d280b5` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Rejected unsupported future `schema_version` values in local memory-library and recent-history documents while preserving the original data for backup, recovery, or upgrade.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -only-testing:WordSceneMacTests/TranslationHistoryStoreTests -derivedDataPath /tmp/WordSceneLocalSchemaMac CODE_SIGNING_ALLOWED=NO`; the 17 local persistence tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the unsupported local schema-version guard plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 

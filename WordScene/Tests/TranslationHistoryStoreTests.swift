@@ -106,4 +106,24 @@ final class TranslationHistoryStoreTests: XCTestCase {
         }
         XCTAssertEqual(defaults.data(forKey: "translationHistory"), corruptData)
     }
+
+    func testLoadOrThrowRejectsUnsupportedSchemaVersionWithoutClearingData() throws {
+        let suiteName = "TranslationHistoryStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = TranslationHistoryStore(defaults: defaults)
+        let futureDocument = Data(#"{"schema_version":99,"records":[]}"#.utf8)
+        defaults.set(futureDocument, forKey: "translationHistory")
+
+        XCTAssertThrowsError(try store.loadOrThrow()) { error in
+            XCTAssertEqual(
+                error as? LocalPersistenceStoreError,
+                .unsupportedSchemaVersion(key: "translationHistory", version: 99)
+            )
+        }
+        XCTAssertEqual(defaults.data(forKey: "translationHistory"), futureDocument)
+    }
 }
