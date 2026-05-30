@@ -32,8 +32,13 @@ enum CoreDataSyncMode: Equatable {
 
     static func defaultForCurrentProcess(
         containerIdentifier: String = CoreDataMemoryStore.productionCloudKitContainerIdentifier,
+        isCloudSyncEnabled: () -> Bool = { CloudKitSyncPreference.isEnabled() },
         entitlementValue: (String) -> Any? = ProcessEntitlementReader.value
     ) -> CoreDataSyncMode {
+        guard isCloudSyncEnabled() else {
+            return .localOnly
+        }
+
         guard
             let services = entitlementValue("com.apple.developer.icloud-services") as? [String],
             services.contains("CloudKit") || services.contains("CloudKit-Anonymous"),
@@ -44,6 +49,14 @@ enum CoreDataSyncMode: Equatable {
         }
 
         return .cloudKit(containerIdentifier: containerIdentifier)
+    }
+}
+
+enum CloudKitSyncPreference {
+    static let isEnabledKey = "cloudKitSync.isEnabled"
+
+    static func isEnabled(defaults: UserDefaults = .standard) -> Bool {
+        defaults.bool(forKey: isEnabledKey)
     }
 }
 

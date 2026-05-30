@@ -1,3 +1,4 @@
+import CloudKit
 import CoreData
 import Network
 import SwiftUI
@@ -124,8 +125,7 @@ struct AppDataController {
     }
 
     private static func failureReason(for error: Error) -> String {
-        let message = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-        return message.isEmpty ? String(describing: error) : message
+        AppErrorDescription.syncFailureReason(for: error)
     }
 
     static func liveForProcess(
@@ -193,6 +193,146 @@ struct AppDataController {
         )
         try? controller.memoryLibrary.saveOrThrow([memoryItem])
         try? controller.translationHistory.saveOrThrow([historyRecord])
+    }
+}
+
+enum AppErrorDescription {
+    private static let maximumReasonLength = 1_200
+
+    static func syncFailureReason(for error: Error) -> String {
+        var components: [String] = []
+        var visitedErrors = Set<ObjectIdentifier>()
+        append(error, label: nil, to: &components, visitedErrors: &visitedErrors)
+
+        let reason = deduplicated(components)
+            .joined(separator: "；")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !reason.isEmpty else {
+            return String(describing: error)
+        }
+        if reason.count <= maximumReasonLength {
+            return reason
+        }
+        return String(reason.prefix(maximumReasonLength)) + "..."
+    }
+
+    private static func append(
+        _ error: Error,
+        label: String?,
+        to components: inout [String],
+        visitedErrors: inout Set<ObjectIdentifier>
+    ) {
+        let nsError = error as NSError
+        let identifier = ObjectIdentifier(nsError)
+        guard visitedErrors.insert(identifier).inserted else {
+            return
+        }
+
+        let description = description(for: nsError)
+        if let label {
+            components.append("\(label)：\(description)")
+        } else {
+            components.append(description)
+        }
+
+        appendStringDetail(NSLocalizedFailureReasonErrorKey, prefix: "失败原因", from: nsError, to: &components)
+        appendStringDetail(NSLocalizedRecoverySuggestionErrorKey, prefix: "恢复建议", from: nsError, to: &components)
+        appendPartialFailures(from: nsError, to: &components, visitedErrors: &visitedErrors)
+        appendErrorList(NSDetailedErrorsKey, prefix: "详细错误", from: nsError, to: &components, visitedErrors: &visitedErrors)
+        appendErrorList(NSMultipleUnderlyingErrorsKey, prefix: "底层错误", from: nsError, to: &components, visitedErrors: &visitedErrors)
+
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            append(underlying, label: "底层错误", to: &components, visitedErrors: &visitedErrors)
+        }
+    }
+
+    private static func description(for error: NSError) -> String {
+        let message = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        let signature = "\(error.domain) code \(error.code)"
+        guard !message.isEmpty else {
+            return signature
+        }
+        guard shouldIncludeDiagnosticSignature(for: error) else {
+            return message
+        }
+        if message.contains(signature) {
+            return message
+        }
+        return "\(message) [\(signature)]"
+    }
+
+    private static func shouldIncludeDiagnosticSignature(for error: NSError) -> Bool {
+        switch error.domain {
+        case CKErrorDomain, NSCocoaErrorDomain, NSPOSIXErrorDomain, NSURLErrorDomain:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func appendStringDetail(
+        _ key: String,
+        prefix: String,
+        from error: NSError,
+        to components: inout [String]
+    ) {
+        guard let detail = error.userInfo[key] as? String else {
+            return
+        }
+        let cleaned = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !cleaned.isEmpty {
+            components.append("\(prefix)：\(cleaned)")
+        }
+    }
+
+    private static func appendPartialFailures(
+        from error: NSError,
+        to components: inout [String],
+        visitedErrors: inout Set<ObjectIdentifier>
+    ) {
+        guard let partialFailures = error.userInfo[CKPartialErrorsByItemIDKey] as? [AnyHashable: Any] else {
+            return
+        }
+
+        for key in partialFailures.keys.sorted(by: { String(describing: $0) < String(describing: $1) }) {
+            guard let partialError = partialFailures[key] as? Error else {
+                continue
+            }
+            append(
+                partialError,
+                label: "部分失败 \(String(describing: key))",
+                to: &components,
+                visitedErrors: &visitedErrors
+            )
+        }
+    }
+
+    private static func appendErrorList(
+        _ key: String,
+        prefix: String,
+        from error: NSError,
+        to components: inout [String],
+        visitedErrors: inout Set<ObjectIdentifier>
+    ) {
+        guard let errors = error.userInfo[key] as? [Error] else {
+            return
+        }
+
+        for (index, nestedError) in errors.enumerated() {
+            append(nestedError, label: "\(prefix) \(index + 1)", to: &components, visitedErrors: &visitedErrors)
+        }
+    }
+
+    private static func deduplicated(_ components: [String]) -> [String] {
+        var seen = Set<String>()
+        return components.filter { component in
+            let cleaned = component.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !cleaned.isEmpty else {
+                return false
+            }
+            return seen.insert(cleaned).inserted
+        }
     }
 }
 
@@ -560,7 +700,7 @@ final class CloudKitSyncEventMonitor: ObservableObject, @unchecked Sendable {
             startDate: event.startDate,
             endDate: event.endDate,
             succeeded: event.succeeded,
-            errorDescription: event.error?.localizedDescription
+            errorDescription: event.error.map(AppErrorDescription.syncFailureReason(for:))
         )
     }
 

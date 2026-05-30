@@ -1,4 +1,5 @@
 import Combine
+import CloudKit
 import Network
 import XCTest
 @testable import WordScene
@@ -187,6 +188,71 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertTrue(controller.syncStatus.message.contains("Core Data store unavailable"))
         XCTAssertFalse(controller.syncStatus.message.contains("没有可用的 CloudKit entitlement"))
         XCTAssertEqual(try controller.memoryLibrary.loadOrThrow(), [item])
+    }
+
+    func testCloudKitBootstrapFailureReportsNestedPartialFailureDetails() throws {
+        let childError = NSError(
+            domain: CKErrorDomain,
+            code: CKError.Code.permissionFailure.rawValue,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Private database access was denied"
+            ]
+        )
+        let partialError = NSError(
+            domain: CKErrorDomain,
+            code: CKError.Code.partialFailure.rawValue,
+            userInfo: [
+                NSLocalizedDescriptionKey: "The operation couldn't be completed. (CKErrorDomain error 2.)",
+                CKPartialErrorsByItemIDKey: [
+                    "private-zone": childError
+                ]
+            ]
+        )
+        let localStore = try CoreDataMemoryStore(inMemory: true)
+        var bootstrapAttempts = 0
+
+        let controller = AppDataController(
+            coreDataStoreFactory: {
+                bootstrapAttempts += 1
+                if bootstrapAttempts == 1 {
+                    throw partialError
+                }
+                return localStore
+            },
+            syncMode: .cloudKit(containerIdentifier: CoreDataMemoryStore.productionCloudKitContainerIdentifier)
+        )
+
+        XCTAssertEqual(controller.persistenceStatus, .coreDataAvailable(syncMode: .localOnly))
+        XCTAssertTrue(controller.syncStatus.message.contains("CKErrorDomain code 2"))
+        XCTAssertTrue(controller.syncStatus.message.contains("private-zone"))
+        XCTAssertTrue(controller.syncStatus.message.contains("Private database access was denied"))
+        XCTAssertTrue(controller.syncStatus.message.contains("CKErrorDomain code 10"))
+    }
+
+    func testCloudKitFailureReasonReportsUnderlyingErrors() {
+        let underlying = NSError(
+            domain: CKErrorDomain,
+            code: CKError.Code.networkUnavailable.rawValue,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Network is unavailable for iCloud"
+            ]
+        )
+        let wrapper = NSError(
+            domain: NSCocoaErrorDomain,
+            code: CocoaError.persistentStoreOpen.rawValue,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Core Data could not load the store",
+                NSUnderlyingErrorKey: underlying
+            ]
+        )
+
+        let reason = AppErrorDescription.syncFailureReason(for: wrapper)
+
+        XCTAssertTrue(reason.contains("Core Data could not load the store"))
+        XCTAssertTrue(reason.contains("NSCocoaErrorDomain code \(CocoaError.persistentStoreOpen.rawValue)"))
+        XCTAssertTrue(reason.contains("底层错误"))
+        XCTAssertTrue(reason.contains("Network is unavailable for iCloud"))
+        XCTAssertTrue(reason.contains("CKErrorDomain code 3"))
     }
 
     func testReportsLocalOnlySyncStatusWhenCloudKitIsNotAvailable() throws {

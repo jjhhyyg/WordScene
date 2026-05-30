@@ -4,7 +4,10 @@ import XCTest
 
 final class CoreDataMemoryStoreTests: XCTestCase {
     func testDefaultSyncModeFallsBackToLocalOnlyWithoutCloudKitEntitlements() {
-        let syncMode = CoreDataSyncMode.defaultForCurrentProcess { _ in nil }
+        let syncMode = CoreDataSyncMode.defaultForCurrentProcess(
+            isCloudSyncEnabled: { true },
+            entitlementValue: { _ in nil }
+        )
 
         XCTAssertEqual(syncMode, .localOnly)
     }
@@ -15,17 +18,38 @@ final class CoreDataMemoryStoreTests: XCTestCase {
     }
     #endif
 
-    func testDefaultSyncModeUsesCloudKitWhenEntitlementsMatchContainer() {
-        let syncMode = CoreDataSyncMode.defaultForCurrentProcess { entitlement in
-            switch entitlement {
-            case "com.apple.developer.icloud-services":
-                return ["CloudKit"]
-            case "com.apple.developer.icloud-container-identifiers":
-                return [CoreDataMemoryStore.productionCloudKitContainerIdentifier]
-            default:
-                return nil
+    func testDefaultSyncModeStaysLocalWhenCloudKitIsNotRequested() {
+        let syncMode = CoreDataSyncMode.defaultForCurrentProcess(
+            isCloudSyncEnabled: { false },
+            entitlementValue: { entitlement in
+                switch entitlement {
+                case "com.apple.developer.icloud-services":
+                    return ["CloudKit"]
+                case "com.apple.developer.icloud-container-identifiers":
+                    return [CoreDataMemoryStore.productionCloudKitContainerIdentifier]
+                default:
+                    return nil
+                }
             }
-        }
+        )
+
+        XCTAssertEqual(syncMode, .localOnly)
+    }
+
+    func testDefaultSyncModeUsesCloudKitWhenRequestedAndEntitlementsMatchContainer() {
+        let syncMode = CoreDataSyncMode.defaultForCurrentProcess(
+            isCloudSyncEnabled: { true },
+            entitlementValue: { entitlement in
+                switch entitlement {
+                case "com.apple.developer.icloud-services":
+                    return ["CloudKit"]
+                case "com.apple.developer.icloud-container-identifiers":
+                    return [CoreDataMemoryStore.productionCloudKitContainerIdentifier]
+                default:
+                    return nil
+                }
+            }
+        )
 
         XCTAssertEqual(
             syncMode,

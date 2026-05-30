@@ -9,6 +9,7 @@ struct SettingsView: View {
     #if DEBUG
     @AppStorage(DebugRawAPIResponseSettings.isEnabledKey) private var storesRawAPIResponses = false
     #endif
+    @AppStorage(CloudKitSyncPreference.isEnabledKey) private var isCloudKitSyncRequested = false
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
     @State private var importExportStatus: SettingsImportExportStatus = .idle
@@ -151,6 +152,7 @@ struct SettingsView: View {
             }
 
             Section("数据存储") {
+                iCloudSyncPreferenceToggle
                 persistenceStatusView
                 syncStatusView
                 NetworkStatusView(monitor: dataController.networkStatusMonitor)
@@ -347,6 +349,7 @@ struct SettingsView: View {
     private var persistenceStatusCard: some View {
         SettingsCard(title: "数据存储", systemImage: "internaldrive") {
             VStack(alignment: .leading, spacing: 14) {
+                iCloudSyncPreferenceToggle
                 persistenceStatusView
                 syncStatusView
                 NetworkStatusView(monitor: dataController.networkStatusMonitor)
@@ -371,6 +374,39 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var iCloudSyncPreferenceToggle: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(isOn: $isCloudKitSyncRequested) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("使用 iCloud 同步")
+                    Text(iCloudSyncPreferenceMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .toggleStyle(.switch)
+            .accessibilityLabel("使用 iCloud 同步")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var iCloudSyncPreferenceMessage: String {
+        if isCloudKitSyncRequested == isCloudKitSyncActive {
+            return isCloudKitSyncActive
+                ? "当前使用 iCloud 私有数据库同步收藏和历史。"
+                : "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。"
+        }
+
+        return "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。"
+    }
+
+    private var isCloudKitSyncActive: Bool {
+        if case .cloudKitConfigured = dataController.syncStatus {
+            return true
+        }
+        return false
     }
 
     private var syncStatusView: some View {
