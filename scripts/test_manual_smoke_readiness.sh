@@ -67,6 +67,26 @@ grep -qF 'Waiting rows: 5' "$TMPDIR/summary.out"
 grep -qF 'Waiting reasons:' "$TMPDIR/summary.out"
 grep -qF -- '- missing PASS candidate build: macOS (5 rows)' "$TMPDIR/summary.out"
 
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands --scope ios >"$TMPDIR/ios-commands.out"
+
+grep -qF 'Manual Smoke Readiness (ios scope)' "$TMPDIR/ios-commands.out"
+grep -qF 'READY Translation loop / iPhone' "$TMPDIR/ios-commands.out"
+grep -qF 'READY Translation loop / iPad' "$TMPDIR/ios-commands.out"
+grep -qF 'READY Local-only fallback / macOS/iOS' "$TMPDIR/ios-commands.out"
+if grep -qF -- '--platform "macOS"' "$TMPDIR/ios-commands.out"; then
+  echo "manual_smoke_readiness --scope ios should not print macOS-only commands" >&2
+  exit 1
+fi
+
+"$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE" --commands --scope macos >"$TMPDIR/macos-commands.out"
+
+grep -qF 'Manual Smoke Readiness (macos scope)' "$TMPDIR/macos-commands.out"
+grep -qF 'WAITING Translation loop / macOS - missing PASS candidate build: macOS' "$TMPDIR/macos-commands.out"
+if grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/macos-commands.out"; then
+  echo "manual_smoke_readiness --scope macos should not print commands while macOS candidate evidence is missing" >&2
+  exit 1
+fi
+
 WORDSCENE_CURRENT_COMMIT="abcdef123456" \
 WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE="scripts/run_release_candidate_gate.sh" \

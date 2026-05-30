@@ -71,8 +71,50 @@ DEVICES
   --device-list "$DEVICE_LIST" >"$TMPDIR/waiting-guide.out"
 
 grep -qF 'WAIT: An available physical iPhone/iPad and iOS candidate app are required before install.' "$TMPDIR/waiting-guide.out"
-grep -qF 'PASS record commands are hidden until an installable physical device is available.' "$TMPDIR/waiting-guide.out"
+grep -qF 'PASS record commands are hidden until an executable candidate environment is available.' "$TMPDIR/waiting-guide.out"
 if grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/waiting-guide.out"; then
   echo "Waiting guide must not print PASS record commands." >&2
+  exit 1
+fi
+
+cat >"$EVIDENCE" <<EVIDENCE_MD
+## Non-Manual Release Gate
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Readiness script | macOS + iOS generic | local build host | 1 | PASS | readiness passed |
+| Candidate gate | macOS + iOS | local build host | 1 | BLOCKED | iOS unavailable |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | live smoke passed. Git commit \`$CURRENT_COMMIT\`. |
+
+## Release Candidate Build Blocker
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | iOS | local build host | 1 | BLOCKED | unavailable device |
+
+## Release Candidate Build Evidence
+
+| Area | Platform | Device / OS | Build | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Candidate build | macOS | local build host | 1 | PASS | signed macOS candidate |
+
+| Field | Value |
+| --- | --- |
+| Build | 1 |
+| Git commit | $CURRENT_COMMIT |
+EVIDENCE_MD
+
+mkdir -p "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
+
+"$ROOT/scripts/manual_smoke_session_guide.sh" \
+  --evidence "$EVIDENCE" \
+  --candidate-root "$CANDIDATE_ROOT" \
+  --device-list "$DEVICE_LIST" >"$TMPDIR/macos-only-guide.out"
+
+grep -qF 'Record only macOS smoke rows that were actually executed and passed:' "$TMPDIR/macos-only-guide.out"
+grep -qF 'Manual Smoke Readiness (macos scope)' "$TMPDIR/macos-only-guide.out"
+grep -qF '  --platform "macOS" \' "$TMPDIR/macos-only-guide.out"
+if grep -qF '  --platform "iPhone" \' "$TMPDIR/macos-only-guide.out"; then
+  echo "macOS-only guide must not print iPhone record commands without an installable device." >&2
   exit 1
 fi

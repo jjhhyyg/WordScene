@@ -72,7 +72,7 @@ Baseline already completed:
 - Release next actions can be listed through `scripts/release_next_actions.sh` so signing recovery, READY manual smoke rows, and completion gating are visible without manually interpreting multiple scripts.
 - Manual smoke environment readiness can be checked through `scripts/manual_smoke_environment_preflight.sh`, separating evidence-eligible rows from physical-device availability before PASS rows are recorded.
 - iOS release candidates can be installed to an available physical iPhone or iPad through `scripts/install_ios_release_candidate.sh`, with a `--dry-run` mode for checking the exact `devicectl` command before device smoke.
-- Manual smoke sessions can be prepared through `scripts/manual_smoke_session_guide.sh`, which prints the current preflight, install command, checklist pointer, and record-command templates without writing PASS evidence.
+- Manual smoke sessions can be prepared through `scripts/manual_smoke_session_guide.sh`, which prints the current preflight, install command, checklist pointer, and scoped record-command templates without writing PASS evidence.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
@@ -437,6 +437,7 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it exercised the tightened manual smoke session guide and completed the non-manual readiness gate.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `97e7314f134e`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `cb97a27aeae9` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Scoped manual smoke record-command templates by executable environment so macOS-only smoke commands can be shown after macOS signing is restored without also showing iPhone/iPad commands before an installable physical device is available.
 
 Next:
 

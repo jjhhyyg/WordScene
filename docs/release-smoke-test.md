@@ -40,7 +40,9 @@ and pass/fail notes for each run.
   applies the same candidate/live-smoke freshness checks as manual evidence
   recording, so stale evidence prints WAITING instead of record commands. It is
   read-only and does not record PASS evidence. Add `--summary` to append READY
-  and WAITING counts plus grouped WAITING reasons for release triage.
+  and WAITING counts plus grouped WAITING reasons for release triage. Add
+  `--scope ios`, `--scope macos`, or `--scope cross-platform` when you only want
+  rows that can run in the currently available environment.
 - Run `scripts/release_next_actions.sh` when deciding what to do next. It wraps
   the same readiness rules into an ordered action list, including the macOS
   signing recovery step, READY manual rows, and the final completion gate.
@@ -54,9 +56,11 @@ and pass/fail notes for each run.
   to target a specific device, or `--dry-run` to print the `devicectl` command
   before installing.
 - Use `scripts/manual_smoke_session_guide.sh` to print the current preflight,
-  iOS install command, checklist pointer, and record-command templates in one
-  place. It is read-only and does not record PASS rows. It hides PASS record
-  command templates until an installable physical iPhone or iPad is available.
+  iOS install command, checklist pointer, and scoped record-command templates in
+  one place. It is read-only and does not record PASS rows. It hides PASS
+  record command templates until the matching executable candidate environment
+  is available, and it does not print iPhone/iPad templates just because macOS
+  smoke is runnable.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek

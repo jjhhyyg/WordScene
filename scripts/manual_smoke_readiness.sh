@@ -5,10 +5,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 SHOW_COMMANDS=0
 SHOW_SUMMARY=0
+SCOPE="all"
 CURRENT_COMMIT="${WORDSCENE_CURRENT_COMMIT:-$(git -C "$ROOT" rev-parse --short=12 HEAD)}"
 
 usage() {
-  echo "Usage: $0 [--evidence <markdown>] [--commands] [--summary]" >&2
+  echo "Usage: $0 [--evidence <markdown>] [--commands] [--summary] [--scope all|ios|macos|cross-platform]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -28,6 +29,21 @@ while [[ $# -gt 0 ]]; do
     --summary)
       SHOW_SUMMARY=1
       shift
+      ;;
+    --scope)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 64
+      fi
+      SCOPE="$2"
+      case "$SCOPE" in
+        all | ios | macos | cross-platform) ;;
+        *)
+          usage
+          exit 64
+          ;;
+      esac
+      shift 2
       ;;
     *)
       usage
@@ -251,6 +267,25 @@ Local-only fallback|macOS/iOS|iOS
 ROWS
 }
 
+row_in_scope() {
+  local required_platforms="$1"
+
+  case "$SCOPE" in
+    all)
+      return 0
+      ;;
+    ios)
+      [[ "$required_platforms" == "iOS" ]]
+      ;;
+    macos)
+      [[ "$required_platforms" == "macOS" ]]
+      ;;
+    cross-platform)
+      [[ "$required_platforms" == "macOS,iOS" ]]
+      ;;
+  esac
+}
+
 missing_platforms_for() {
   local required_csv="$1"
   local required
@@ -311,7 +346,11 @@ build_number="$(candidate_build_number)"
 candidate_freshness_blocker="$(candidate_freshness_reason)"
 live_smoke_freshness_blocker="$(live_smoke_freshness_reason)"
 
-echo "Manual Smoke Readiness"
+if [[ "$SCOPE" == "all" ]]; then
+  echo "Manual Smoke Readiness"
+else
+  echo "Manual Smoke Readiness ($SCOPE scope)"
+fi
 if [[ -n "$build_number" ]]; then
   echo "Candidate build: $build_number"
 else
@@ -323,6 +362,10 @@ waiting_count=0
 waiting_reasons=""
 
 while IFS='|' read -r area platform required_platforms; do
+  if ! row_in_scope "$required_platforms"; then
+    continue
+  fi
+
   reason=""
   missing_platforms="$(missing_platforms_for "$required_platforms")"
 
