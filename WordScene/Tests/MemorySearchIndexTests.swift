@@ -33,6 +33,21 @@ final class MemorySearchIndexTests: XCTestCase {
         XCTAssertEqual(results.first?.kind, .history)
     }
 
+    func testHistoryResultExposesOriginalRecordIDForManagementActions() {
+        let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
+        let record = TranslationRecord(
+            sourceText: "delete me",
+            translatedText: "删除我",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+
+        let result = index.search(query: "delete", memoryItems: [], history: [record]).first
+
+        XCTAssertEqual(result?.sourceID, record.id)
+        XCTAssertEqual(result?.kind, .history)
+    }
+
     func testSavedItemWinsOverDuplicateHistoryRecord() {
         let index = MemorySearchIndex(transliterator: StubPinyinTransliterator())
         let item = MemoryItem(

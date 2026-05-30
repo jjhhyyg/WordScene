@@ -101,6 +101,7 @@ struct MemorySearchResult: Identifiable, Equatable {
     }
 
     let id: String
+    let sourceID: UUID
     let kind: Kind
     let sourceText: String
     let translatedText: String
@@ -111,6 +112,7 @@ struct MemorySearchResult: Identifiable, Equatable {
 
     init(item: MemoryItem) {
         self.id = "memory-\(item.id.uuidString)"
+        self.sourceID = item.id
         self.kind = .memory
         self.sourceText = item.sourceText
         self.translatedText = item.translatedText
@@ -122,6 +124,7 @@ struct MemorySearchResult: Identifiable, Equatable {
 
     init(record: TranslationRecord) {
         self.id = "history-\(record.id.uuidString)"
+        self.sourceID = record.id
         self.kind = .history
         self.sourceText = record.sourceText
         self.translatedText = record.translatedText

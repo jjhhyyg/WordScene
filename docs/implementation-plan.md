@@ -43,6 +43,7 @@ Baseline already completed:
 - Settings maps local persistence read/version errors to recovery-oriented guidance before backup/reset or upgrade decisions.
 - Settings local recovery checks for existing legacy cache documents before exporting a raw backup or resetting, avoiding empty backup files and misleading "reset 0 documents" results.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
+- Search results can remove matching recent-history records directly, without affecting saved memory items.
 - Language direction model and tests.
 - Pinyin transliterator and tests.
 - Core Data is configured with the project CloudKit container for the production persistent store.
@@ -547,6 +548,8 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the history deletion UI and repository change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `29aa943e7604`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `50f53648a06f` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Added a Search-result history delete action backed by `MemorySearchResult.sourceID`, so users can delete a matched recent-history record from Search without deleting the saved-memory duplicate.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 6 search-index tests passed.
 
 Next:
 

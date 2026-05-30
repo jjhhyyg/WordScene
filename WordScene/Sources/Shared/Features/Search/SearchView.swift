@@ -67,7 +67,12 @@ struct SearchView: View {
 
                         LazyVStack(alignment: .leading, spacing: 12) {
                             ForEach(results) { result in
-                                SearchResultRow(result: result)
+                                SearchResultRow(
+                                    result: result,
+                                    onDeleteHistory: result.kind == .history ? {
+                                        deleteHistoryRecord(id: result.sourceID)
+                                    } : nil
+                                )
                             }
                         }
                     }
@@ -118,10 +123,22 @@ struct SearchView: View {
         }
         hasLoaded = true
     }
+
+    private func deleteHistoryRecord(id: UUID) {
+        let updatedHistory = historyStore.removing(id: id, from: history)
+        do {
+            try historyStore.saveOrThrow(updatedHistory)
+            history = updatedHistory
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = "翻译历史删除失败：\(error.localizedDescription)"
+        }
+    }
 }
 
 private struct SearchResultRow: View {
     let result: MemorySearchResult
+    let onDeleteHistory: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -136,6 +153,19 @@ private struct SearchResultRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                if let onDeleteHistory {
+                    Button(role: .destructive) {
+                        onDeleteHistory()
+                    } label: {
+                        Image(systemName: "trash")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                    .accessibilityLabel("删除历史")
+                    .accessibilityIdentifier("search.history.delete")
+                }
             }
 
             Text(result.sourceText)
