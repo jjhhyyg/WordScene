@@ -2,13 +2,13 @@
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-30T07:41:39Z using the ignored local token file. Git commit `9c4493c220f5`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 | Readiness script | macOS + iOS generic | local build host | 1 | PASS | scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, CloudKit background-mode validation, XcodeGen version-marker scan, macOS tests, iOS simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles. |
 | Candidate gate | macOS + iOS | local build host | 1 | PASS | scripts/run_release_candidate_gate.sh recorded release readiness and signed release candidate evidence for all requested platforms. |
-| DeepSeek live protocol smoke | API | local build host | 1 | PASS | `scripts/run_live_deepseek_translation_smoke.sh` passed at 2026-05-30T07:41:39Z using the ignored local token file. Git commit `9c4493c220f5`. It verified JSON Output with the real DeepSeek API and returned `你好世界` without printing the token. |
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-30T07:41:05Z
+Generated: 2026-05-30T08:00:46Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ Generated: 2026-05-30T07:41:05Z
 | Bundle ID | com.erikssonhou.leximemory |
 | Version | 1.0.0 |
 | Build | 1 |
-| Git commit | a96b7b3fbf4f |
+| Git commit | 308355301d2a |
 | iPad orientations | missing |
 | CloudKit containers | iCloud.com.erikssonhou.leximemory |
 | iCloud services | CloudKit |
@@ -27,7 +27,7 @@ Generated: 2026-05-30T07:41:05Z
 
 ## Release Candidate Build Evidence
 
-Generated: 2026-05-30T07:41:08Z
+Generated: 2026-05-30T08:00:48Z
 
 | Area | Platform | Device / OS | Build | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ Generated: 2026-05-30T07:41:08Z
 | Bundle ID | com.erikssonhou.leximemory |
 | Version | 1.0.0 |
 | Build | 1 |
-| Git commit | a96b7b3fbf4f |
+| Git commit | 308355301d2a |
 | iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |
 | CloudKit containers | iCloud.com.erikssonhou.leximemory |
 | iCloud services | CloudKit |
