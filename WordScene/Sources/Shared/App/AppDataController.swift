@@ -147,16 +147,18 @@ struct AppDataController {
         let localDocumentRecovery = LocalPersistenceRecoveryController(defaults: userDefaults)
 
         if let coreDataStore {
-            return AppDataController(
+            let controller = AppDataController(
                 coreDataStore: coreDataStore,
                 syncEventStore: syncEventStore,
                 legacyMemoryStore: legacyMemoryStore,
                 legacyHistoryStore: legacyHistoryStore,
                 localDocumentRecovery: localDocumentRecovery
             )
+            seedUITestDataIfNeeded(environment: environment, into: controller)
+            return controller
         }
 
-        return AppDataController(
+        let controller = AppDataController(
             coreDataStoreFactory: { throw CocoaError(.persistentStoreOpen) },
             syncMode: .localOnly,
             syncEventStore: syncEventStore,
@@ -164,6 +166,33 @@ struct AppDataController {
             legacyHistoryStore: legacyHistoryStore,
             localDocumentRecovery: localDocumentRecovery
         )
+        seedUITestDataIfNeeded(environment: environment, into: controller)
+        return controller
+    }
+
+    private static func seedUITestDataIfNeeded(
+        environment: [String: String],
+        into controller: AppDataController
+    ) {
+        guard environment["WORDSCENE_UI_TEST_SEED"] == "library-search-fixture" else {
+            return
+        }
+
+        let memoryItem = MemoryItem(
+            sourceText: "seeded library phrase",
+            translatedText: "种子收藏短语",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "seeded note"
+        )
+        let historyRecord = TranslationRecord(
+            sourceText: "seeded history phrase",
+            translatedText: "种子历史短语",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+        try? controller.memoryLibrary.saveOrThrow([memoryItem])
+        try? controller.translationHistory.saveOrThrow([historyRecord])
     }
 }
 

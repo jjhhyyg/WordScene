@@ -6,14 +6,21 @@ final class WordSceneLaunchUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        app = XCUIApplication()
-        app.launchArguments.append("-WordSceneUITest")
-        app.launchEnvironment["WORDSCENE_UI_TEST_SUITE"] = "WordSceneUITests.\(UUID().uuidString)"
-        app.launch()
+        launchApp()
     }
 
     override func tearDownWithError() throws {
         app = nil
+    }
+
+    private func launchApp(seed: String? = nil) {
+        app = XCUIApplication()
+        app.launchArguments.append("-WordSceneUITest")
+        app.launchEnvironment["WORDSCENE_UI_TEST_SUITE"] = "WordSceneUITests.\(UUID().uuidString)"
+        if let seed {
+            app.launchEnvironment["WORDSCENE_UI_TEST_SEED"] = seed
+        }
+        app.launch()
     }
 
     func testTranslateScreenInitialStateAndInputReadiness() throws {
@@ -67,6 +74,24 @@ final class WordSceneLaunchUITests: XCTestCase {
 
         openTab("翻译")
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 8))
+    }
+
+    func testSeededLibraryAndSearchContentRender() throws {
+        app.terminate()
+        launchApp(seed: "library-search-fixture")
+
+        openTab("收藏")
+        XCTAssertTrue(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["种子收藏短语"].waitForExistence(timeout: 4))
+
+        openTab("搜索")
+        let searchField = app.searchFields.firstMatch
+        XCTAssertTrue(searchField.waitForExistence(timeout: 8))
+        searchField.tap()
+        searchField.typeText("seeded")
+
+        XCTAssertTrue(app.staticTexts["seeded library phrase"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["seeded history phrase"].waitForExistence(timeout: 8))
     }
 
     private func openTab(_ title: String) {

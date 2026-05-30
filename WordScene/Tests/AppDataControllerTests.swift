@@ -45,6 +45,27 @@ final class AppDataControllerTests: XCTestCase {
         XCTAssertEqual(controller.syncStatus, .localOnly)
     }
 
+    func testUITestLaunchCanSeedLibraryAndSearchData() throws {
+        let suiteName = "WordSceneUITests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let controller = AppDataController.liveForProcess(
+            arguments: ["WordScene", "-WordSceneUITest"],
+            environment: [
+                "WORDSCENE_UI_TEST_SUITE": suiteName,
+                "WORDSCENE_UI_TEST_SEED": "library-search-fixture"
+            ]
+        )
+
+        XCTAssertEqual(try controller.memoryLibrary.loadOrThrow().map(\.sourceText), ["seeded library phrase"])
+        XCTAssertEqual(try controller.memoryLibrary.loadOrThrow().map(\.translatedText), ["种子收藏短语"])
+        XCTAssertEqual(try controller.translationHistory.loadOrThrow().map(\.sourceText), ["seeded history phrase"])
+        XCTAssertEqual(try controller.translationHistory.loadOrThrow().map(\.translatedText), ["种子历史短语"])
+    }
+
     func testRepositoriesShareInjectedCoreDataStore() throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let controller = AppDataController(coreDataStore: coreDataStore)

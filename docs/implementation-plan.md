@@ -96,6 +96,7 @@ Baseline already completed:
 - Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
 - Translation execution and DeepSeek connectivity checks trim stored DeepSeek tokens before invoking the provider, so pasted or migrated tokens with surrounding whitespace still authenticate correctly.
 - UI tests now launch with an isolated in-memory data stack and per-run `UserDefaults` suite, so existing simulator or developer app data cannot make initial Library/Search/Settings assertions flaky.
+- UI tests can launch with a deterministic library/search fixture and now cover non-empty Library rendering plus Search results from both saved memory and recent history.
 
 Known gaps:
 
@@ -561,6 +562,10 @@ Verification:
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -derivedDataPath /tmp/WordSceneMemoryEditGreen CODE_SIGNING_ALLOWED=NO`; the 14 memory-library store tests passed.
 - Tightened full saved-memory editing so unchanged snapshots after trimming do not touch `updatedAt` or trigger repository writes, avoiding needless CloudKit/local-change churn.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -derivedDataPath /tmp/WordSceneMemoryEditNoopGreen CODE_SIGNING_ALLOWED=NO`; the 15 memory-library store tests passed.
+- Added `WORDSCENE_UI_TEST_SEED=library-search-fixture` support for UI test launches, seeding an in-memory saved item and recent-history record without touching real user data.
+- Added an iOS UI test that verifies seeded saved memory renders in Library and both seeded memory/history records are searchable from the Search tab.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/AppDataControllerTests/testUITestLaunchCanSeedLibraryAndSearchData -derivedDataPath /tmp/WordSceneUITestSeedGreen CODE_SIGNING_ALLOWED=NO`; the seeded UI-test bootstrap unit test passed.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordScene -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5' -only-testing:WordSceneUITests/WordSceneLaunchUITests/testSeededLibraryAndSearchContentRender -derivedDataPath /tmp/WordSceneSeededUITest CODE_SIGNING_ALLOWED=NO`; the seeded Library/Search UI test passed.
 
 Next:
 
