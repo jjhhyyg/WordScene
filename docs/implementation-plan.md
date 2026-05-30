@@ -539,6 +539,7 @@ Verification:
 - Skipped `TranslationHistoryRepository` writes and local change notifications when the replacement recent-history snapshot matches the current store state, covering both Core Data and legacy local-only paths.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/TranslationHistoryRepositoryTests -derivedDataPath /tmp/WordSceneHistoryNoopGreen CODE_SIGNING_ALLOWED=NO`; the 8 translation-history repository tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the recent-history no-op guard plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `e76871a36eb4`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
