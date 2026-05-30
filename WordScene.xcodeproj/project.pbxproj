@@ -795,7 +795,7 @@
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WordScene/Generated/WordSceneInfo.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "词境";
+				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -994,7 +994,7 @@
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "词境";
+				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1017,7 +1017,7 @@
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WordScene/Generated/WordSceneInfo.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "词境";
+				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1043,7 +1043,7 @@
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "词境";
+				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

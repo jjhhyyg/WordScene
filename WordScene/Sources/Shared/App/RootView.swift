@@ -49,7 +49,7 @@ struct RootView: View {
                     .accessibilityIdentifier("navigation.\(section.rawValue)")
                 }
             }
-            .navigationTitle(String(localized: "词境", comment: "Root sidebar navigation title."))
+            .navigationTitle(String(localized: "译笺", comment: "Root sidebar navigation title."))
             #if os(macOS)
             .frame(minWidth: 176)
             #else

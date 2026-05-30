@@ -152,7 +152,7 @@ final class AppLocalizationTests: XCTestCase {
         let data = try Data(contentsOf: catalogURL)
         let catalog = try JSONDecoder().decode(StringCatalogFixture.self, from: data)
         let requiredKeys = [
-            "词境",
+            "译笺",
             "正在加载翻译历史...",
             "正在加载收藏...",
             "删除全部翻译历史？",

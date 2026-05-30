@@ -1,9 +1,9 @@
-# 词境 / Word Scene 项目配置
+# 译笺 / Word Scene 项目配置
 
 ## 基本信息
 
 ```text
-App 中文名：词境
+App 中文名：译笺
 App 英文名：Word Scene
 Bundle ID：com.erikssonhou.leximemory
 Apple Team ID：JU68L3U235
@@ -18,7 +18,7 @@ UI 默认语言：跟随系统语言，不在 App 内提供独立语言开关
 工程技术：Localizable.xcstrings 管理界面文案，InfoPlist.strings 管理系统显示名
 开发语言：简体中文 zh-Hans
 支持语言：简体中文 zh-Hans、英文 en、西班牙语 es
-iOS / iPadOS 设置路径：Settings -> Apps -> 词境 / Word Scene -> Preferred Language
+iOS / iPadOS 设置路径：Settings -> Apps -> 译笺 / Word Scene -> Preferred Language
 macOS 设置路径：System Settings -> General -> Language & Region -> Applications
 macOS 生效规则：如果 App 已打开，修改单个 App 语言后需要退出并重新打开
 ```

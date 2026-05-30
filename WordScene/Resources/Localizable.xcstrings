@@ -543,7 +543,7 @@
         }
       }
     },
-    "词境": {
+    "译笺": {
       "comment": "Root sidebar navigation title.",
       "localizations": {
         "en": {
@@ -561,7 +561,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "词境"
+            "value": "译笺"
           }
         }
       }
