@@ -56,10 +56,12 @@ done
 case "$PLATFORM" in
   macos)
     SCHEME="WordSceneMac"
+    TEST_TARGET="WordSceneMacTests"
     TEST_IDENTIFIER="WordSceneMacTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
     ;;
   ios)
     SCHEME="WordScene"
+    TEST_TARGET="WordSceneTests"
     TEST_IDENTIFIER="WordSceneTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
     if [[ "$DESTINATION" == "platform=macOS" ]]; then
       echo "iOS schema initialization requires --device <identifier> for a signed physical device." >&2
@@ -72,11 +74,43 @@ case "$PLATFORM" in
     ;;
 esac
 
-WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA=1 \
-WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA_DRY_RUN="$DRY_RUN" \
-WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA_PRINT="$PRINT_SCHEMA" \
-xcodebuild test \
+DERIVED_DATA="$(mktemp -d "${TMPDIR:-/tmp}/WordSceneSchemaInit.XXXXXX")"
+trap 'rm -rf "$DERIVED_DATA"' EXIT
+
+xcodebuild build-for-testing \
   -project "$ROOT/WordScene.xcodeproj" \
   -scheme "$SCHEME" \
+  -destination "$DESTINATION" \
+  -derivedDataPath "$DERIVED_DATA" \
+  -only-testing:"$TEST_IDENTIFIER"
+
+XCTESTRUN="$(find "$DERIVED_DATA/Build/Products" -name '*.xctestrun' -print -quit)"
+if [[ -z "$XCTESTRUN" ]]; then
+  echo "xcodebuild did not produce an .xctestrun file for CloudKit schema initialization." >&2
+  exit 1
+fi
+
+set_plist_string() {
+  local plist="$1"
+  local key_path="$2"
+  local value="$3"
+
+  if /usr/libexec/PlistBuddy -c "Print $key_path" "$plist" >/dev/null 2>&1; then
+    /usr/libexec/PlistBuddy -c "Set $key_path $value" "$plist"
+  else
+    /usr/libexec/PlistBuddy -c "Add $key_path string $value" "$plist"
+  fi
+}
+
+if ! /usr/libexec/PlistBuddy -c "Print :$TEST_TARGET:TestingEnvironmentVariables" "$XCTESTRUN" >/dev/null 2>&1; then
+  /usr/libexec/PlistBuddy -c "Add :$TEST_TARGET:TestingEnvironmentVariables dict" "$XCTESTRUN"
+fi
+
+set_plist_string "$XCTESTRUN" ":$TEST_TARGET:TestingEnvironmentVariables:WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA" "1"
+set_plist_string "$XCTESTRUN" ":$TEST_TARGET:TestingEnvironmentVariables:WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA_DRY_RUN" "$DRY_RUN"
+set_plist_string "$XCTESTRUN" ":$TEST_TARGET:TestingEnvironmentVariables:WORDSCENE_INITIALIZE_CLOUDKIT_SCHEMA_PRINT" "$PRINT_SCHEMA"
+
+xcodebuild test-without-building \
+  -xctestrun "$XCTESTRUN" \
   -destination "$DESTINATION" \
   -only-testing:"$TEST_IDENTIFIER"
