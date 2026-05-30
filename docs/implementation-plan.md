@@ -434,6 +434,9 @@ Verification:
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `3f01ccfe4d52`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `31b46ccefaa4` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Tightened `scripts/manual_smoke_session_guide.sh` so PASS record-command templates are hidden until an installable physical iPhone or iPad is available.
+- Reran `scripts/test_verify_release_readiness.sh`; it exercised the tightened manual smoke session guide and completed the non-manual readiness gate.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `97e7314f134e`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `cb97a27aeae9` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
