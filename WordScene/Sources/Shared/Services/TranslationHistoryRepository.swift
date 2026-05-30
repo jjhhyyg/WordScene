@@ -6,6 +6,7 @@ protocol TranslationHistoryDataStore {
     func loadOrThrow() throws -> [TranslationRecord]
     func saveOrThrow(_ records: [TranslationRecord]) throws
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord]
+    func removing(id: UUID, from records: [TranslationRecord]) -> [TranslationRecord]
 }
 
 struct TranslationHistoryRepository: TranslationHistoryDataStore {
@@ -71,6 +72,10 @@ struct TranslationHistoryRepository: TranslationHistoryDataStore {
     func adding(_ record: TranslationRecord, to records: [TranslationRecord]) -> [TranslationRecord] {
         let deduplicatedRecords = records.filter { !$0.hasSameTranslationContent(as: record) }
         return Array(([record] + deduplicatedRecords).prefix(maximumCount))
+    }
+
+    func removing(id: UUID, from records: [TranslationRecord]) -> [TranslationRecord] {
+        records.filter { $0.id != id }
     }
 
     private func migrateLegacyRecordsIfNeeded(into coreDataStore: any CoreDataTranslationHistoryDataStore) throws {

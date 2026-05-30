@@ -617,6 +617,7 @@ struct TranslationView: View {
                                 Spacer()
                                 Text(record.createdAt, style: .time)
                                 memoryIconButton(for: record)
+                                deleteHistoryIconButton(for: record)
                             }
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -750,6 +751,19 @@ struct TranslationView: View {
         .accessibilityLabel(isSavedToMemory(record) ? "取消收藏" : "收藏")
     }
 
+    private func deleteHistoryIconButton(for record: TranslationRecord) -> some View {
+        Button(role: .destructive) {
+            deleteHistoryRecord(id: record.id)
+        } label: {
+            Image(systemName: "trash")
+                .symbolRenderingMode(.hierarchical)
+        }
+        .buttonStyle(.borderless)
+        .controlSize(.small)
+        .accessibilityLabel("删除历史")
+        .accessibilityIdentifier("translation.history.delete")
+    }
+
     @MainActor
     private func loadHistory() {
         do {
@@ -785,6 +799,18 @@ struct TranslationView: View {
             persistenceWarningMessage = nil
         } catch {
             persistenceWarningMessage = "收藏保存失败：\(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func deleteHistoryRecord(id: UUID) {
+        let updatedHistory = historyStore.removing(id: id, from: history)
+        do {
+            try historyStore.saveOrThrow(updatedHistory)
+            history = updatedHistory
+            persistenceWarningMessage = nil
+        } catch {
+            persistenceWarningMessage = "翻译历史删除失败：\(error.localizedDescription)"
         }
     }
 

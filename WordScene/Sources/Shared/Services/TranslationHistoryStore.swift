@@ -71,6 +71,10 @@ struct TranslationHistoryStore: TranslationHistoryDataStore {
         let deduplicatedRecords = records.filter { !$0.hasSameTranslationContent(as: record) }
         return Array(([record] + deduplicatedRecords).prefix(maximumCount))
     }
+
+    func removing(id: UUID, from records: [TranslationRecord]) -> [TranslationRecord] {
+        records.filter { $0.id != id }
+    }
 }
 
 private struct TranslationHistoryDocument: Codable {
