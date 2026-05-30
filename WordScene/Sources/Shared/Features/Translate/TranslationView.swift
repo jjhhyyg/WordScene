@@ -12,6 +12,8 @@ struct TranslationView: View {
     @State private var inputText = ""
     @State private var translationState: TranslationState = .idle
     @State private var lastTranslatedRecord: TranslationRecord?
+    @State private var translationGeneration = 0
+    @State private var didCopyTranslation = false
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
     @State private var persistenceWarningMessage: String?
@@ -361,13 +363,14 @@ struct TranslationView: View {
 
                     if !inputText.isEmpty {
                         Button {
-                            inputText = ""
+                            clearTranslationDraft()
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
                         .accessibilityLabel("清空输入")
+                        .accessibilityIdentifier("translation.input.clear")
                     }
                 }
 
@@ -422,11 +425,31 @@ struct TranslationView: View {
                 Text("输入")
                     .font(.headline)
                 Spacer()
-                Text("\(inputText.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-                    .accessibilityLabel("输入字符数 \(inputText.count)")
+                if inputText.isEmpty {
+                    Text("\(inputText.count)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .accessibilityLabel("输入字符数 \(inputText.count)")
+                } else {
+                    HStack(spacing: 8) {
+                        Text("\(inputText.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                            .accessibilityLabel("输入字符数 \(inputText.count)")
+
+                        Button {
+                            clearTranslationDraft()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("清空输入和译文")
+                        .accessibilityIdentifier("translation.input.clear")
+                    }
+                }
             }
 
             PromptedTextEditor(
@@ -476,23 +499,6 @@ struct TranslationView: View {
             .disabled(!hasInput || translationState.isTranslating)
             .accessibilityLabel("开始翻译")
             .accessibilityIdentifier("translation.start")
-
-            Button {
-                inputText = ""
-                translationState = .idle
-                lastTranslatedRecord = nil
-            } label: {
-                Label("清空", systemImage: "xmark.circle")
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.86)
-                    .frame(width: style.secondaryWidth)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-            .disabled(!hasInput)
-            .opacity(hasInput ? 1 : 0)
-            .accessibilityHidden(!hasInput)
-            .accessibilityIdentifier("translation.clear")
         }
     }
 
@@ -567,6 +573,11 @@ struct TranslationView: View {
                             Text("译文")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            if didCopyTranslation {
+                                Label("已复制", systemImage: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            }
                             Spacer()
                             memoryTextButton(for: lastTranslatedRecord)
                         }
@@ -583,6 +594,12 @@ struct TranslationView: View {
                             .padding(.top, lastTranslatedRecord == nil ? 14 : 0)
                             .padding(.bottom, 14)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        copyTranslation(text)
+                    }
+                    .accessibilityLabel("译文，点击复制")
+                    .accessibilityIdentifier("translation.result.copyArea")
                 }
             case .failed(let message):
                 ContentUnavailableView(
@@ -816,12 +833,41 @@ struct TranslationView: View {
     }
 
     @MainActor
+    private func clearTranslationDraft() {
+        translationGeneration += 1
+        inputText = ""
+        translationState = .idle
+        lastTranslatedRecord = nil
+        didCopyTranslation = false
+    }
+
+    @MainActor
+    private func copyTranslation(_ text: String) {
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        #elseif os(iOS)
+        UIPasteboard.general.string = text
+        #endif
+
+        didCopyTranslation = true
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_600_000_000)
+            didCopyTranslation = false
+        }
+    }
+
+    @MainActor
     private func translateInput() async {
+        let currentGeneration = translationGeneration + 1
+
         do {
             if inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 return
             }
 
+            translationGeneration = currentGeneration
+            didCopyTranslation = false
             translationState = .translating
             lastTranslatedRecord = nil
             let normalizedDirection = currentLanguageDirection.normalized()
@@ -839,11 +885,18 @@ struct TranslationView: View {
                 currentHistory: history
             )
 
+            guard currentGeneration == translationGeneration else {
+                return
+            }
             lastTranslatedRecord = result.record
             translationState = .translated(result.translatedText)
             history = result.updatedHistory
             persistenceWarningMessage = result.persistenceWarningMessage
         } catch {
+            guard currentGeneration == translationGeneration,
+                  !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return
+            }
             translationState = .failed(translationErrorMessage(for: error))
         }
     }
@@ -1259,16 +1312,6 @@ private enum ActionControlStyle {
         }
     }
 
-    var secondaryWidth: CGFloat? {
-        switch self {
-        case .commandBar:
-            return 76
-        case .macCommandBar:
-            return 82
-        case .fullWidth:
-            return nil
-        }
-    }
 }
 
 private extension View {

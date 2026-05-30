@@ -40,6 +40,12 @@ final class WordSceneLaunchUITests: XCTestCase {
         inputEditor.typeText("hello")
 
         XCTAssertTrue(startButton.waitForEnabled(timeout: 4))
+        XCTAssertFalse(app.buttons["translation.clear"].firstMatch.exists)
+
+        let inputClearButton = app.buttons["translation.input.clear"].firstMatch
+        XCTAssertTrue(inputClearButton.waitForExistence(timeout: 4))
+        inputClearButton.tap()
+        XCTAssertTrue(startButton.waitForDisabled(timeout: 4))
     }
 
     func testTappingOutsideTranslationInputDismissesKeyboard() throws {
@@ -168,6 +174,12 @@ private extension XCUIElement {
 
     func waitForHittable(timeout: TimeInterval) -> Bool {
         let predicate = NSPredicate(format: "isHittable == true")
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
+    }
+
+    func waitForDisabled(timeout: TimeInterval) -> Bool {
+        let predicate = NSPredicate(format: "isEnabled == false")
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
         return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
     }
