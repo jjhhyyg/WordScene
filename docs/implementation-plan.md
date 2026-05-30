@@ -466,6 +466,9 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `1be31774b14a` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Extended `scripts/manual_smoke_environment_preflight.sh` to print executable smoke environment readiness for iOS/iPadOS device smoke, signed macOS smoke, cross-platform iCloud smoke, and local-only fallback smoke.
 - Reran `scripts/test_manual_smoke_environment_preflight.sh`; it covered both partial and all-ready executable environment states.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the executable smoke environment preflight update plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `1db324957ecb`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `7e5012b6b8a7` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
