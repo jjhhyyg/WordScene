@@ -286,4 +286,29 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(store.updatingItem(blankSource, in: [original]), [original])
         XCTAssertEqual(store.updatingItem(blankTranslation, in: [original]), [original])
     }
+
+    func testUpdatingItemLeavesUnchangedSnapshotUntouched() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let original = MemoryItem(
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "greeting",
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        let replacement = MemoryItem(
+            id: original.id,
+            sourceText: "  hello\n",
+            translatedText: "  你好 ",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: " greeting ",
+            createdAt: Date(timeIntervalSince1970: 30),
+            updatedAt: Date(timeIntervalSince1970: 40)
+        )
+
+        XCTAssertEqual(store.updatingItem(replacement, in: [original]), [original])
+    }
 }

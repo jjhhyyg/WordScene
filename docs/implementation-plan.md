@@ -37,7 +37,7 @@ Baseline already completed:
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
 - Library supports editing saved memory source text, translated text, language direction, and notes after creation.
 - Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
-- Local memory note edits avoid no-op timestamp churn, and unchanged replacement snapshots skip repository writes and local change notifications.
+- Local memory note edits and full-item edits avoid no-op timestamp churn, and unchanged replacement snapshots skip repository writes and local change notifications.
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Versioned local persistence rejects unsupported future schema versions without clearing the original local data.
@@ -559,6 +559,8 @@ Verification:
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchMemoryDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 8 search-index tests passed.
 - Added full saved-memory editing in Library, backed by `MemoryLibraryStore.updatingItem`, so saved source text, translated text, language direction, and note can be corrected without deleting and recreating the item.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -derivedDataPath /tmp/WordSceneMemoryEditGreen CODE_SIGNING_ALLOWED=NO`; the 14 memory-library store tests passed.
+- Tightened full saved-memory editing so unchanged snapshots after trimming do not touch `updatedAt` or trigger repository writes, avoiding needless CloudKit/local-change churn.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -derivedDataPath /tmp/WordSceneMemoryEditNoopGreen CODE_SIGNING_ALLOWED=NO`; the 15 memory-library store tests passed.
 
 Next:
 

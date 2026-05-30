@@ -138,6 +138,9 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
             updatedItem.sourceLanguage = replacement.sourceLanguage
             updatedItem.targetLanguage = replacement.targetLanguage
             updatedItem.note = replacement.note.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard updatedItem != item else {
+                return item
+            }
             updatedItem.updatedAt = Date()
             return updatedItem
         }
