@@ -71,6 +71,7 @@ Baseline already completed:
 - Manual smoke readiness can append a summary of READY/WAITING counts and grouped WAITING reasons for release triage.
 - Release next actions can be listed through `scripts/release_next_actions.sh` so signing recovery, READY manual smoke rows, and completion gating are visible without manually interpreting multiple scripts.
 - Manual smoke environment readiness can be checked through `scripts/manual_smoke_environment_preflight.sh`, separating evidence-eligible rows from physical-device availability before PASS rows are recorded.
+- iOS release candidates can be installed to an available physical iPhone or iPad through `scripts/install_ios_release_candidate.sh`, with a `--dry-run` mode for checking the exact `devicectl` command before device smoke.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
 - Final release completion evidence can be audited through `scripts/check_release_completion.sh`, including candidate Git commit metadata.
 - Release completion and manual smoke recording accept candidate evidence from an ancestor commit only when later commits are limited to release evidence/progress documentation.
@@ -423,11 +424,12 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it exercised the new preflight test and completed the non-manual readiness gate, including macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `311770acdcda`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `33294c9bcb83` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Added `scripts/install_ios_release_candidate.sh` plus regression coverage so the current iOS release candidate can be installed to an available physical iPhone/iPad through `devicectl` without hand-assembling the command.
 
 Next:
 
 - Restore a valid Xcode Apple Developer account session and Mac App Development provisioning profile for team `JU68L3U235`, then rerun `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`.
-- Run `scripts/manual_smoke_environment_preflight.sh`, then run the five evidence-READY smoke rows listed by `scripts/manual_smoke_readiness.sh --commands --summary` only on available target hardware; do not record PASS rows from simulator-only checks because the release checklist requires a signed candidate or the documented unsigned Mac fallback.
+- Run `scripts/manual_smoke_environment_preflight.sh`, install the iOS candidate with `scripts/install_ios_release_candidate.sh` when target hardware is available, then run the five evidence-READY smoke rows listed by `scripts/manual_smoke_readiness.sh --commands --summary` only on available target hardware; do not record PASS rows from simulator-only checks because the release checklist requires a signed candidate or the documented unsigned Mac fallback.
 - After macOS signing is restored, run the macOS translation/import-export/recovery rows and the iCloud create/delete sync rows from `docs/release-smoke-test.md`.
 - Run `scripts/check_release_completion.sh` only after all required manual rows and both signed candidate builds have exactly one PASS row and no BLOCKED/FAIL rows remain.
 - Keep local-only mode fully usable while sync is being prepared.

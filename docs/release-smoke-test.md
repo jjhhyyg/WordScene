@@ -49,6 +49,10 @@ and pass/fail notes for each run.
   and physical iPhone/iPad availability reported by `devicectl`. READY rows are
   only permission to run and record a row; they are not proof that the target
   device checklist has been executed.
+- When a target iPhone or iPad is available, install the current iOS candidate
+  with `scripts/install_ios_release_candidate.sh`. Add `--device <identifier>`
+  to target a specific device, or `--dry-run` to print the `devicectl` command
+  before installing.
 - Optionally run
   `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`
   before signed app smoke testing to verify and record the current DeepSeek
