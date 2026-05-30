@@ -526,6 +526,7 @@ Verification:
 - Tightened Settings local recovery so backup export and reset first check whether known legacy `UserDefaults` documents exist, then show a no-op notice instead of creating an empty backup or claiming a reset of zero documents.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/LocalPersistenceRecoveryControllerTests -derivedDataPath /tmp/WordSceneRecoveryCountMac CODE_SIGNING_ALLOWED=NO`; the 4 local recovery tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the local recovery no-op guidance change plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `599bf97bafe8`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 
 Next:
 
