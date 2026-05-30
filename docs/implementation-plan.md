@@ -483,6 +483,9 @@ Verification:
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `dd66356c997f` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 - Sanitized imported memory items so valid export documents cannot introduce blank source/translation rows or persistent leading/trailing whitespace into the library.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryImportExportServiceTests -only-testing:WordSceneMacTests/SettingsImportExportControllerTests -derivedDataPath /tmp/WordSceneImportSanitizeMac CODE_SIGNING_ALLOWED=NO`; the 11 import/export tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the import sanitization change plus macOS/iOS tests and unsigned Release compiles.
+- Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `89964d8a212d`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `b0358bc5d2b2` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
