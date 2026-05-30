@@ -521,6 +521,7 @@ Verification:
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/SettingsErrorMessageFactoryTests -derivedDataPath /tmp/WordSceneSettingsErrorsMac CODE_SIGNING_ALLOWED=NO`; the 3 Settings error-message tests passed.
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the Settings recovery-error guidance change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `fedd76525553`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
+- Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `acec154d94ba` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
 
 Next:
 
