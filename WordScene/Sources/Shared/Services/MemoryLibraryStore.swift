@@ -142,6 +142,6 @@ private struct MemoryMatchKey: Equatable {
     }
 
     private static func normalized(_ text: String) -> String {
-        text.trimmingCharacters(in: .whitespacesAndNewlines)
+        text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 }

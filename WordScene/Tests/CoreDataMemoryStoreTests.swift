@@ -87,6 +87,34 @@ final class CoreDataMemoryStoreTests: XCTestCase {
         XCTAssertEqual(try store.loadActiveItems(), [item])
     }
 
+    func testDuplicateKeyNormalizesCaseInsensitiveText() throws {
+        let store = try CoreDataMemoryStore(inMemory: true)
+        let first = MemoryItem(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+            sourceText: " Hello ",
+            translatedText: " Cat ",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 10)
+        )
+        let duplicate = MemoryItem(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+            sourceText: "hello",
+            translatedText: "cat",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            createdAt: Date(timeIntervalSince1970: 20),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+
+        try store.upsert(first)
+        try store.upsert(duplicate)
+
+        XCTAssertEqual(try store.loadActiveItems().count, 1)
+        XCTAssertEqual(try store.loadActiveItems().first?.id, duplicate.id)
+    }
+
     func testSoftDeleteHidesItemAndWritesTombstone() throws {
         let store = try CoreDataMemoryStore(inMemory: true)
         let id = UUID()

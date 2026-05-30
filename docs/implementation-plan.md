@@ -33,6 +33,7 @@ Baseline already completed:
 - Recent translation history deduplicates repeated translations by normalized source text, translated text, and language direction.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
+- Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
 - Versioned local persistence documents for memory library and recent history, with legacy array migration.
 - Local search across saved memory and recent history, including Chinese pinyin matching.
@@ -486,6 +487,8 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the import sanitization change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `89964d8a212d`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `b0358bc5d2b2` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Aligned local-memory duplicate detection with import/search behavior by making saved source/translation matching case-insensitive in both UserDefaults and Core Data paths.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -only-testing:WordSceneMacTests/CoreDataMemoryStoreTests -only-testing:WordSceneMacTests/MemoryLibraryRepositoryTests -derivedDataPath /tmp/WordSceneMemoryDedupeMac CODE_SIGNING_ALLOWED=NO`; the 23 memory-store tests passed.
 
 Next:
 

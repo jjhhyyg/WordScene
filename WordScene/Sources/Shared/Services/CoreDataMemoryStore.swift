@@ -175,7 +175,9 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
 
     func upsert(_ item: MemoryItem) throws {
         let context = container.viewContext
-        let object = try fetchTranslationItem(id: item.id, in: context) ?? Self.insertObject(
+        let object = try fetchTranslationItem(id: item.id, in: context) ??
+            fetchActiveTranslationItem(duplicateKey: Self.duplicateKey(for: item), in: context) ??
+            Self.insertObject(
             entityName: Self.translationItemEntityName,
             in: context
         )
@@ -279,6 +281,16 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
         return try context.fetch(request).first
     }
 
+    private func fetchActiveTranslationItem(
+        duplicateKey: String,
+        in context: NSManagedObjectContext
+    ) throws -> NSManagedObject? {
+        let request = NSFetchRequest<NSManagedObject>(entityName: Self.translationItemEntityName)
+        request.fetchLimit = 1
+        request.predicate = NSPredicate(format: "duplicateKey == %@ AND isDeleted == NO", duplicateKey)
+        return try context.fetch(request).first
+    }
+
     private func fetchTombstone(itemID: UUID, in context: NSManagedObjectContext) throws -> NSManagedObject? {
         let request = NSFetchRequest<NSManagedObject>(entityName: Self.tombstoneEntityName)
         request.fetchLimit = 1
@@ -346,7 +358,7 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
     }
 
     private static func normalized(_ text: String) -> String {
-        text.trimmingCharacters(in: .whitespacesAndNewlines)
+        text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     private static func storeDirectoryURL() throws -> URL {
