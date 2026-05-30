@@ -144,6 +144,43 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 
+    static func initializeCloudKitDevelopmentSchema(
+        containerIdentifier: String = productionCloudKitContainerIdentifier,
+        storeURL: URL? = nil,
+        dryRun: Bool = false,
+        printsSchema: Bool = false
+    ) throws {
+        let container = NSPersistentCloudKitContainer(
+            name: modelName,
+            managedObjectModel: makeModel()
+        )
+        let resolvedStoreURL = try storeURL ?? temporarySchemaStoreURL()
+        container.persistentStoreDescriptions = [
+            makeStoreDescription(
+                inMemory: false,
+                syncMode: .cloudKit(containerIdentifier: containerIdentifier),
+                storeURL: resolvedStoreURL
+            )
+        ]
+
+        var persistentStoreError: Error?
+        container.loadPersistentStores { _, error in
+            persistentStoreError = error
+        }
+        if let persistentStoreError {
+            throw persistentStoreError
+        }
+
+        var options: NSPersistentCloudKitContainerSchemaInitializationOptions = []
+        if dryRun {
+            options.insert(.dryRun)
+        }
+        if printsSchema {
+            options.insert(.printSchema)
+        }
+        try container.initializeCloudKitSchema(options: options)
+    }
+
     static func makeStoreDescription(
         inMemory: Bool,
         syncMode: CoreDataSyncMode,
@@ -184,6 +221,13 @@ struct CoreDataMemoryStore: CoreDataMemoryDataStore, CoreDataTranslationHistoryD
                 return "\(entity.name ?? "Unknown").\(attribute.name)"
             }
         }
+    }
+
+    private static func temporarySchemaStoreURL() throws -> URL {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("WordSceneCloudKitSchema-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory.appendingPathComponent("WordSceneSchema.sqlite")
     }
 
     func upsert(_ item: MemoryItem) throws {

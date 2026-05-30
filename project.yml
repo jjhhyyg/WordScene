@@ -13,6 +13,11 @@ settings:
     SWIFT_VERSION: 6.0
     CODE_SIGN_STYLE: Automatic
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+  configs:
+    Debug:
+      APS_ENVIRONMENT: development
+    Release:
+      APS_ENVIRONMENT: production
 targets:
   WordScene:
     type: application
@@ -24,8 +29,9 @@ targets:
     resources:
       - path: WordScene/Resources
     entitlements:
-      path: WordScene/WordScene.entitlements
+      path: WordScene/WordSceneiOS.entitlements
       properties:
+        aps-environment: $(APS_ENVIRONMENT)
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.erikssonhou.leximemory
         com.apple.developer.icloud-services:
@@ -54,8 +60,9 @@ targets:
     resources:
       - path: WordScene/Resources
     entitlements:
-      path: WordScene/WordScene.entitlements
+      path: WordScene/WordSceneMac.entitlements
       properties:
+        com.apple.developer.aps-environment: $(APS_ENVIRONMENT)
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.erikssonhou.leximemory
         com.apple.developer.icloud-services:

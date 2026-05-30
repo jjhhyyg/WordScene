@@ -15,6 +15,19 @@ and pass/fail notes for each run.
 - If macOS signing fails with missing Xcode account or Mac App Development
   profile errors, follow `docs/release-signing-runbook.md` before changing
   project settings.
+- Core Data with CloudKit needs the iCloud / CloudKit capability, Push
+  Notifications entitlement, and iOS Remote notifications background mode. The
+  release readiness checks verify the project-level settings, but the Apple
+  Developer App ID still needs Push Notifications enabled so regenerated
+  provisioning profiles include `aps-environment` on iOS and
+  `com.apple.developer.aps-environment` on macOS.
+- Before the first signed-device CloudKit smoke for a new or changed Core Data
+  model, initialize the CloudKit development schema with
+  `scripts/initialize_cloudkit_schema.sh`. Use `--platform ios --device <id>`
+  for a physical iPhone/iPad or run the default macOS path with a signed Mac
+  candidate environment. This is a development-environment step only; deploy the
+  schema to Production later from CloudKit Dashboard before TestFlight or App
+  Store distribution.
 - Run `scripts/verify_release_readiness.sh` before manual smoke testing. It
   covers script syntax, release evidence script tests, `git diff --check`, token
   leak scanning, privacy manifest validation, required-reason API scanning,

@@ -44,6 +44,7 @@ PRIVACY_MANIFEST
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-container-identifiers:0 string iCloud.com.erikssonhou.leximemory' "$ENTITLEMENTS"
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-services array' "$ENTITLEMENTS"
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-services:0 string CloudKit' "$ENTITLEMENTS"
+/usr/libexec/PlistBuddy -c 'Add :aps-environment string development' "$ENTITLEMENTS"
 
 OUTPUT="$("$ROOT/scripts/collect_release_candidate_evidence.sh" --platform ios --app "$APP" --entitlements "$ENTITLEMENTS")"
 CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
@@ -56,4 +57,5 @@ grep -qF '| Build | 1 |' <<<"$OUTPUT"
 grep -qF '| iPad orientations | UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight |' <<<"$OUTPUT"
 grep -qF '| CloudKit containers | iCloud.com.erikssonhou.leximemory |' <<<"$OUTPUT"
 grep -qF '| iCloud services | CloudKit |' <<<"$OUTPUT"
+grep -qF '| APS environment | development |' <<<"$OUTPUT"
 grep -qF '| Privacy manifest | UserDefaults: CA92.1 |' <<<"$OUTPUT"

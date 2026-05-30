@@ -71,6 +71,8 @@ run bash -n \
   scripts/test_install_ios_release_candidate.sh \
   scripts/manual_smoke_session_guide.sh \
   scripts/test_manual_smoke_session_guide.sh \
+  scripts/initialize_cloudkit_schema.sh \
+  scripts/test_initialize_cloudkit_schema.sh \
   scripts/check_release_completion.sh \
   scripts/test_check_release_completion.sh \
   scripts/test_privacy_manifest.sh \
@@ -90,6 +92,7 @@ run "$RELEASE_NEXT_ACTIONS_TEST_SCRIPT"
 run "$MANUAL_SMOKE_ENVIRONMENT_PREFLIGHT_TEST_SCRIPT"
 run "$INSTALL_IOS_RELEASE_CANDIDATE_TEST_SCRIPT"
 run "$MANUAL_SMOKE_SESSION_GUIDE_TEST_SCRIPT"
+run scripts/test_initialize_cloudkit_schema.sh
 run "$CHECK_RELEASE_COMPLETION_TEST_SCRIPT"
 run "$PRIVACY_MANIFEST_TEST_SCRIPT"
 run "$PRIVACY_SURFACE_TEST_SCRIPT"

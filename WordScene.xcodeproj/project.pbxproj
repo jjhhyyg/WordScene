@@ -104,7 +104,9 @@
 		EBB18BFE15879357DE3B3855 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
 		EBB64F51EEB42F7B3A935EA3 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
 		EF9C91796A1D3361577B3BD1 /* MemorySearchIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */; };
+		EFA165CBE0D22CEC640FB392 /* CloudKitSchemaInitializationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */; };
 		F294FCD453CF07E7643B19C8 /* PinyinTransliteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */; };
+		F48575D457E1FA25FEF9C74E /* CloudKitSchemaInitializationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */; };
 		F7673D2CAD402679A62E7E8E /* AppBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74C8385412454C45DC5ECE5B /* AppBuildInfo.swift */; };
 		F7A5C8B44172D6B4E104ED37 /* MemoryLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */; };
 		F8D301CB66598C87B2FE6BE4 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44533584DC00160FE0C4B52A /* LibraryView.swift */; };
@@ -143,6 +145,7 @@
 		1B8242AC1FDB1CDF361985E3 /* WordSceneMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WordSceneMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
 		22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMemoryStore.swift; sourceTree = "<group>"; };
+		264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaInitializationTests.swift; sourceTree = "<group>"; };
 		2B861A782D48915285586521 /* DeepSeekCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekCredential.swift; sourceTree = "<group>"; };
 		2D33B19133D47E17DF6859DA /* LocalPersistenceRecoveryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceRecoveryController.swift; sourceTree = "<group>"; };
 		33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekTranslationResponseTests.swift; sourceTree = "<group>"; };
@@ -333,6 +336,7 @@
 			children = (
 				69311892584D2F886271DE06 /* AppBuildInfoTests.swift */,
 				34E1AB2FCE2706C58FFA814B /* AppDataControllerTests.swift */,
+				264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */,
 				14A549AC5C802B87B3E2F4F7 /* CoreDataMemoryStoreTests.swift */,
 				D292D4CF8CBF1E54EC0932D9 /* DeepSeekBalanceResponseTests.swift */,
 				33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */,
@@ -554,6 +558,7 @@
 			files = (
 				C5C7FD729E47B60912B70165 /* AppBuildInfoTests.swift in Sources */,
 				E8387D3BEC5985278E5A4367 /* AppDataControllerTests.swift in Sources */,
+				F48575D457E1FA25FEF9C74E /* CloudKitSchemaInitializationTests.swift in Sources */,
 				11B2E89470900D5DEA1D7BAC /* CoreDataMemoryStoreTests.swift in Sources */,
 				063E7182FAD89E83C949B943 /* DeepSeekBalanceResponseTests.swift in Sources */,
 				0B302040AA11E344D195DAC1 /* DeepSeekTranslationResponseTests.swift in Sources */,
@@ -578,6 +583,7 @@
 			files = (
 				CEF28723147A8B231DAB70FB /* AppBuildInfoTests.swift in Sources */,
 				102D82AE369D4F041D4243DC /* AppDataControllerTests.swift in Sources */,
+				EFA165CBE0D22CEC640FB392 /* CloudKitSchemaInitializationTests.swift in Sources */,
 				C765D91811294F1FF8736585 /* CoreDataMemoryStoreTests.swift in Sources */,
 				CD66F6383CF9B9FEF278BC0E /* DeepSeekBalanceResponseTests.swift in Sources */,
 				2820F677E928FD959E601CC4 /* DeepSeekTranslationResponseTests.swift in Sources */,
@@ -743,7 +749,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WordScene/WordScene.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneiOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -811,6 +817,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -872,6 +879,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -940,7 +948,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WordScene/WordScene.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "词境";
@@ -961,7 +969,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WordScene/WordScene.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneiOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -989,7 +997,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WordScene/WordScene.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "词境";

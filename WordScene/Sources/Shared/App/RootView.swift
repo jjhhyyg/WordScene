@@ -130,10 +130,6 @@ private final class KeyboardOutsideTapDismissalView: UIView, UIGestureRecognizer
         }
     }
 
-    deinit {
-        installedWindow?.removeGestureRecognizer(tapRecognizer)
-    }
-
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         guard var touchedView = touch.view else {
             return true
