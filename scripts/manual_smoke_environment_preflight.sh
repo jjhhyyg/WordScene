@@ -102,6 +102,24 @@ print_environment_state() {
   fi
 }
 
+print_device_guidance() {
+  if [[ "$has_available_mobile" -eq 1 ]]; then
+    echo "- Physical iPhone/iPad detected as available; install the iOS candidate before recording device smoke."
+  elif [[ -n "$unavailable_mobile" ]]; then
+    echo "- A physical iPhone/iPad is visible but unavailable; unlock it, trust this Mac, confirm Developer Mode, and reconnect or re-pair it before smoke."
+  else
+    echo "- No physical iPhone/iPad is visible; connect or pair a real device. Simulator runs do not satisfy release smoke evidence."
+  fi
+
+  if [[ "$has_ios_candidate" -eq 0 ]]; then
+    echo "- iOS candidate app is missing; rerun scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all after release-critical changes."
+  fi
+
+  if [[ "$has_macos_candidate" -eq 0 ]]; then
+    echo "- Signed macOS candidate app is missing; restore the Xcode account/profile for team JU68L3U235 before macOS and iCloud smoke."
+  fi
+}
+
 readiness="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 ready_count="$(printf '%s\n' "$readiness" | sed -n 's/^Ready rows: //p' | tail -n 1)"
 waiting_count="$(printf '%s\n' "$readiness" | sed -n 's/^Waiting rows: //p' | tail -n 1)"
@@ -176,3 +194,6 @@ echo "- READY means release evidence allows recording that row; it is not proof 
 echo "- Do not record PASS for iPhone/iPad rows until the target physical device has actually run the checklist."
 echo "- Do not record macOS or iCloud PASS rows until a signed macOS candidate exists."
 echo "- Do not record the local-only fallback row until both the iOS candidate is installed on a physical device and the unsigned macOS Release app has actually run the checklist."
+echo
+echo "Next environment actions:"
+print_device_guidance

@@ -76,6 +76,7 @@ Baseline already completed:
 - Release next actions can be listed through `scripts/release_next_actions.sh` so signing recovery, READY manual smoke rows, and completion gating are visible without manually interpreting multiple scripts.
 - Release next actions include executable smoke environment readiness, so evidence-READY rows are not mistaken for runnable device or signed-candidate smoke.
 - Manual smoke environment readiness can be checked through `scripts/manual_smoke_environment_preflight.sh`, separating evidence-eligible rows from physical-device availability and executable smoke environments before PASS rows are recorded.
+- Manual smoke environment preflight prints concrete next actions for unavailable or missing physical iPhone/iPad devices and missing candidate artifacts.
 - iOS release candidates can be installed to an available physical iPhone or iPad through `scripts/install_ios_release_candidate.sh`, with a `--dry-run` mode for checking the exact `devicectl` command before device smoke.
 - Manual smoke sessions can be prepared through `scripts/manual_smoke_session_guide.sh`, which prints the current preflight, install command, checklist pointer, and scoped record-command templates without writing PASS evidence.
 - Real DeepSeek translation protocol can be smoke-tested and recorded without a signed app through `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`.
@@ -498,6 +499,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the unsupported local schema-version guard plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `ac6e911447b2`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `41acee0ccd61` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Clarified `scripts/manual_smoke_environment_preflight.sh` so unavailable or missing physical iPhone/iPad devices and missing candidate artifacts produce actionable next environment steps.
+- Reran `scripts/test_manual_smoke_environment_preflight.sh`; it covered available, unavailable, and missing physical-device guidance.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the manual-smoke preflight guidance update plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 
