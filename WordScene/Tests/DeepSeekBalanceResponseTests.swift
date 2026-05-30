@@ -48,7 +48,7 @@ final class DeepSeekBalanceResponseTests: XCTestCase {
         let client = DeepSeekBalanceClient(session: session)
 
         do {
-            _ = try await client.fetchBalance(apiToken: "test-token")
+            _ = try await client.fetchBalance(apiToken: "  test-token\n")
             XCTFail("Expected unavailable balance to reject token validation.")
         } catch {
             XCTAssertEqual(error as? DeepSeekBalanceError, .unavailableBalance)

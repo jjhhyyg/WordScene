@@ -146,11 +146,12 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         guard !trimmedText.isEmpty else {
             throw DeepSeekTranslationError.emptyInput
         }
+        let token = credential.apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let endpoint = baseURL.appending(path: "chat/completions")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(credential.apiToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONEncoder().encode(

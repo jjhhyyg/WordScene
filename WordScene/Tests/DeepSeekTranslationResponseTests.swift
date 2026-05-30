@@ -66,7 +66,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
 
         let result = try await provider.translate(
             TranslationProviderRequest(text: "He said \"hello\"", source: .en, target: .zh),
-            credential: TranslationProviderCredential(apiToken: "test-token")
+            credential: TranslationProviderCredential(apiToken: "  test-token\n")
         )
 
         let capturedRequestValue = requestCapture.recordedRequest()

@@ -37,10 +37,11 @@ struct DeepSeekBalanceClient {
     }
 
     func fetchBalance(apiToken: String) async throws -> DeepSeekBalanceResponse {
+        let token = apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
         let endpoint = baseURL.appending(path: "user/balance")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         let (data, response) = try await session.data(for: request)

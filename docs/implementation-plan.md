@@ -79,7 +79,7 @@ Baseline already completed:
 - Release completion and manual smoke recording reject candidate evidence after product, project, script, checklist, or other release-critical changes.
 - Manual smoke readiness now applies candidate and DeepSeek live-smoke freshness checks before printing READY rows or recording command templates.
 - Translation execution is now covered by a testable workflow object that verifies token lookup, provider invocation, recent-history persistence, missing-token failure, and non-blocking history-save warnings.
-- Translation execution trims stored DeepSeek tokens before invoking the provider, so pasted or migrated tokens with surrounding whitespace still authenticate correctly.
+- Translation execution and DeepSeek connectivity checks trim stored DeepSeek tokens before invoking the provider, so pasted or migrated tokens with surrounding whitespace still authenticate correctly.
 - UI tests now launch with an isolated in-memory data stack and per-run `UserDefaults` suite, so existing simulator or developer app data cannot make initial Library/Search/Settings assertions flaky.
 
 Known gaps:
@@ -459,6 +459,9 @@ Verification:
 - Reran `scripts/test_verify_release_readiness.sh`; it covered the token-trim workflow change plus macOS/iOS tests and unsigned Release compiles.
 - Reran `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`; iOS candidate evidence now points at commit `d710ed8d47ed`, while macOS remains blocked by the missing Xcode account session and Mac App Development provisioning profile.
 - Reran `scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evidence.md`; live API smoke evidence now points at commit `be7a32684093` and the real DeepSeek JSON Output path returned `你好世界` without printing the token.
+- Trimmed DeepSeek tokens defensively inside the balance client and OpenAI-compatible translation adapter so lower-level service calls match the Settings and workflow behavior.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/DeepSeekBalanceResponseTests -only-testing:WordSceneMacTests/DeepSeekTranslationResponseTests -derivedDataPath /tmp/WordSceneDeepSeekTrimMac CODE_SIGNING_ALLOWED=NO`; the 11 DeepSeek service tests passed.
+- Reran `scripts/test_verify_release_readiness.sh`; it covered the service-token trim change plus macOS/iOS tests and unsigned Release compiles.
 
 Next:
 
