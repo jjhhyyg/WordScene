@@ -229,4 +229,61 @@ final class MemoryLibraryStoreTests: XCTestCase {
 
         XCTAssertEqual(updatedItems, [item])
     }
+
+    func testUpdatingItemTrimsFieldsPreservesCreatedAtAndTouchesUpdatedAt() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let id = UUID()
+        let original = MemoryItem(
+            id: id,
+            sourceText: "hello",
+            translatedText: "你好",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: "old",
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+        let replacement = MemoryItem(
+            id: id,
+            sourceText: "  good morning ",
+            translatedText: "  早上好\n",
+            sourceLanguage: .en,
+            targetLanguage: .zh,
+            note: " updated ",
+            createdAt: Date(timeIntervalSince1970: 100),
+            updatedAt: Date(timeIntervalSince1970: 200)
+        )
+
+        let updatedItems = store.updatingItem(replacement, in: [original])
+
+        XCTAssertEqual(updatedItems.first?.id, id)
+        XCTAssertEqual(updatedItems.first?.sourceText, "good morning")
+        XCTAssertEqual(updatedItems.first?.translatedText, "早上好")
+        XCTAssertEqual(updatedItems.first?.note, "updated")
+        XCTAssertEqual(updatedItems.first?.createdAt, original.createdAt)
+        XCTAssertGreaterThan(updatedItems.first?.updatedAt ?? original.updatedAt, original.updatedAt)
+    }
+
+    func testUpdatingItemRejectsBlankSourceOrTranslation() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let original = MemoryItem(sourceText: "hello", translatedText: "你好", sourceLanguage: .en, targetLanguage: .zh)
+
+        let blankSource = MemoryItem(
+            id: original.id,
+            sourceText: " ",
+            translatedText: "updated",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+        let blankTranslation = MemoryItem(
+            id: original.id,
+            sourceText: "updated",
+            translatedText: "\n",
+            sourceLanguage: .en,
+            targetLanguage: .zh
+        )
+
+        XCTAssertEqual(store.updatingItem(blankSource, in: [original]), [original])
+        XCTAssertEqual(store.updatingItem(blankTranslation, in: [original]), [original])
+    }
 }

@@ -5,6 +5,7 @@ struct LibraryView: View {
     @State private var hasLoaded = false
     @State private var persistenceErrorMessage: String?
     @State private var isShowingManualAdd = false
+    @State private var editingItem: MemoryItem?
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -69,6 +70,9 @@ struct LibraryView: View {
                                     onSaveNote: { note in
                                         saveNote(for: item.id, note: note)
                                     },
+                                    onEdit: {
+                                        editingItem = item
+                                    },
                                     onDelete: {
                                         deleteItem(id: item.id)
                                     }
@@ -95,8 +99,17 @@ struct LibraryView: View {
             .disabled(!canAddManualItem)
         }
         .sheet(isPresented: $isShowingManualAdd) {
-            ManualMemoryItemSheet { draft in
+            MemoryItemEditorSheet(title: "手动新增") { draft in
                 addManualItem(draft)
+            }
+        }
+        .sheet(item: $editingItem) { item in
+            MemoryItemEditorSheet(
+                title: "编辑收藏",
+                initialDraft: ManualMemoryItemDraft(item: item),
+                allowsAutoSource: true
+            ) { draft in
+                updateItem(id: item.id, draft: draft)
             }
         }
         .onAppear {
@@ -168,6 +181,37 @@ struct LibraryView: View {
         }
     }
 
+    private func updateItem(id: UUID, draft: ManualMemoryItemDraft) -> Bool {
+        guard let original = items.first(where: { $0.id == id }) else {
+            return false
+        }
+
+        let replacement = MemoryItem(
+            id: id,
+            sourceText: draft.sourceText,
+            translatedText: draft.translatedText,
+            sourceLanguage: draft.sourceLanguage,
+            targetLanguage: draft.targetLanguage,
+            note: draft.note,
+            createdAt: original.createdAt,
+            updatedAt: original.updatedAt
+        )
+        let updatedItems = store.updatingItem(replacement, in: items)
+        guard updatedItems != items else {
+            return false
+        }
+
+        do {
+            try store.saveOrThrow(updatedItems)
+            items = updatedItems
+            persistenceErrorMessage = nil
+            return true
+        } catch {
+            persistenceErrorMessage = "收藏更新失败：\(error.localizedDescription)"
+            return false
+        }
+    }
+
     private func addManualItem(_ draft: ManualMemoryItemDraft) -> Bool {
         let now = Date()
         let item = MemoryItem(
@@ -203,24 +247,48 @@ private struct ManualMemoryItemDraft {
     var targetLanguage: LanguageSelection = .zh
     var note = ""
 
+    init() {}
+
+    init(item: MemoryItem) {
+        sourceText = item.sourceText
+        translatedText = item.translatedText
+        sourceLanguage = item.sourceLanguage
+        targetLanguage = item.targetLanguage
+        note = item.note
+    }
+
     var canSave: Bool {
         !sourceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !translatedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
 
-private struct ManualMemoryItemSheet: View {
+private struct MemoryItemEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft = ManualMemoryItemDraft()
 
+    let title: String
+    let allowsAutoSource: Bool
     let onSave: (ManualMemoryItemDraft) -> Bool
+
+    init(
+        title: String,
+        initialDraft: ManualMemoryItemDraft = ManualMemoryItemDraft(),
+        allowsAutoSource: Bool = false,
+        onSave: @escaping (ManualMemoryItemDraft) -> Bool
+    ) {
+        self.title = title
+        self.allowsAutoSource = allowsAutoSource
+        self.onSave = onSave
+        self._draft = State(initialValue: initialDraft)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("语言") {
                     Picker("源语言", selection: $draft.sourceLanguage) {
-                        ForEach(concreteLanguageOptions) { language in
+                        ForEach(sourceLanguageOptions) { language in
                             Text(language.title).tag(language)
                         }
                     }
@@ -248,7 +316,7 @@ private struct ManualMemoryItemSheet: View {
                     TextField("可选", text: $draft.note)
                 }
             }
-            .navigationTitle("手动新增")
+            .navigationTitle(title)
             #if os(macOS)
             .frame(minWidth: 420, minHeight: 520)
             #endif
@@ -277,14 +345,15 @@ private struct ManualMemoryItemSheet: View {
         }
     }
 
-    private var concreteLanguageOptions: [LanguageSelection] {
-        LanguageSelection.sourceOptions.filter { $0 != .auto }
+    private var sourceLanguageOptions: [LanguageSelection] {
+        allowsAutoSource ? LanguageSelection.sourceOptions : LanguageSelection.sourceOptions.filter { $0 != .auto }
     }
 }
 
 private struct MemoryItemRow: View {
     let item: MemoryItem
     let onSaveNote: (String) -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     @State private var noteDraft: String
@@ -292,10 +361,12 @@ private struct MemoryItemRow: View {
     init(
         item: MemoryItem,
         onSaveNote: @escaping (String) -> Void,
+        onEdit: @escaping () -> Void,
         onDelete: @escaping () -> Void
     ) {
         self.item = item
         self.onSaveNote = onSaveNote
+        self.onEdit = onEdit
         self.onDelete = onDelete
         self._noteDraft = State(initialValue: item.note)
     }
@@ -313,6 +384,15 @@ private struct MemoryItemRow: View {
                 Text(item.updatedAt, style: .date)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                Button {
+                    onEdit()
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+                .accessibilityLabel("编辑收藏")
 
                 Button(role: .destructive) {
                     onDelete()

@@ -119,6 +119,29 @@ struct MemoryLibraryStore: MemoryLibraryDataStore {
             return updatedItem
         }
     }
+
+    func updatingItem(_ replacement: MemoryItem, in items: [MemoryItem]) -> [MemoryItem] {
+        let trimmedSource = replacement.sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedTranslation = replacement.translatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSource.isEmpty, !trimmedTranslation.isEmpty else {
+            return items
+        }
+
+        return items.map { item in
+            guard item.id == replacement.id else {
+                return item
+            }
+
+            var updatedItem = item
+            updatedItem.sourceText = trimmedSource
+            updatedItem.translatedText = trimmedTranslation
+            updatedItem.sourceLanguage = replacement.sourceLanguage
+            updatedItem.targetLanguage = replacement.targetLanguage
+            updatedItem.note = replacement.note.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedItem.updatedAt = Date()
+            return updatedItem
+        }
+    }
 }
 
 private struct MemoryLibraryDocument: Codable {

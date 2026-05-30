@@ -100,6 +100,10 @@ struct MemoryLibraryRepository: MemoryLibraryDataStore {
         legacyStore.updatingNote(for: id, note: note, in: items)
     }
 
+    func updatingItem(_ replacement: MemoryItem, in items: [MemoryItem]) -> [MemoryItem] {
+        legacyStore.updatingItem(replacement, in: items)
+    }
+
     private func migrateLegacyItemsIfNeeded(into coreDataStore: any CoreDataMemoryDataStore) throws {
         let legacyItems = try legacyStore.loadOrThrow()
         guard !legacyItems.isEmpty else {

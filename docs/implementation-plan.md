@@ -35,6 +35,7 @@ Baseline already completed:
 - Recent translation history can be removed from the Translate view without deleting saved memory items.
 - Local memory library backed by `UserDefaults`, with favorite/unfavorite, delete, and note editing.
 - Library supports manual local memory entry so users can add source/translation pairs without a network translation request.
+- Library supports editing saved memory source text, translated text, language direction, and notes after creation.
 - Local memory deduplicates saved source/translation pairs case-insensitively across UserDefaults and Core Data storage paths.
 - Local memory note edits avoid no-op timestamp churn, and unchanged replacement snapshots skip repository writes and local change notifications.
 - Import sanitizes incoming memory items by trimming text fields and skipping blank source or translation rows before they can reach the local library.
@@ -556,6 +557,8 @@ Verification:
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchSaveGreen CODE_SIGNING_ALLOWED=NO`; the 7 search-index tests passed.
 - Added a Search-result saved-memory delete action backed by `MemorySearchResult.memoryItem`, so users can remove a matched memory item directly from Search.
 - Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemorySearchIndexTests -derivedDataPath /tmp/WordSceneSearchMemoryDeleteGreen CODE_SIGNING_ALLOWED=NO`; the 8 search-index tests passed.
+- Added full saved-memory editing in Library, backed by `MemoryLibraryStore.updatingItem`, so saved source text, translated text, language direction, and note can be corrected without deleting and recreating the item.
+- Reran `xcodebuild test -project WordScene.xcodeproj -scheme WordSceneMac -destination 'platform=macOS' -only-testing:WordSceneMacTests/MemoryLibraryStoreTests -derivedDataPath /tmp/WordSceneMemoryEditGreen CODE_SIGNING_ALLOWED=NO`; the 14 memory-library store tests passed.
 
 Next:
 
