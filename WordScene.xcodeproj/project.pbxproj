@@ -537,6 +537,7 @@
 					9440FE1B7D3D80400DD69B76 = {
 						DevelopmentTeam = JU68L3U235;
 						ProvisioningStyle = Automatic;
+						TestTargetID = 5014EC536FD1F8A94C35187B;
 					};
 				};
 			};
@@ -816,7 +817,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.erikssonhou.leximemory.mactests;
 				PRODUCT_MODULE_NAME = WordSceneMacTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Contents/MacOS/Word Scene";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Word Scene.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Word Scene";
 			};
 			name = Release;
 		};
@@ -835,7 +836,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.erikssonhou.leximemory.mactests;
 				PRODUCT_MODULE_NAME = WordSceneMacTests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Contents/MacOS/Word Scene";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Word Scene.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Word Scene";
 			};
 			name = Debug;
 		};
@@ -845,7 +846,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneiOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WordScene/Generated/WordSceneInfo.plist;
@@ -1047,7 +1048,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
@@ -1069,7 +1070,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneiOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WordScene/Generated/WordSceneInfo.plist;
@@ -1098,7 +1099,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WordScene/WordSceneMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "译笺";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";

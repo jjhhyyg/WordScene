@@ -1,16 +1,11 @@
 import XCTest
 
+@MainActor
 final class WordSceneLaunchUITests: XCTestCase {
     private var app: XCUIApplication!
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-
-        launchApp()
-    }
-
-    override func tearDownWithError() throws {
-        app = nil
     }
 
     private func launchApp(seed: String? = nil, language: String? = "zh-Hans", locale: String? = "zh_CN") {
@@ -30,6 +25,8 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testTranslateScreenInitialStateAndInputReadiness() throws {
+        launchApp()
+
         let inputEditor = app.textViews["translation.input.editor"].firstMatch
         XCTAssertTrue(inputEditor.waitForExistence(timeout: 12))
 
@@ -55,6 +52,8 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testTappingOutsideTranslationInputDismissesKeyboard() throws {
+        launchApp()
+
         let inputEditor = app.textViews["translation.input.editor"].firstMatch
         XCTAssertTrue(inputEditor.waitForExistence(timeout: 12))
 
@@ -71,7 +70,6 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testExistingLibraryNoteRequiresEditBeforeSavingChanges() throws {
-        app.terminate()
         launchApp(seed: "library-search-fixture")
 
         openTab("收藏")
@@ -87,6 +85,8 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testLanguageControlsEnableSwapOnlyForConcreteSource() throws {
+        launchApp()
+
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
 
         let swapButton = app.buttons["translation.swapDirection"].firstMatch
@@ -103,6 +103,8 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testPrimaryTabsReachExpectedInitialSurfaces() throws {
+        launchApp()
+
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
 
         openTab("收藏")
@@ -134,7 +136,7 @@ final class WordSceneLaunchUITests: XCTestCase {
 
     func testSupportedLanguageLocalizationSmoke() throws {
         for language in supportedLanguageSmokeCases {
-            app.terminate()
+            app?.terminate()
             launchApp(language: language.code, locale: language.locale)
 
             XCTAssertTrue(
@@ -167,7 +169,6 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testSeededLibraryAndSearchContentRender() throws {
-        app.terminate()
         launchApp(seed: "library-search-fixture")
 
         openTab("收藏")
@@ -200,7 +201,6 @@ final class WordSceneLaunchUITests: XCTestCase {
     }
 
     func testSeededLibraryAndHistoryRowsScrollVertically() throws {
-        app.terminate()
         launchApp(seed: "scroll-swipe-fixture")
 
         openTab("收藏")
