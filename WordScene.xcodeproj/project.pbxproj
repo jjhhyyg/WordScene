@@ -33,6 +33,7 @@
 		2BB75C7F3580296B3F664533 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */; };
 		3417254A726A1308C0B0DD66 /* WordSceneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */; };
 		3592CEE5F9506FF06612E915 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BAF2CB4697677551219CBB /* RootView.swift */; };
+		3816E6F7FCC71CC7F37D29ED /* WordSceneLogo-v2.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B2DC5A718FE010D5BC2EFFF /* WordSceneLogo-v2.png */; };
 		39C00451F4E5C6C7CB6C1CCF /* MemoryImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */; };
 		3B8CE754475ECBFAFF85413B /* LanguageDirectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9620FC5598FBD6CA7CB9106B /* LanguageDirectionTests.swift */; };
 		3C1DEF743818571127CE27FB /* MemoryImportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */; };
@@ -66,6 +67,7 @@
 		7AB1A9BC5FAC51F0C6A22E06 /* MemoryLibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD8C4290705F81BA86674BC /* MemoryLibraryStoreTests.swift */; };
 		7AEBF304A5DF92C4DC087CF7 /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */; };
 		7FFE125CA283C5951E815B72 /* LocalPersistenceRecoveryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F61FD2185A224582098C586 /* LocalPersistenceRecoveryControllerTests.swift */; };
+		8278CBA84B1B4B24B0D6980D /* WordSceneAppIcon-previous-20260531.png in Resources */ = {isa = PBXBuildFile; fileRef = 23BB63E93A04781665D632E2 /* WordSceneAppIcon-previous-20260531.png */; };
 		832EEB97AC7EE88AB5CD7247 /* LocalPersistenceStoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */; };
 		882949E983224EB9D2AF5600 /* WordSceneLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */; };
 		91566169B9D98817B5F67F57 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0810899951479D6FBD559709 /* SearchView.swift */; };
@@ -77,6 +79,7 @@
 		99789BE74D4F9380AE1099C6 /* PinyinTransliteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359F37B0DAF58C519EBB15FB /* PinyinTransliteratorTests.swift */; };
 		9D8C15C3A824CE20FBC6D246 /* MemoryItemCodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6E568C7D086F4FEED01E80 /* MemoryItemCodingTests.swift */; };
 		9F26440D8AF5ACF3CDC08D1C /* WordSceneLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */; };
+		A0034B44AA4CA6ED09ABFE1C /* WordSceneAppIcon-previous-20260531.png in Resources */ = {isa = PBXBuildFile; fileRef = 23BB63E93A04781665D632E2 /* WordSceneAppIcon-previous-20260531.png */; };
 		A1FF6F8390ABACCCFC42D618 /* MemoryLibraryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */; };
 		A3763EB90C333BAE13DD6151 /* MemoryImportExportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */; };
 		A4A5D25B054C3C52CF254C35 /* TranslationHistoryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */; };
@@ -108,6 +111,7 @@
 		E52F57F2A8F6D00761F689F6 /* AppDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00EA37578F51C218C5DBC3 /* AppDataController.swift */; };
 		E5B7353A38053A7132DC2B4E /* SettingsImportExportController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */; };
 		E5E0E767AB87050F9F6D44CF /* KeychainCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */; };
+		E76DDD0A8FFBDF3F10687C15 /* WordSceneLogo-v2.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B2DC5A718FE010D5BC2EFFF /* WordSceneLogo-v2.png */; };
 		E8387D3BEC5985278E5A4367 /* AppDataControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E1AB2FCE2706C58FFA814B /* AppDataControllerTests.swift */; };
 		EBB18BFE15879357DE3B3855 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
 		EBB64F51EEB42F7B3A935EA3 /* TranslationWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */; };
@@ -153,6 +157,7 @@
 		1B8242AC1FDB1CDF361985E3 /* WordSceneMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WordSceneMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
 		22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMemoryStore.swift; sourceTree = "<group>"; };
+		23BB63E93A04781665D632E2 /* WordSceneAppIcon-previous-20260531.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "WordSceneAppIcon-previous-20260531.png"; sourceTree = "<group>"; };
 		264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaInitializationTests.swift; sourceTree = "<group>"; };
 		2B861A782D48915285586521 /* DeepSeekCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekCredential.swift; sourceTree = "<group>"; };
 		2D33B19133D47E17DF6859DA /* LocalPersistenceRecoveryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceRecoveryController.swift; sourceTree = "<group>"; };
@@ -170,6 +175,7 @@
 		4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageDirection.swift; sourceTree = "<group>"; };
 		52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceStoreError.swift; sourceTree = "<group>"; };
 		5885FF66CE79D54FE26076E7 /* AppLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocalizationTests.swift; sourceTree = "<group>"; };
+		5B2DC5A718FE010D5BC2EFFF /* WordSceneLogo-v2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "WordSceneLogo-v2.png"; sourceTree = "<group>"; };
 		61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRawAPIResponseRecorder.swift; sourceTree = "<group>"; };
 		62E99C711EE951EFB367F4B5 /* WordSceneMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WordSceneMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		65F9A00F99984FA6130BBBB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
@@ -265,6 +271,14 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		452502AC159CFE0F7A6656A9 /* Archive */ = {
+			isa = PBXGroup;
+			children = (
+				23BB63E93A04781665D632E2 /* WordSceneAppIcon-previous-20260531.png */,
+			);
+			path = Archive;
+			sourceTree = "<group>";
+		};
 		47E9AE0DA9C67CC3E766FF29 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -331,7 +345,9 @@
 		AE08FE29942FCE024F26EBBA /* Brand */ = {
 			isa = PBXGroup;
 			children = (
+				5B2DC5A718FE010D5BC2EFFF /* WordSceneLogo-v2.png */,
 				E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */,
+				452502AC159CFE0F7A6656A9 /* Archive */,
 			);
 			path = Brand;
 			sourceTree = "<group>";
@@ -425,6 +441,7 @@
 			buildPhases = (
 				D235C0EB861FEE3E9FFFF6BE /* Sources */,
 				FC822117C1C2534DB6FB8358 /* Resources */,
+				047824433F73B151C8AA1429 /* Generate complete macOS AppIcon.icns */,
 			);
 			buildRules = (
 			);
@@ -557,6 +574,8 @@
 				601E8031A2DC6926A6F56777 /* InfoPlist.strings in Resources */,
 				5B7C76985F8F39C9C3F15CB0 /* Localizable.xcstrings in Resources */,
 				2BB75C7F3580296B3F664533 /* PrivacyInfo.xcprivacy in Resources */,
+				8278CBA84B1B4B24B0D6980D /* WordSceneAppIcon-previous-20260531.png in Resources */,
+				3816E6F7FCC71CC7F37D29ED /* WordSceneLogo-v2.png in Resources */,
 				9F26440D8AF5ACF3CDC08D1C /* WordSceneLogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -569,11 +588,45 @@
 				7923D8806E42E96FBC91A61F /* InfoPlist.strings in Resources */,
 				6FD85F1B603FFBCABE71A6B9 /* Localizable.xcstrings in Resources */,
 				BC504BA40DF313394019842F /* PrivacyInfo.xcprivacy in Resources */,
+				A0034B44AA4CA6ED09ABFE1C /* WordSceneAppIcon-previous-20260531.png in Resources */,
+				E76DDD0A8FFBDF3F10687C15 /* WordSceneLogo-v2.png in Resources */,
 				882949E983224EB9D2AF5600 /* WordSceneLogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		047824433F73B151C8AA1429 /* Generate complete macOS AppIcon.icns */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac@2x.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-32-mac.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-32-mac@2x.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-128-mac.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-128-mac@2x.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-256-mac.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-256-mac@2x.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-512-mac.png",
+				"$(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-1024.png",
+			);
+			name = "Generate complete macOS AppIcon.icns";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/AppIcon.icns",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = scripts/generate_macos_app_icon.sh;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		27FCCA2B24ECF48C5235F7D6 /* Sources */ = {

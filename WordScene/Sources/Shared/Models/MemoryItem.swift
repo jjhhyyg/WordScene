@@ -37,7 +37,7 @@ struct MemoryItem: Identifiable, Codable, Equatable {
         self.init(
             sourceText: record.sourceText.trimmingCharacters(in: .whitespacesAndNewlines),
             translatedText: record.translatedText.trimmingCharacters(in: .whitespacesAndNewlines),
-            sourceLanguage: record.sourceLanguage,
+            sourceLanguage: record.resolvedSourceLanguage,
             targetLanguage: record.targetLanguage,
             note: note,
             createdAt: createdAt,
@@ -68,5 +68,23 @@ struct MemoryItem: Identifiable, Codable, Equatable {
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         self.isStarred = try container.decodeIfPresent(Bool.self, forKey: .isStarred) ?? false
+    }
+}
+
+extension MemoryItem {
+    var displaySourceLanguage: LanguageSelection {
+        guard sourceLanguage == .auto else {
+            return sourceLanguage
+        }
+        return TranslationLanguageDetector.detect(sourceText) ?? sourceLanguage
+    }
+}
+
+extension TranslationRecord {
+    var resolvedSourceLanguage: LanguageSelection {
+        guard sourceLanguage == .auto else {
+            return sourceLanguage
+        }
+        return TranslationLanguageDetector.detect(sourceText) ?? sourceLanguage
     }
 }

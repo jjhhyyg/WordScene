@@ -81,6 +81,22 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: 译笺
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         GENERATE_INFOPLIST_FILE: YES
+    postBuildScripts:
+      - name: Generate complete macOS AppIcon.icns
+        script: scripts/generate_macos_app_icon.sh
+        inputFiles:
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac@2x.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-32-mac.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-32-mac@2x.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-128-mac.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-128-mac@2x.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-256-mac.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-256-mac@2x.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-512-mac.png
+          - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-1024.png
+        outputFiles:
+          - $(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/AppIcon.icns
   WordSceneTests:
     type: bundle.unit-test
     platform: iOS

@@ -501,7 +501,11 @@ struct LibraryView: View {
             Button {
                 isShowingManualAdd = true
             } label: {
-                Label(String(localized: "手动新增", comment: "Button title for manually adding a saved memory item."), systemImage: "plus")
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                        .font(.body.weight(.semibold))
+                    Text(String(localized: "手动新增", comment: "Button title for manually adding a saved memory item."))
+                }
             }
             .buttonStyle(.borderedProminent)
             .disabled(!canAddManualItem)
@@ -936,7 +940,7 @@ private struct MemoryItemRow: View {
 
     private var languageDirectionText: String {
         let format = String(localized: "%@ 到 %@", comment: "Language direction label. The placeholders are source language and target language.")
-        return String(format: format, item.sourceLanguage.title, item.targetLanguage.title)
+        return String(format: format, item.displaySourceLanguage.title, item.targetLanguage.title)
     }
 
     private var panelBackground: Color {

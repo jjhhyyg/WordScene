@@ -65,11 +65,14 @@ struct TranslationWorkflow {
             target: target,
             apiToken: token
         )
+        let resolvedSource = source == .auto
+            ? TranslationLanguageDetector.detect(trimmedInput) ?? source
+            : source
 
         return persistResult(
             translatedText: translatedText,
             sourceText: trimmedInput,
-            resolvedSource: source,
+            resolvedSource: resolvedSource,
             target: target,
             currentHistory: currentHistory
         )
@@ -110,7 +113,7 @@ struct TranslationWorkflow {
     }
 }
 
-private enum TranslationLanguageDetector {
+enum TranslationLanguageDetector {
     private static let minimumConfidence = 0.35
 
     static func detect(_ text: String) -> LanguageSelection? {
@@ -130,6 +133,10 @@ private enum TranslationLanguageDetector {
 
         if normalizedText.range(of: #"[ñáéíóúü¿¡]"#, options: .regularExpression) != nil {
             return .es
+        }
+
+        if normalizedText.range(of: #"[a-z]"#, options: .regularExpression) != nil {
+            return .en
         }
 
         return nil

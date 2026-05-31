@@ -8,9 +8,6 @@ import UIKit
 #endif
 
 struct SettingsView: View {
-    #if DEBUG
-    @AppStorage(DebugRawAPIResponseSettings.isEnabledKey) private var storesRawAPIResponses = false
-    #endif
     @AppStorage(CloudKitSyncPreference.isEnabledKey) private var isCloudKitSyncRequested = false
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
@@ -28,6 +25,7 @@ struct SettingsView: View {
     @State private var recoveryBackupFileName = "wordscene-local-backup.json"
     @State private var isExportingRecoveryBackup = false
     @State private var isConfirmingLegacyReset = false
+    @State private var isConfirmingDeepSeekTokenDeletion = false
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
 
@@ -39,7 +37,6 @@ struct SettingsView: View {
     private var recoveryController: LocalPersistenceRecoveryController {
         dataController.localDocumentRecovery
     }
-    private let appBuildInfo = AppBuildInfo.current()
 
     var body: some View {
         Group {
@@ -79,6 +76,17 @@ struct SettingsView: View {
             }
         }
         #endif
+        .alert(
+            String(localized: "删除 DeepSeek Token？", comment: "Alert title before deleting the saved DeepSeek token."),
+            isPresented: $isConfirmingDeepSeekTokenDeletion
+        ) {
+            Button(String(localized: "取消", comment: "Cancel button title."), role: .cancel) {}
+            Button(String(localized: "删除", comment: "Delete action title."), role: .destructive) {
+                confirmDeepSeekTokenDeletion()
+            }
+        } message: {
+            Text(String(localized: "删除后这台设备上的翻译 Token 会被移除，之后需要重新保存 Token 才能继续翻译。", comment: "Alert message before deleting the saved DeepSeek token."))
+        }
         .confirmationDialog(
             String(localized: "重置旧缓存？", comment: "Confirmation title before resetting legacy local cache documents."),
             isPresented: $isConfirmingLegacyReset,
@@ -103,17 +111,13 @@ struct SettingsView: View {
                 if usesTwoColumnSettings {
                     LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
                         deepSeekCard
-                        appInfoCard
                         persistenceStatusCard
-                        privacyCard
                         importExportCard
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
                         deepSeekCard
-                        appInfoCard
                         persistenceStatusCard
-                        privacyCard
                         importExportCard
                     }
                 }
@@ -139,10 +143,7 @@ struct SettingsView: View {
     #if os(macOS)
     private var macSettingsBody: some View {
         Form {
-            Section("DeepSeek") {
-                settingValueRow(String(localized: "模型", comment: "Settings row title for the translation model."), value: "deepseek-v4-flash")
-                settingValueRow("Base URL", value: "https://api.deepseek.com")
-
+            Section(String(localized: "翻译服务", comment: "Settings section title for translation service setup.")) {
                 SecureField("sk-...", text: $apiToken)
                     .textContentType(.password)
                     .textFieldStyle(.roundedBorder)
@@ -153,44 +154,29 @@ struct SettingsView: View {
                 deepSeekTokenButtons
             }
 
-            Section(String(localized: "隐私", comment: "Settings section title for privacy controls.")) {
-                Text(String(localized: "敏感内容仅保存在本机设置和系统凭据存储中。API Token 不进入 CloudKit、导出文件或调试响应记录。", comment: "Privacy explanation for API tokens and sensitive content."))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                #if DEBUG
-                Toggle(String(localized: "保存 Raw API Response", comment: "Debug setting title for storing raw API responses."), isOn: $storesRawAPIResponses)
-                    .accessibilityLabel(String(localized: "保存 Raw API Response", comment: "Accessibility label for the debug raw API response toggle."))
-
-                Text(String(localized: "仅 Debug build 可用，用于排查模型响应；Release build 不保存、不显示、不同步，也不导出。", comment: "Debug raw API response privacy explanation."))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                #endif
-            }
-
-            Section(String(localized: "数据存储", comment: "Settings section title for data storage.")) {
+            Section(String(localized: "同步", comment: "Settings section title for sync controls.")) {
                 iCloudSyncPreferenceToggle
-                persistenceStatusView
-                syncStatusView
-                NetworkStatusView(monitor: dataController.networkStatusMonitor)
-                SyncEventStatusView(monitor: dataController.syncEventMonitor)
-                recoveryStatusView
+                userFacingSyncStatusView
+                if dataController.persistenceStatus.isDegraded {
+                    persistenceStatusView
+                }
+                if shouldShowNetworkStatus {
+                    NetworkStatusView(monitor: dataController.networkStatusMonitor)
+                }
+                if shouldShowSyncEventStatus {
+                    SyncEventStatusView(monitor: dataController.syncEventMonitor)
+                }
+                if showsLegacyRecoveryTools {
+                    recoveryStatusView
 
-                HStack {
-                    Spacer()
-                    localRecoveryButtons
+                    HStack {
+                        Spacer()
+                        localRecoveryButtons
+                    }
                 }
             }
 
-            Section(String(localized: "关于", comment: "Settings section title for app information.")) {
-                settingValueRow(String(localized: "版本", comment: "Settings row title for app version."), value: appBuildInfo.version)
-                settingValueRow(String(localized: "构建", comment: "Settings row title for build number."), value: appBuildInfo.build)
-                settingValueRow(String(localized: "验收标识", comment: "Settings row title for smoke test identifier."), value: appBuildInfo.smokeTestDisplayValue)
-            }
-
             Section(String(localized: "导入导出", comment: "Settings section title for import and export.")) {
-                settingValueRow(String(localized: "导出文件名", comment: "Settings row title for export file name."), value: "memory-book-export-YYYYMMDD.json")
-                settingValueRow(String(localized: "范围", comment: "Settings row title for import/export scope."), value: String(localized: "全量导入 / 全量导出", comment: "Settings value describing import/export scope."))
                 Picker(String(localized: "重复项", comment: "Picker label for duplicate import handling."), selection: $importConflictPolicy) {
                     ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
                         Text(policy.title).tag(policy)
@@ -241,11 +227,8 @@ struct SettingsView: View {
     }
 
     private var deepSeekCard: some View {
-        SettingsCard(title: "DeepSeek", systemImage: "sparkles") {
+        SettingsCard(title: String(localized: "翻译服务", comment: "Settings card title for translation service setup."), systemImage: "sparkles") {
             VStack(alignment: .leading, spacing: 14) {
-                settingValueRow(String(localized: "模型", comment: "Settings row title for the translation model."), value: "deepseek-v4-flash")
-                settingValueRow("Base URL", value: "https://api.deepseek.com")
-
                 VStack(alignment: .leading, spacing: 8) {
                     Text("API Token")
                         .font(.caption)
@@ -286,99 +269,114 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    @ViewBuilder
     private var deepSeekTokenButtons: some View {
+        #if os(iOS)
+        if adaptiveLayout.usesCompactContent {
+            compactDeepSeekTokenButtons
+        } else {
+            horizontalDeepSeekTokenButtons
+        }
+        #else
+        horizontalDeepSeekTokenButtons
+        #endif
+    }
+
+    private var horizontalDeepSeekTokenButtons: some View {
         HStack(spacing: 10) {
-            Button {
-                saveToken()
-            } label: {
-                Label(String(localized: "保存", comment: "Save button title."), systemImage: "key")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
-            .accessibilityLabel(String(localized: "保存 DeepSeek Token", comment: "Accessibility label for saving the DeepSeek token."))
-            .accessibilityIdentifier("settings.deepSeek.save")
-
-            Button {
-                Task {
-                    await testToken()
-                }
-            } label: {
-                Label(String(localized: "测试连接", comment: "Button title for testing the DeepSeek token."), systemImage: "checkmark.seal")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
-            .accessibilityLabel(String(localized: "测试 DeepSeek Token", comment: "Accessibility label for testing the DeepSeek token."))
-            .accessibilityIdentifier("settings.deepSeek.test")
-
-            Button(role: .destructive) {
-                deleteToken()
-            } label: {
-                Image(systemName: "trash")
-                    .frame(width: 34)
-            }
-            .buttonStyle(.bordered)
-            .disabled(tokenStatus.isWorking)
-            .accessibilityLabel(String(localized: "删除 DeepSeek Token", comment: "Accessibility label for deleting the DeepSeek token."))
-            .accessibilityIdentifier("settings.deepSeek.delete")
+            saveDeepSeekTokenButton
+            testDeepSeekTokenButton
+            deleteDeepSeekTokenButton(includeTitle: false)
         }
         .controlSize(.large)
     }
 
-    private var appInfoCard: some View {
-        SettingsCard(title: String(localized: "关于", comment: "Settings card title for app information."), systemImage: "info.circle") {
-            VStack(alignment: .leading, spacing: 14) {
-                settingValueRow(String(localized: "版本", comment: "Settings row title for app version."), value: appBuildInfo.version)
-                settingValueRow(String(localized: "构建", comment: "Settings row title for build number."), value: appBuildInfo.build)
-                settingValueRow(String(localized: "验收标识", comment: "Settings row title for smoke test identifier."), value: appBuildInfo.smokeTestDisplayValue)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(appVersionAccessibilityLabel)
-        }
-    }
+    private var compactDeepSeekTokenButtons: some View {
+        VStack(spacing: 10) {
+            testDeepSeekTokenButton
 
-    private var appVersionAccessibilityLabel: String {
-        let format = String(localized: "App 版本 %@", comment: "Accessibility label for app version information. The placeholder is the visible smoke test version value.")
-        return String(format: format, appBuildInfo.smokeTestDisplayValue)
-    }
-
-    private var privacyCard: some View {
-        SettingsCard(title: String(localized: "隐私", comment: "Settings card title for privacy controls."), systemImage: "hand.raised") {
-            VStack(alignment: .leading, spacing: 14) {
-                #if DEBUG
-                Toggle(isOn: $storesRawAPIResponses) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(String(localized: "保存 Raw API Response", comment: "Debug setting title for storing raw API responses."))
-                        Text(String(localized: "仅 Debug build 可用；Release build 不保存、不同步、不导出。", comment: "Debug raw API response privacy explanation."))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .toggleStyle(.switch)
-                .accessibilityLabel(String(localized: "保存 Raw API Response", comment: "Accessibility label for the debug raw API response toggle."))
-                #endif
-
-                Label(String(localized: "敏感内容仅保存在本机设置和系统凭据存储中。", comment: "Short privacy note for local credential storage."), systemImage: "lock")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            HStack(spacing: 10) {
+                saveDeepSeekTokenButton
+                deleteDeepSeekTokenButton(includeTitle: true)
             }
         }
+        .controlSize(.large)
+    }
+
+    private var saveDeepSeekTokenButton: some View {
+        Button {
+            saveToken()
+        } label: {
+            Label(String(localized: "保存", comment: "Save button title."), systemImage: "key")
+                .lineLimit(1)
+                .minimumScaleFactor(0.88)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
+        .accessibilityLabel(String(localized: "保存 DeepSeek Token", comment: "Accessibility label for saving the DeepSeek token."))
+        .accessibilityIdentifier("settings.deepSeek.save")
+    }
+
+    private var testDeepSeekTokenButton: some View {
+        Button {
+            Task {
+                await testToken()
+            }
+        } label: {
+            Label(String(localized: "测试连接", comment: "Button title for testing the DeepSeek token."), systemImage: "checkmark.seal")
+                .lineLimit(1)
+                .minimumScaleFactor(0.88)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(trimmedToken.isEmpty || tokenStatus.isWorking)
+        .accessibilityLabel(String(localized: "测试 DeepSeek Token", comment: "Accessibility label for testing the DeepSeek token."))
+        .accessibilityIdentifier("settings.deepSeek.test")
+    }
+
+    @ViewBuilder
+    private func deleteDeepSeekTokenButton(includeTitle: Bool) -> some View {
+        Button(role: .destructive) {
+            isConfirmingDeepSeekTokenDeletion = true
+        } label: {
+            if includeTitle {
+                Label(String(localized: "删除", comment: "Delete action title."), systemImage: "trash")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.88)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Image(systemName: "trash")
+                    .frame(width: 34)
+            }
+        }
+        .buttonStyle(.bordered)
+        .disabled(tokenStatus.isWorking)
+        .accessibilityLabel(String(localized: "删除 DeepSeek Token", comment: "Accessibility label for deleting the DeepSeek token."))
+        .accessibilityIdentifier("settings.deepSeek.delete")
     }
 
     private var persistenceStatusCard: some View {
-        SettingsCard(title: String(localized: "数据存储", comment: "Settings card title for data storage."), systemImage: "internaldrive") {
+        SettingsCard(title: String(localized: "同步", comment: "Settings card title for sync controls."), systemImage: "icloud") {
             VStack(alignment: .leading, spacing: 14) {
                 iCloudSyncPreferenceToggle
-                persistenceStatusView
-                syncStatusView
-                NetworkStatusView(monitor: dataController.networkStatusMonitor)
-                SyncEventStatusView(monitor: dataController.syncEventMonitor)
+                userFacingSyncStatusView
+                if dataController.persistenceStatus.isDegraded {
+                    persistenceStatusView
+                }
+                if shouldShowNetworkStatus {
+                    NetworkStatusView(monitor: dataController.networkStatusMonitor)
+                }
+                if shouldShowSyncEventStatus {
+                    SyncEventStatusView(monitor: dataController.syncEventMonitor)
+                }
 
-                Divider()
+                if showsLegacyRecoveryTools {
+                    Divider()
 
-                recoveryStatusView
-                localRecoveryButtons
+                    recoveryStatusView
+                    localRecoveryButtons
+                }
             }
         }
     }
@@ -415,11 +413,11 @@ struct SettingsView: View {
     private var iCloudSyncPreferenceMessage: String {
         if isCloudKitSyncRequested == isCloudKitSyncActive {
             return isCloudKitSyncActive
-                ? String(localized: "当前使用 iCloud 私有数据库同步收藏和历史。", comment: "Settings message when iCloud sync is active.")
-                : String(localized: "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。", comment: "Settings message when local-only storage is active.")
+                ? String(localized: "收藏和历史会在登录同一 Apple ID 的设备间同步。", comment: "Settings message when iCloud sync is active.")
+                : String(localized: "收藏和历史只保存在这台设备。", comment: "Settings message when local-only storage is active.")
         }
 
-        return String(localized: "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。", comment: "Settings message after changing the iCloud sync preference.")
+        return String(localized: "重启 App 后生效，已有内容不会被删除。", comment: "Settings message after changing the iCloud sync preference.")
     }
 
     private var isCloudKitSyncActive: Bool {
@@ -442,11 +440,27 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var userFacingSyncStatusView: some View {
+        Label(userFacingSyncStatusMessage, systemImage: dataController.syncStatus.systemImage)
+            .font(.footnote)
+            .foregroundStyle(dataController.syncStatus.tint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var userFacingSyncStatusMessage: String {
+        switch dataController.syncStatus {
+        case .cloudKitConfigured:
+            return String(localized: "iCloud 同步已开启。", comment: "Short user-facing sync status when iCloud sync is active.")
+        case .localOnly:
+            return String(localized: "当前只保存在本机。", comment: "Short user-facing sync status when local-only storage is active.")
+        case .localOnlyFallback, .unavailable:
+            return dataController.syncStatus.message
+        }
+    }
+
     private var importExportCard: some View {
         SettingsCard(title: String(localized: "导入导出", comment: "Settings card title for import and export."), systemImage: "arrow.up.arrow.down") {
             VStack(alignment: .leading, spacing: 14) {
-                settingValueRow(String(localized: "导出文件名", comment: "Settings row title for export file name."), value: "memory-book-export-YYYYMMDD.json")
-                settingValueRow(String(localized: "范围", comment: "Settings row title for import/export scope."), value: String(localized: "全量导入 / 全量导出", comment: "Settings value describing import/export scope."))
                 VStack(alignment: .leading, spacing: 8) {
                     Text(String(localized: "重复项", comment: "Picker label for duplicate import handling."))
                         .font(.caption)
@@ -585,6 +599,28 @@ struct SettingsView: View {
         dataController.persistenceStatus.isDegraded ? .orange : .secondary
     }
 
+    private var shouldShowNetworkStatus: Bool {
+        switch dataController.networkStatusMonitor.status {
+        case .available(isExpensive: false, isConstrained: false):
+            return false
+        case .checking, .available, .unavailable:
+            return true
+        }
+    }
+
+    private var shouldShowSyncEventStatus: Bool {
+        switch dataController.syncEventMonitor.status {
+        case .inProgress, .lastFailure:
+            return true
+        case .unavailable, .waitingForCloudEvents, .lastSuccess:
+            return false
+        }
+    }
+
+    private var showsLegacyRecoveryTools: Bool {
+        recoveryController.localDocumentCount() > 0 || recoveryStatus != .idle
+    }
+
     private var trimmedToken: String {
         apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -610,7 +646,7 @@ struct SettingsView: View {
     }
 
     @MainActor
-    private func deleteToken() {
+    private func confirmDeepSeekTokenDeletion() {
         do {
             try credentialStore.delete(account: DeepSeekCredential.tokenAccount)
             apiToken = ""
@@ -899,7 +935,7 @@ private enum SettingsTokenStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return String(localized: "Token 只会保存在本机系统凭据存储中。", comment: "Privacy note for the API token field.")
+            return String(localized: "粘贴 DeepSeek Token，保存后即可翻译。", comment: "Setup hint for the API token field.")
         case .saved:
             return String(localized: "Token 已保存在本机。", comment: "Status shown after saving an API token.")
         case .testing:
@@ -944,7 +980,7 @@ private enum SettingsTokenStatus: Equatable {
     }
 }
 
-    private enum SettingsImportExportStatus: Equatable {
+private enum SettingsImportExportStatus: Equatable {
     case idle
     case notice(String)
     case working(String)
@@ -954,14 +990,14 @@ private enum SettingsTokenStatus: Equatable {
     var message: String {
         switch self {
         case .idle:
-            return Self.privacyNotice
+            return String(localized: "备份或迁移收藏内容。", comment: "Short import/export helper text.")
         case .notice(let message), .working(let message), .success(let message), .failed(let message):
             return message
         }
     }
 
     static var privacyNotice: String {
-        String(localized: "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。", comment: "Privacy note shown before exporting saved memory.")
+        String(localized: "导出文件包含收藏内容，请妥善保管。", comment: "Practical note shown before exporting saved memory.")
     }
 
     var systemImage: String {

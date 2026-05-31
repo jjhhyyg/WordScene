@@ -188,14 +188,14 @@ private struct MemoryMatchKey: Equatable {
     init(item: MemoryItem) {
         self.sourceText = Self.normalized(item.sourceText)
         self.translatedText = Self.normalized(item.translatedText)
-        self.sourceLanguage = item.sourceLanguage
+        self.sourceLanguage = item.displaySourceLanguage
         self.targetLanguage = item.targetLanguage
     }
 
     init(record: TranslationRecord) {
         self.sourceText = Self.normalized(record.sourceText)
         self.translatedText = Self.normalized(record.translatedText)
-        self.sourceLanguage = record.sourceLanguage
+        self.sourceLanguage = record.resolvedSourceLanguage
         self.targetLanguage = record.targetLanguage
     }
 

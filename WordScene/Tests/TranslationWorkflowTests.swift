@@ -26,10 +26,12 @@ final class TranslationWorkflowTests: XCTestCase {
     }
 
     private final class StubTranslationClient: TranslationClienting, @unchecked Sendable {
+        let expectedText: String
         let translatedText: String
         private(set) var callCount = 0
 
-        init(translatedText: String) {
+        init(expectedText: String = "hello world", translatedText: String) {
+            self.expectedText = expectedText
             self.translatedText = translatedText
         }
 
@@ -40,7 +42,7 @@ final class TranslationWorkflowTests: XCTestCase {
             apiToken: String
         ) async throws -> String {
             callCount += 1
-            XCTAssertEqual(text, "hello world")
+            XCTAssertEqual(text, expectedText)
             XCTAssertEqual(source, .auto)
             XCTAssertEqual(target, .zh)
             XCTAssertEqual(apiToken, "test-token")
@@ -79,9 +81,32 @@ final class TranslationWorkflowTests: XCTestCase {
         XCTAssertNil(result.persistenceWarningMessage)
         XCTAssertEqual(result.record.sourceText, "hello world")
         XCTAssertEqual(result.record.translatedText, "你好，世界。")
+        XCTAssertEqual(result.record.sourceLanguage, .en)
+        XCTAssertEqual(result.record.targetLanguage, .zh)
         XCTAssertEqual(result.updatedHistory.map(\.sourceText), ["hello world"])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords().map(\.sourceText), ["hello world"])
         XCTAssertEqual(translationClient.callCount, 1)
+    }
+
+    func testAutoDetectedSpanishTranslationWritesDetectedSourceLanguage() async throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let translationClient = StubTranslationClient(expectedText: "Hola", translatedText: "你好")
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: "test-token"),
+            translationClient: translationClient,
+            historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
+        )
+
+        let result = try await workflow.translate(
+            text: "Hola",
+            source: .auto,
+            target: .zh,
+            currentHistory: []
+        )
+
+        XCTAssertEqual(result.record.sourceLanguage, .es)
+        XCTAssertEqual(result.record.targetLanguage, .zh)
+        XCTAssertEqual(MemoryItem(record: result.record).sourceLanguage, .es)
     }
 
     func testTranslationStillSucceedsWhenHistoryPersistenceFails() async throws {

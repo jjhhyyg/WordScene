@@ -112,12 +112,15 @@ final class AppLocalizationTests: XCTestCase {
             "翻译中",
             "已翻译",
             "需要处理",
-            "Token 只会保存在本机系统凭据存储中。",
+            "粘贴 DeepSeek Token，保存后即可翻译。",
             "Token 已保存在本机。",
             "Token 可认证，但账户余额不可用。请检查 DeepSeek 余额。",
             "正在测试 DeepSeek 连接...",
             "连接成功，Token 已保存。",
-            "导出文件不加密，包含收藏内容，但不包含 API Token。请妥善保管。",
+            "删除 DeepSeek Token？",
+            "删除后这台设备上的翻译 Token 会被移除，之后需要重新保存 Token 才能继续翻译。",
+            "导出文件包含收藏内容，请妥善保管。",
+            "备份或迁移收藏内容。",
             "正在准备导出文件...",
             "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@",
             "已导出 %@。%@",
@@ -190,10 +193,13 @@ final class AppLocalizationTests: XCTestCase {
             "隐私",
             "关于",
             "导入导出",
+            "翻译服务",
             "使用 iCloud 同步",
-            "当前使用 iCloud 私有数据库同步收藏和历史。",
-            "当前仅使用本机 Core Data 存储，不会向 iCloud 写入数据。",
-            "更改会在下次打开 App 后生效；本机数据不会因为切换同步开关而被删除。"
+            "收藏和历史会在登录同一 Apple ID 的设备间同步。",
+            "收藏和历史只保存在这台设备。",
+            "重启 App 后生效，已有内容不会被删除。",
+            "iCloud 同步已开启。",
+            "当前只保存在本机。"
         ]
 
         try assertCatalog(catalog, containsCompleteLocalizationsFor: requiredKeys)
@@ -319,6 +325,25 @@ final class AppLocalizationTests: XCTestCase {
         XCTAssertNil(catalog.strings["收藏 1"])
     }
 
+    func testSettingsDeepSeekTokenDeleteUsesConfirmationDialog() throws {
+        let source = try settingsViewSource()
+
+        XCTAssertTrue(source.contains("@State private var isConfirmingDeepSeekTokenDeletion = false"))
+        XCTAssertTrue(source.contains("isPresented: $isConfirmingDeepSeekTokenDeletion"))
+        XCTAssertTrue(source.contains("confirmDeepSeekTokenDeletion()"))
+        XCTAssertFalse(source.contains("Button(role: .destructive) {\n            deleteToken()"))
+    }
+
+    func testMobileSettingsDoesNotShowAppInfoCard() throws {
+        let source = try settingsViewSource()
+
+        let mobileBodyRange = try XCTUnwrap(source.range(of: "private var mobileSettingsBody: some View"))
+        let macBodyRange = try XCTUnwrap(source.range(of: "#if os(macOS)\n    private var macSettingsBody: some View"))
+        let mobileBody = String(source[mobileBodyRange.lowerBound..<macBodyRange.lowerBound])
+
+        XCTAssertFalse(mobileBody.contains("appInfoCard"))
+    }
+
     private func assertCatalog(
         _ catalog: StringCatalogFixture,
         containsCompleteLocalizationsFor requiredKeys: [String],
@@ -358,6 +383,11 @@ final class AppLocalizationTests: XCTestCase {
 
     private func sourceResourcesDirectory() throws -> URL {
         try projectRootDirectory().appendingPathComponent("WordScene/Resources", isDirectory: true)
+    }
+
+    private func settingsViewSource() throws -> String {
+        let sourceURL = try projectRootDirectory().appendingPathComponent("WordScene/Sources/Shared/Features/Settings/SettingsView.swift")
+        return try String(contentsOf: sourceURL, encoding: .utf8)
     }
 
     private func projectRootDirectory() throws -> URL {

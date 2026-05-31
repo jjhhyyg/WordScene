@@ -113,6 +113,29 @@ final class MemoryLibraryStoreTests: XCTestCase {
         XCTAssertEqual(second.first?.sourceText, "hello")
     }
 
+    func testAddingDetectedRecordReplacesLegacyAutoDuplicate() {
+        let store = MemoryLibraryStore(defaults: UserDefaults.standard)
+        let legacyItem = MemoryItem(
+            sourceText: "Hola",
+            translatedText: "你好",
+            sourceLanguage: .auto,
+            targetLanguage: .zh,
+            note: "old"
+        )
+        let detectedRecord = TranslationRecord(
+            sourceText: "Hola",
+            translatedText: "你好",
+            sourceLanguage: .es,
+            targetLanguage: .zh
+        )
+
+        let items = store.adding(detectedRecord, to: [legacyItem])
+
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items.first?.sourceLanguage, .es)
+        XCTAssertEqual(items.first?.note, "")
+    }
+
     func testAddingManualItemTrimsAndDeduplicatesSavedMemory() {
         let store = MemoryLibraryStore(defaults: UserDefaults.standard)
         let manualItem = MemoryItem(
