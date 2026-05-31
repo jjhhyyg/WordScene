@@ -2,6 +2,9 @@ import XCTest
 @testable import WordScene
 
 final class AppLocalizationTests: XCTestCase {
+    private let supportedLocalizationCodes = ["zh-Hans", "en", "es"]
+    private let translatedLocalizationCodes = ["en", "es"]
+
     func testStringCatalogIsPrimaryLocalizationSource() throws {
         let resourcesDirectory = try sourceResourcesDirectory()
         let catalogURL = resourcesDirectory.appendingPathComponent("Localizable.xcstrings")
@@ -19,16 +22,17 @@ final class AppLocalizationTests: XCTestCase {
 
         XCTAssertEqual(catalog.sourceLanguage, "zh-Hans")
         let translationLocalizations = catalog.strings["翻译"]?.localizations ?? [:]
-        XCTAssertEqual(Set(translationLocalizations.keys), ["zh-Hans", "en", "es"])
-        XCTAssertEqual(catalog.strings["翻译"]?.localizations["en"]?.stringUnit?.value, "Translate")
-        XCTAssertEqual(catalog.strings["翻译"]?.localizations["es"]?.stringUnit?.value, "Traducir")
+        XCTAssertEqual(Set(translationLocalizations.keys), Set(supportedLocalizationCodes))
+        XCTAssertEqual(translationLocalizations["en"]?.stringUnit?.value, "Translate")
+        XCTAssertEqual(translationLocalizations["es"]?.stringUnit?.value, "Traducir")
     }
 
     func testAppBundleAdvertisesSystemSelectableLanguages() throws {
         let bundle = Bundle.main
 
-        XCTAssertTrue(bundle.localizations.contains("en"))
-        XCTAssertTrue(bundle.localizations.contains("es"))
+        for languageCode in translatedLocalizationCodes {
+            XCTAssertTrue(bundle.localizations.contains(languageCode), "Missing selectable app language: \(languageCode)")
+        }
     }
 
     func testLocalizedDisplayNamesAreAvailable() throws {
@@ -53,7 +57,7 @@ final class AppLocalizationTests: XCTestCase {
     func testBuiltBundleContainsCompiledLocalizationResources() throws {
         let bundle = Bundle.main
 
-        for languageCode in ["zh-Hans", "en", "es"] {
+        for languageCode in supportedLocalizationCodes {
             let localizationDirectory = try XCTUnwrap(
                 bundle.url(forResource: languageCode, withExtension: "lproj"),
                 "Missing built \(languageCode).lproj resources"
@@ -312,7 +316,7 @@ final class AppLocalizationTests: XCTestCase {
 
         for key in pluralKeys {
             let localizations = try XCTUnwrap(catalog.strings[key]?.localizations, "Missing plural string catalog key: \(key)")
-            for language in ["zh-Hans", "en", "es"] {
+            for language in supportedLocalizationCodes {
                 let plural = try XCTUnwrap(localizations[language]?.variations?.plural, "Missing plural variations for \(key) in \(language)")
                 XCTAssertNotNil(plural["one"]?.stringUnit.value, "Missing singular plural variation for \(key) in \(language)")
                 XCTAssertNotNil(plural["other"]?.stringUnit.value, "Missing other plural variation for \(key) in \(language)")
@@ -352,7 +356,7 @@ final class AppLocalizationTests: XCTestCase {
     ) throws {
         for key in requiredKeys {
             let localizations = try XCTUnwrap(catalog.strings[key]?.localizations, "Missing string catalog key: \(key)")
-            for language in ["zh-Hans", "en", "es"] {
+            for language in supportedLocalizationCodes {
                 let localization = try XCTUnwrap(localizations[language], "Missing \(language) translation for \(key)")
                 let values = localization.translatedValues
                 XCTAssertFalse(values.isEmpty, "Missing \(language) translation for \(key)", file: file, line: line)
@@ -409,7 +413,7 @@ private struct StringCatalogFixture: Decodable {
 }
 
 private struct StringCatalogEntryFixture: Decodable {
-    let localizations: [String: StringCatalogLocalizationFixture]
+    let localizations: [String: StringCatalogLocalizationFixture]?
 }
 
 private struct StringCatalogLocalizationFixture: Decodable {

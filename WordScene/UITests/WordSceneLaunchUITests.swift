@@ -13,7 +13,7 @@ final class WordSceneLaunchUITests: XCTestCase {
         app = nil
     }
 
-    private func launchApp(seed: String? = nil, language: String? = nil, locale: String? = nil) {
+    private func launchApp(seed: String? = nil, language: String? = "zh-Hans", locale: String? = "zh_CN") {
         app = XCUIApplication()
         app.launchArguments.append("-WordSceneUITest")
         if let language {
@@ -78,7 +78,7 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["seeded note"].waitForExistence(timeout: 8))
         XCTAssertFalse(app.textFields["library.note.editor"].firstMatch.exists)
 
-        let editButton = app.buttons["编辑收藏"].firstMatch
+        let editButton = app.buttons["library.item.edit"].firstMatch
         XCTAssertTrue(editButton.waitForExistence(timeout: 4))
         editButton.tap()
 
@@ -132,38 +132,38 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 8))
     }
 
-    func testEnglishLocalizationSmoke() throws {
-        app.terminate()
-        launchApp(language: "en", locale: "en_US")
+    func testSupportedLanguageLocalizationSmoke() throws {
+        for language in supportedLanguageSmokeCases {
+            app.terminate()
+            launchApp(language: language.code, locale: language.locale)
 
-        XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
-        chooseMenuValue(pickerIdentifier: "translation.sourceLanguage.picker", value: "English")
+            XCTAssertTrue(
+                app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12),
+                "Missing translate input for \(language.code)"
+            )
+            chooseMenuValue(
+                pickerIdentifier: "translation.sourceLanguage.picker",
+                value: language.englishSourceOption
+            )
 
-        openTab("Saved")
-        XCTAssertTrue(app.staticTexts["No Saved Items Yet"].waitForExistence(timeout: 8))
+            openTab(language.savedTab)
+            XCTAssertTrue(
+                app.staticTexts[language.emptySavedTitle].waitForExistence(timeout: 8),
+                "Missing empty saved title for \(language.code)"
+            )
 
-        openTab("Settings")
-        XCTAssertTrue(app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8))
+            openTab(language.settingsTab)
+            XCTAssertTrue(
+                app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8),
+                "Missing settings token field for \(language.code)"
+            )
 
-        openTab("History")
-        XCTAssertTrue(app.staticTexts["No Translation History Yet"].waitForExistence(timeout: 8))
-    }
-
-    func testSpanishLocalizationSmoke() throws {
-        app.terminate()
-        launchApp(language: "es", locale: "es_ES")
-
-        XCTAssertTrue(app.textViews["translation.input.editor"].firstMatch.waitForExistence(timeout: 12))
-        chooseMenuValue(pickerIdentifier: "translation.sourceLanguage.picker", value: "Inglés")
-
-        openTab("Guardados")
-        XCTAssertTrue(app.staticTexts["Aún no hay guardados"].waitForExistence(timeout: 8))
-
-        openTab("Ajustes")
-        XCTAssertTrue(app.secureTextFields["settings.deepSeek.token"].firstMatch.waitForExistence(timeout: 8))
-
-        openTab("Historial")
-        XCTAssertTrue(app.staticTexts["Aún no hay historial de traducción"].waitForExistence(timeout: 8))
+            openTab(language.historyTab)
+            XCTAssertTrue(
+                app.staticTexts[language.emptyHistoryTitle].waitForExistence(timeout: 8),
+                "Missing empty history title for \(language.code)"
+            )
+        }
     }
 
     func testSeededLibraryAndSearchContentRender() throws {
@@ -304,6 +304,52 @@ final class WordSceneLaunchUITests: XCTestCase {
         XCTAssertTrue(option.waitForExistence(timeout: 4), "Missing menu option: \(value)")
         option.tap()
     }
+
+    private var supportedLanguageSmokeCases: [LanguageSmokeCase] {
+        [
+            LanguageSmokeCase(
+                code: "zh-Hans",
+                locale: "zh_CN",
+                englishSourceOption: "英文",
+                savedTab: "收藏",
+                settingsTab: "设置",
+                historyTab: "翻译历史",
+                emptySavedTitle: "还没有收藏",
+                emptyHistoryTitle: "还没有翻译历史"
+            ),
+            LanguageSmokeCase(
+                code: "en",
+                locale: "en_US",
+                englishSourceOption: "English",
+                savedTab: "Saved",
+                settingsTab: "Settings",
+                historyTab: "History",
+                emptySavedTitle: "No Saved Items Yet",
+                emptyHistoryTitle: "No Translation History Yet"
+            ),
+            LanguageSmokeCase(
+                code: "es",
+                locale: "es_ES",
+                englishSourceOption: "Inglés",
+                savedTab: "Guardados",
+                settingsTab: "Ajustes",
+                historyTab: "Historial",
+                emptySavedTitle: "Aún no hay guardados",
+                emptyHistoryTitle: "Aún no hay historial de traducción"
+            )
+        ]
+    }
+}
+
+private struct LanguageSmokeCase {
+    let code: String
+    let locale: String
+    let englishSourceOption: String
+    let savedTab: String
+    let settingsTab: String
+    let historyTab: String
+    let emptySavedTitle: String
+    let emptyHistoryTitle: String
 }
 
 private extension XCUIElement {

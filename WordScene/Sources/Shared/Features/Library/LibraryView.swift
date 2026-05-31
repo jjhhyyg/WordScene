@@ -894,6 +894,7 @@ private struct MemoryItemRow: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .accessibilityLabel(String(localized: "编辑收藏", comment: "Accessibility label for editing a saved memory item."))
+                .accessibilityIdentifier("library.item.edit")
 
                 #if os(macOS)
                 Button(role: .destructive) {
