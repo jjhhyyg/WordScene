@@ -319,6 +319,29 @@
         }
       }
     },
+    "DeepSeek 响应超时，请稍后重试或缩短文本。" : {
+      "comment" : "Error shown when the translation provider does not respond before the timeout.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek timed out. Try again later or shorten the text."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek agotó el tiempo de espera. Inténtalo más tarde o acorta el texto."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek 响应超时，请稍后重试或缩短文本。"
+          }
+        }
+      }
+    },
     "DeepSeek 拒绝了该内容，请调整文本后重试。" : {
       "comment" : "Error shown when the translation provider refuses the content.",
       "localizations" : {
@@ -407,29 +430,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DeepSeek 请求失败：HTTP %lld。"
-          }
-        }
-      }
-    },
-    "DeepSeek 响应超时，请稍后重试或缩短文本。" : {
-      "comment" : "Error shown when the translation provider does not respond before the timeout.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DeepSeek timed out. Try again later or shorten the text."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DeepSeek agotó el tiempo de espera. Inténtalo más tarde o acorta el texto."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DeepSeek 响应超时，请稍后重试或缩短文本。"
           }
         }
       }
@@ -1176,6 +1176,29 @@
         }
       }
     },
+    "内容" : {
+      "comment" : "Section title for memory item editor content fields.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contenido"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内容"
+          }
+        }
+      }
+    },
     "最近同步成功" : {
       "comment" : "Sync event status title after recent successful sync.",
       "localizations" : {
@@ -1797,29 +1820,6 @@
         }
       }
     },
-    "内容" : {
-      "comment" : "Section title for memory item editor content fields.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Content"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contenido"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "内容"
-          }
-        }
-      }
-    },
     "失败原因" : {
       "comment" : "Diagnostic label for an error failure reason.",
       "localizations" : {
@@ -2372,29 +2372,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已复制"
-          }
-        }
-      }
-    },
-    "点击复制" : {
-      "comment" : "Accessibility hint for copying translated text.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to copy"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para copiar"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "点击复制"
           }
         }
       }
@@ -3910,6 +3887,7 @@
     },
     "正在生成译文" : {
       "comment" : "Accessibility label for streaming translated text.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4249,6 +4227,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "源语言"
+          }
+        }
+      }
+    },
+    "点击复制" : {
+      "comment" : "Accessibility hint for copying translated text.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to copy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para copiar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击复制"
           }
         }
       }
@@ -5006,6 +5007,7 @@
     },
     "译文，点击复制" : {
       "comment" : "Accessibility label for the translated text copy area.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
