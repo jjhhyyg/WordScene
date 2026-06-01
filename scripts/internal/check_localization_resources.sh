@@ -4,7 +4,26 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RESOURCES_DIR="${1:-$ROOT/WordScene/Resources}"
 CATALOG="$RESOURCES_DIR/Localizable.xcstrings"
-SUPPORTED_LANGUAGES=("zh-Hans" "en" "es")
+SUPPORTED_LANGUAGES=(
+  "zh-Hans"
+  "zh-Hant"
+  "en"
+  "es"
+  "fr"
+  "de"
+  "pt"
+  "it"
+  "ru"
+  "ja"
+  "ko"
+  "nl"
+  "pl"
+  "ar"
+  "tr"
+  "vi"
+  "id"
+  "hi"
+)
 REQUIRED_INFO_PLIST_KEYS=("CFBundleDisplayName" "CFBundleName")
 
 if [[ ! -d "$RESOURCES_DIR" ]]; then
@@ -112,4 +131,4 @@ for language in "${SUPPORTED_LANGUAGES[@]}"; do
   done
 done
 
-echo "Localization resources are complete for zh-Hans, en, es."
+echo "Localization resources are complete for ${SUPPORTED_LANGUAGES[*]}."

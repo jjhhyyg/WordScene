@@ -81,7 +81,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertTrue(userPrompt.contains("translated_text"))
         XCTAssertTrue(userPrompt.contains("Translate only the text field"))
         XCTAssertTrue(userPrompt.contains(#""source_language":"English""#))
-        XCTAssertTrue(userPrompt.contains(#""target_language":"Chinese""#))
+        XCTAssertTrue(userPrompt.contains(#""target_language":"Simplified Chinese""#))
         XCTAssertTrue(userPrompt.contains(#""text":"He said \"hello\"""#))
         XCTAssertFalse(userPrompt.contains("Text:\nHe said"))
     }

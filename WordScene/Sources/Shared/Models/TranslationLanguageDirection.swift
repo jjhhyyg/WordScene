@@ -35,6 +35,7 @@ struct TranslationLanguageDirection: Equatable {
     }
 
     private static func defaultTarget(excluding source: LanguageSelection) -> LanguageSelection {
-        LanguageSelection.targetOptions(excluding: source).first ?? .zh
+        let targets = LanguageSelection.targetOptions(excluding: source)
+        return targets.first { $0 == .en } ?? targets.first ?? .zh
     }
 }

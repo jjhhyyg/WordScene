@@ -182,6 +182,7 @@
 		14A549AC5C802B87B3E2F4F7 /* CoreDataMemoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMemoryStoreTests.swift; sourceTree = "<group>"; };
 		1B8242AC1FDB1CDF361985E3 /* WordSceneMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WordSceneMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E14F2772CC2912044804B8C /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
+		20455E41FA258DD1F1844FE9 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMemoryStore.swift; sourceTree = "<group>"; };
 		23BB63E93A04781665D632E2 /* WordSceneAppIcon-previous-20260531.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "WordSceneAppIcon-previous-20260531.png"; sourceTree = "<group>"; };
 		264C36452F781611F35592EE /* CloudKitSchemaInitializationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaInitializationTests.swift; sourceTree = "<group>"; };
@@ -203,6 +204,7 @@
 		4F5A9209CA61F4DFC45C9142 /* TranslationLanguageDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguageDirection.swift; sourceTree = "<group>"; };
 		52C5C4DB518A431CA892CA02 /* LocalPersistenceStoreError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPersistenceStoreError.swift; sourceTree = "<group>"; };
 		536AAF306418794408804405 /* WordSceneCloudKitSchemaTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WordSceneCloudKitSchemaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		57F6F437254D2983DCA73D0B /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5885FF66CE79D54FE26076E7 /* AppLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocalizationTests.swift; sourceTree = "<group>"; };
 		5B2DC5A718FE010D5BC2EFFF /* WordSceneLogo-v2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "WordSceneLogo-v2.png"; sourceTree = "<group>"; };
 		61D9D238385B21460CDAA2BE /* DebugRawAPIResponseRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRawAPIResponseRecorder.swift; sourceTree = "<group>"; };
@@ -217,8 +219,13 @@
 		721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		74C8385412454C45DC5ECE5B /* AppBuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBuildInfo.swift; sourceTree = "<group>"; };
 		7E1C69A659E9CCA80A97DDED /* WordScene.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WordScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8100501C567D6C759CB8E82B /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		814B5E9442D220750AA59F13 /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		82A5739540213031688666FA /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		8322A438212CDD6C9442E764 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySearchIndexTests.swift; sourceTree = "<group>"; };
 		8810F2E5879F440CE84CCB89 /* TranslationWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationWorkflowTests.swift; sourceTree = "<group>"; };
+		8BB51B8123787392232CFA4F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8BDFCAD432A6ABC28AE84A32 /* TranslationHistoryRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryRepositoryTests.swift; sourceTree = "<group>"; };
 		90DB37BC6A6D92D6B7DEF9BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		930A284E1EE951193AB252A3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -229,7 +236,11 @@
 		A0F120F9F3E9AD8D8E1592F0 /* MemoryLibraryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryRepository.swift; sourceTree = "<group>"; };
 		A326C54DE9B73BA7405FCB32 /* SettingsImportExportControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImportExportControllerTests.swift; sourceTree = "<group>"; };
 		B0C4B50893C096889DF9D09D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B39F58C7E8DA588FCE2140C2 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B4E60684E1B6272D9745193A /* SettingsErrorMessageFactoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsErrorMessageFactoryTests.swift; sourceTree = "<group>"; };
+		B65C7CD22598E02444B9E922 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		BB525AF5475C39A86C3E8D99 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		BC540308F0AF670DD6F45945 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BE9E0982950392A61A156324 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C040CEEF155F11CC214D80B6 /* MemoryLibraryRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryRepositoryTests.swift; sourceTree = "<group>"; };
 		C35642BEE32B879ABC655A25 /* MemoryLibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLibraryStore.swift; sourceTree = "<group>"; };
@@ -241,12 +252,16 @@
 		DC00EA37578F51C218C5DBC3 /* AppDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDataController.swift; sourceTree = "<group>"; };
 		E86CD1C4073069E019639A99 /* PinyinTransliterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinyinTransliterator.swift; sourceTree = "<group>"; };
 		E9C3CD2F958C050EB19CA357 /* WordSceneLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = WordSceneLogo.png; sourceTree = "<group>"; };
+		EAC6C4900D5A97AB8100AE61 /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		EF8131B45255E2A2A5312B3B /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneApp.swift; sourceTree = "<group>"; };
 		F408F501A6A95AD07E0B0863 /* WordSceneLaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSceneLaunchUITests.swift; sourceTree = "<group>"; };
 		F6C63AA5983B0F3B41AC45B2 /* TranslationRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationRecord.swift; sourceTree = "<group>"; };
 		F80A880CF735DFDBCBD4F181 /* SettingsImportExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImportExportController.swift; sourceTree = "<group>"; };
 		F84790B07076C5D4FBF3B735 /* TranslationWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationWorkflow.swift; sourceTree = "<group>"; };
+		FAB2D1A9D885057387838DAA /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FBC9BE49BE2C9B8A82659BEF /* WordSceneMacCloudKitSchemaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WordSceneMacCloudKitSchemaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEC984C6F34367543C02C66E /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FEE156408D1FB064F3583F8A /* MemoryImportExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -648,9 +663,24 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				ar,
+				de,
 				en,
 				es,
+				fr,
+				hi,
+				id,
+				it,
+				ja,
+				ko,
+				nl,
+				pl,
+				pt,
+				ru,
+				tr,
+				vi,
 				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = 202AA4332A717340E61C26AB;
 			minimizedProjectReferenceProxies = 1;
@@ -938,9 +968,24 @@
 		DE67FC610560C08B600F953A /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
+				FAB2D1A9D885057387838DAA /* ar */,
+				57F6F437254D2983DCA73D0B /* de */,
 				B0C4B50893C096889DF9D09D /* en */,
 				D7AFFA06A08B69A49579A2C8 /* es */,
+				EF8131B45255E2A2A5312B3B /* fr */,
+				EAC6C4900D5A97AB8100AE61 /* hi */,
+				814B5E9442D220750AA59F13 /* id */,
+				8BB51B8123787392232CFA4F /* it */,
+				8100501C567D6C759CB8E82B /* ja */,
+				20455E41FA258DD1F1844FE9 /* ko */,
+				8322A438212CDD6C9442E764 /* nl */,
+				B39F58C7E8DA588FCE2140C2 /* pl */,
+				BB525AF5475C39A86C3E8D99 /* pt */,
+				BC540308F0AF670DD6F45945 /* ru */,
+				B65C7CD22598E02444B9E922 /* tr */,
+				FEC984C6F34367543C02C66E /* vi */,
 				9FB6E05D994332391A0906EE /* zh-Hans */,
+				82A5739540213031688666FA /* zh-Hant */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1126,7 +1171,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1195,7 +1240,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

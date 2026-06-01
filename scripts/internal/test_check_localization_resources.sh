@@ -5,10 +5,33 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT="$ROOT/scripts/internal/check_localization_resources.sh"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/wordscene-localization-test.XXXXXX")"
 trap 'rm -rf "$TMP_DIR"' EXIT
+SUPPORTED_LANGUAGES=(
+  "zh-Hans"
+  "zh-Hant"
+  "en"
+  "es"
+  "fr"
+  "de"
+  "pt"
+  "it"
+  "ru"
+  "ja"
+  "ko"
+  "nl"
+  "pl"
+  "ar"
+  "tr"
+  "vi"
+  "id"
+  "hi"
+)
 
 make_fixture() {
   local resources="$1"
-  mkdir -p "$resources/zh-Hans.lproj" "$resources/en.lproj" "$resources/es.lproj"
+  local language
+  for language in "${SUPPORTED_LANGUAGES[@]}"; do
+    mkdir -p "$resources/$language.lproj"
+  done
   cat >"$resources/Localizable.xcstrings" <<'JSON'
 {
   "sourceLanguage": "zh-Hans",
@@ -111,6 +134,38 @@ STRINGS
 CFBundleDisplayName = "Escena de Palabras";
 CFBundleName = "Word Scene";
 STRINGS
+  /usr/bin/python3 - "$resources/Localizable.xcstrings" "$resources" "${SUPPORTED_LANGUAGES[@]}" <<'PY'
+import json
+import pathlib
+import sys
+
+catalog_path = pathlib.Path(sys.argv[1])
+resources = pathlib.Path(sys.argv[2])
+languages = sys.argv[3:]
+
+with catalog_path.open(encoding="utf-8") as handle:
+    catalog = json.load(handle)
+
+for entry in catalog["strings"].values():
+    localizations = entry.get("localizations")
+    if not isinstance(localizations, dict):
+        continue
+    template = localizations["en"]
+    for language in languages:
+        localizations.setdefault(language, template)
+
+for language in languages:
+    info_plist = resources / f"{language}.lproj" / "InfoPlist.strings"
+    if not info_plist.exists():
+        info_plist.write_text(
+            'CFBundleDisplayName = "Word Scene";\nCFBundleName = "Word Scene";\n',
+            encoding="utf-8"
+        )
+
+with catalog_path.open("w", encoding="utf-8") as handle:
+    json.dump(catalog, handle, ensure_ascii=False, indent=2)
+    handle.write("\n")
+PY
 }
 
 expect_failure() {
@@ -137,7 +192,7 @@ expect_failure() {
 PASSING_RESOURCES="$TMP_DIR/passing"
 make_fixture "$PASSING_RESOURCES"
 "$SCRIPT" "$PASSING_RESOURCES" >/tmp/wordscene-localization-pass.out
-grep -qF "Localization resources are complete for zh-Hans, en, es." /tmp/wordscene-localization-pass.out
+grep -qF "Localization resources are complete for zh-Hans zh-Hant en es fr de pt it ru ja ko nl pl ar tr vi id hi." /tmp/wordscene-localization-pass.out
 
 MISSING_CATALOG_LANGUAGE="$TMP_DIR/missing-catalog-language"
 make_fixture "$MISSING_CATALOG_LANGUAGE"
