@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -47,7 +47,7 @@ Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000
 Lab iPad         Lab-iPad.coredevice.local        00000000-0000-0000-0000-000000000002   unavailable   iPad Pro 11-inch
 DEVICES
 
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
@@ -74,7 +74,7 @@ grep -qF 'Signed macOS candidate app is missing; restore the Xcode account/profi
 mkdir -p "$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
 mkdir -p "$UNSIGNED_MAC_APP"
 
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
@@ -91,7 +91,7 @@ Name             Hostname                         Identifier                    
 Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   connected   iPhone 17 Pro Max
 DEVICES
 
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
@@ -107,7 +107,7 @@ Name             Hostname                         Identifier                    
 Moses iPhone     Moses-iPhone.coredevice.local    00000000-0000-0000-0000-000000000001   unavailable   iPhone 17 Pro Max
 DEVICES
 
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
@@ -120,7 +120,7 @@ Name             Hostname                         Identifier                    
 --------------   ------------------------------   ------------------------------------   -----------   --------------------
 DEVICES
 
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" \
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \

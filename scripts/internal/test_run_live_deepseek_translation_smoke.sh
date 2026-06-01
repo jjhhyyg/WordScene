@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -60,17 +60,23 @@ while [[ $# -gt 0 ]]; do
 done
 
 grep -qF 'Authorization: Bearer test-token-secret' "$config"
+grep -qF 'Accept: text/event-stream' "$config"
+grep -qF 'max-time = 10' "$config"
 grep -qF '"model":"deepseek-v4-flash"' "$body"
 grep -qF '"response_format":{"type":"json_object"}' "$body"
 grep -qF '"thinking":{"type":"disabled"}' "$body"
+grep -qF '"stream":true' "$body"
 grep -qF 'translated_text' "$body"
 grep -qF '\"source_language\":\"Auto-detect\"' "$body"
 grep -qF '\"target_language\":\"Chinese\"' "$body"
 grep -qF '\"text\":\"hello world\"' "$body"
 
-cat <<'JSON'
-{"choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"{\"translated_text\":\"你好，世界。\"}"}}]}
-JSON
+cat <<'SSE'
+data: {"choices":[{"index":0,"finish_reason":null,"delta":{"content":"{\"translated_text\":\"你好，世界。\"}"}}]}
+
+data: [DONE]
+
+SSE
 FAKE_CURL
 
 chmod +x "$BIN/curl"

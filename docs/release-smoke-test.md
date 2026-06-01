@@ -8,10 +8,9 @@ and pass/fail notes for each run.
 
 - Use a signed build with the production bundle identifier.
 - Generate release candidate builds with
-  `scripts/build_release_candidates.sh --allow-provisioning-updates` after Xcode
-  is signed in to the Apple Developer account. If provisioning has already been
-  prepared locally, the flag can be omitted. Use `--platform ios` or
-  `--platform macos` only when recording a platform-specific build blocker.
+  `scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all`
+  after Xcode is signed in to the Apple Developer account. Use the internal
+  build helper only when debugging one platform-specific build blocker.
 - If macOS signing fails with missing Xcode account or Mac App Development
   profile errors, follow `docs/release-signing-runbook.md` before changing
   project settings.
@@ -23,12 +22,12 @@ and pass/fail notes for each run.
   `com.apple.developer.aps-environment` on macOS.
 - Before the first signed-device CloudKit smoke for a new or changed Core Data
   model, initialize the CloudKit development schema with
-  `scripts/initialize_cloudkit_schema.sh`. Use `--platform ios --device <id>`
+  `scripts/internal/initialize_cloudkit_schema.sh`. Use `--platform ios --device <id>`
   for a physical iPhone/iPad or run the default macOS path with a signed Mac
   candidate environment. This is a development-environment step only; deploy the
   schema to Production later from CloudKit Dashboard before TestFlight or App
   Store distribution.
-- Run `scripts/verify_release_readiness.sh` before manual smoke testing. It
+- Run `scripts/test_verify_release_readiness.sh` before manual smoke testing. It
   covers script syntax, release evidence script tests, `git diff --check`, token
   leak scanning, privacy manifest validation, required-reason API scanning,
   privacy surface validation, CloudKit background-mode validation, XcodeGen
@@ -47,9 +46,9 @@ and pass/fail notes for each run.
   HEAD or be an ancestor with only evidence/progress documentation changed after
   it. Rerun the candidate gate after any product, project, script, checklist, or
   release-critical code change.
-- Run `scripts/manual_smoke_readiness.sh` after candidate and live API evidence
+- Run `scripts/internal/manual_smoke_readiness.sh` after candidate and live API evidence
   are refreshed to see which manual rows can be tested now. Add `--commands` to
-  print `scripts/record_release_smoke_result.sh` templates for READY rows. It
+  print `scripts/internal/record_release_smoke_result.sh` templates for READY rows. It
   applies the same candidate/live-smoke freshness checks as manual evidence
   recording, so stale evidence prints WAITING instead of record commands. It is
   read-only and does not record PASS evidence. Add `--summary` to append READY
@@ -58,19 +57,6 @@ and pass/fail notes for each run.
   `--scope macos` for signed Mac rows, `--scope cross-platform` for rows that
   require both signed iOS and signed macOS candidates, or `--scope local-only`
   for the unsigned Mac plus signed iOS fallback row.
-- Run `scripts/release_next_actions.sh` when deciding what to do next. It wraps
-  the same readiness rules into an ordered action list, including the macOS
-  signing recovery step, READY manual rows, and the final completion gate.
-- Run `scripts/manual_smoke_environment_preflight.sh` before recording PASS
-  rows. It checks the current evidence readiness, candidate app bundle paths,
-  physical iPhone/iPad availability reported by `devicectl`, and the resulting
-  executable smoke environments. READY rows are only permission to run and
-  record a row; they are not proof that the target device checklist has been
-  executed.
-- When a target iPhone or iPad is available, install the current iOS candidate
-  with `scripts/install_ios_release_candidate.sh`. Add `--device <identifier>`
-  to target a specific device, or `--dry-run` to print the `devicectl` command
-  before installing.
 - Use `scripts/manual_smoke_session_guide.sh` to print the current preflight,
   iOS install command, checklist pointer, and scoped record-command templates in
   one place. It is read-only and does not record PASS rows. It hides PASS
@@ -222,7 +208,7 @@ Expected result:
 
 Use this table for each release candidate. Build metadata and blocker evidence
 for the current candidate is recorded in `docs/release-smoke-evidence.md`.
-Prefer recording manual rows with `scripts/record_release_smoke_result.sh` so
+Prefer recording manual rows with `scripts/internal/record_release_smoke_result.sh` so
 the table format stays consistent. The script only accepts the canonical
 manual `Area` and `Platform` pairs listed in the template below, so typos such
 as `iPadOS` instead of `iOS/iPadOS` are rejected before they create evidence
@@ -246,7 +232,7 @@ so a retest can move a row from `BLOCKED` or `FAIL` to the current result
 without leaving contradictory evidence behind:
 
 ```bash
-scripts/record_release_smoke_result.sh \
+scripts/internal/record_release_smoke_result.sh \
   --evidence docs/release-smoke-evidence.md \
   --area "Translation loop" \
   --platform "macOS" \

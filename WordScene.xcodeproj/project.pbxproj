@@ -625,7 +625,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = scripts/generate_macos_app_icon.sh;
+			shellScript = scripts/internal/generate_macos_app_icon.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 

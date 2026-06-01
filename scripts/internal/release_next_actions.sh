@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 CANDIDATE_ROOT="/tmp/WordSceneReleaseCandidates"
 UNSIGNED_MACOS_RELEASE_APP="/tmp/WordSceneVerifyReleaseMac/Build/Products/Release/Word Scene.app"
@@ -57,7 +57,7 @@ if [[ ! -f "$EVIDENCE_FILE" ]]; then
   exit 1
 fi
 
-readiness="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
+readiness="$("$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 preflight_args=(
   --evidence "$EVIDENCE_FILE"
   --candidate-root "$CANDIDATE_ROOT"
@@ -66,7 +66,7 @@ preflight_args=(
 if [[ -n "$DEVICE_LIST_FILE" ]]; then
   preflight_args+=(--device-list "$DEVICE_LIST_FILE")
 fi
-preflight="$("$ROOT/scripts/manual_smoke_environment_preflight.sh" "${preflight_args[@]}")"
+preflight="$("$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" "${preflight_args[@]}")"
 ready_rows="$(
   printf '%s\n' "$readiness" |
     awk '/^READY / {
@@ -130,16 +130,16 @@ echo "3. Executable smoke environments right now:"
 if [[ -n "$executable_environments" ]]; then
   printf '%s\n' "$executable_environments" | sed 's/^/   /'
 else
-  echo "   - unknown; rerun scripts/manual_smoke_environment_preflight.sh"
+  echo "   - unknown; rerun scripts/internal/manual_smoke_environment_preflight.sh"
 fi
 echo "4. Environment actions before smoke:"
 if [[ -n "$environment_actions" ]]; then
   printf '%s\n' "$environment_actions" | sed 's/^/   /'
 else
-  echo "   - unknown; rerun scripts/manual_smoke_environment_preflight.sh"
+  echo "   - unknown; rerun scripts/internal/manual_smoke_environment_preflight.sh"
 fi
-echo "5. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh."
-echo "6. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke."
+echo "5. Before recording PASS, confirm executable devices with scripts/internal/manual_smoke_environment_preflight.sh."
+echo "6. When a physical iPhone or iPad is available, install the iOS candidate with scripts/internal/install_ios_release_candidate.sh before running device smoke."
 echo "7. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place."
 echo "8. Do not call the release complete until scripts/check_release_completion.sh passes."
 echo

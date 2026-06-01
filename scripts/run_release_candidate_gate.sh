@@ -7,10 +7,10 @@ EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 ALLOW_PROVISIONING_UPDATES=0
 export DERIVED_DATA_BASE="${DERIVED_DATA_BASE:-/tmp/WordSceneReleaseCandidates}"
 
-BUILD_CANDIDATES_SCRIPT="${WORDSCENE_BUILD_CANDIDATES_SCRIPT:-$ROOT/scripts/build_release_candidates.sh}"
-COLLECT_EVIDENCE_SCRIPT="${WORDSCENE_COLLECT_EVIDENCE_SCRIPT:-$ROOT/scripts/collect_release_candidate_evidence.sh}"
-DIAGNOSE_SIGNING_SCRIPT="${WORDSCENE_DIAGNOSE_SIGNING_SCRIPT:-$ROOT/scripts/diagnose_release_signing.sh}"
-VERIFY_READINESS_SCRIPT="${WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT:-$ROOT/scripts/verify_release_readiness.sh}"
+BUILD_CANDIDATES_SCRIPT="${WORDSCENE_BUILD_CANDIDATES_SCRIPT:-$ROOT/scripts/internal/build_release_candidates.sh}"
+COLLECT_EVIDENCE_SCRIPT="${WORDSCENE_COLLECT_EVIDENCE_SCRIPT:-$ROOT/scripts/internal/collect_release_candidate_evidence.sh}"
+DIAGNOSE_SIGNING_SCRIPT="${WORDSCENE_DIAGNOSE_SIGNING_SCRIPT:-$ROOT/scripts/internal/diagnose_release_signing.sh}"
+VERIFY_READINESS_SCRIPT="${WORDSCENE_VERIFY_RELEASE_READINESS_SCRIPT:-$ROOT/scripts/internal/verify_release_readiness.sh}"
 
 usage() {
   echo "Usage: $0 [--allow-provisioning-updates] [--platform all|macos|ios] [--evidence <markdown>]" >&2
@@ -286,13 +286,13 @@ run_readiness() {
 
   if [[ "$status" -ne 0 ]]; then
     cat "$log_file" >&2
-    notes="scripts/verify_release_readiness.sh failed before release candidate builds; see $log_file"
+    notes="scripts/internal/verify_release_readiness.sh failed before release candidate builds; see $log_file"
     prepare_evidence_file
     append_non_manual_gate_row "Readiness script" "macOS + iOS generic" "BLOCKED" "$notes"
     return "$status"
   fi
 
-  notes="scripts/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, CloudKit background-mode validation, XcodeGen version-marker scan, macOS tests, iOS simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles."
+  notes="scripts/internal/verify_release_readiness.sh passed script syntax checks, shell regression tests, git diff --check, token leak scan, privacy manifest validation, required-reason API scan, privacy surface validation, CloudKit background-mode validation, XcodeGen version-marker scan, macOS tests, iOS simulator tests, iOS generic build, and unsigned macOS/iOS Release compiles."
   prepare_evidence_file
   append_non_manual_gate_row "Readiness script" "macOS + iOS generic" "PASS" "$notes"
 }

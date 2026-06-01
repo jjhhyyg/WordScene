@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -37,7 +37,7 @@ cat >"$EVIDENCE" <<EVIDENCE_MD
 EVIDENCE_MD
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -55,7 +55,7 @@ if grep -qF '## Manual Smoke Evidence' "$EVIDENCE"; then
   exit 1
 fi
 
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -68,7 +68,7 @@ fi
 grep -qF '## Manual Smoke Evidence' "$EVIDENCE"
 grep -qF '| Translation loop | macOS | MacBook Pro / macOS 26.5 | 1 | PASS | Saved token, translated hello world, history survived relaunch. |' "$EVIDENCE"
 
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Import/export" \
   --platform "iOS/iPadOS" \
@@ -80,7 +80,7 @@ grep -qF '| Translation loop | macOS | MacBook Pro / macOS 26.5 | 1 | PASS | Sav
 grep -qF '| Import/export | iOS/iPadOS | iPad Pro 11-inch / iPadOS 26.0 | 1 | BLOCKED | Awaiting signed build / do not break table |' "$EVIDENCE"
 test "$(grep -cF '## Manual Smoke Evidence' "$EVIDENCE")" -eq 1
 
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Import/export" \
   --platform "iOS/iPadOS" \
@@ -98,7 +98,7 @@ if grep -qF '| Import/export | iOS/iPadOS | iPad Pro 11-inch / iPadOS 26.0 | 1 |
 fi
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Translation loops" \
   --platform "macOS" \
@@ -114,7 +114,7 @@ test "$status" -eq 64
 grep -qF 'Unsupported manual smoke area/platform' "$TMPDIR/invalid-area.err"
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Import/export" \
   --platform "iPadOS" \
@@ -136,7 +136,7 @@ Existing gate evidence without candidate metadata.
 MISSING_CANDIDATE_MD
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$MISSING_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -158,7 +158,7 @@ fi
 cp "$EVIDENCE" "$MISMATCHED_BUILD_EVIDENCE"
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$MISMATCHED_BUILD_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -193,7 +193,7 @@ cat >"$MISSING_LIVE_SMOKE_EVIDENCE" <<MISSING_LIVE_SMOKE_MD
 MISSING_LIVE_SMOKE_MD
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$MISSING_LIVE_SMOKE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -220,7 +220,7 @@ WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
 WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
-  "$ROOT/scripts/record_release_smoke_result.sh" \
+  "$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$ANCESTOR_DOCS_ONLY_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -241,7 +241,7 @@ WORDSCENE_CANDIDATE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_CANDIDATE=$'docs/release-smoke-evidence.md\nscripts/run_release_candidate_gate.sh' \
 WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\ndocs/implementation-plan.md' \
-  "$ROOT/scripts/record_release_smoke_result.sh" \
+  "$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$ANCESTOR_PRODUCT_CHANGE_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -279,7 +279,7 @@ set +e
 WORDSCENE_CURRENT_COMMIT="bbbbbbbbbbbb" \
 WORDSCENE_LIVE_SMOKE_IS_ANCESTOR=1 \
 WORDSCENE_CHANGED_FILES_SINCE_LIVE_SMOKE=$'docs/release-smoke-evidence.md\nscripts/run_live_deepseek_translation_smoke.sh' \
-  "$ROOT/scripts/record_release_smoke_result.sh" \
+  "$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$STALE_LIVE_SMOKE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -298,7 +298,7 @@ cp "$EVIDENCE" "$STALE_CANDIDATE_EVIDENCE"
 sed -i '' "s/| Git commit | $CURRENT_COMMIT |/| Git commit | 000000000000 |/" "$STALE_CANDIDATE_EVIDENCE"
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$STALE_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -332,7 +332,7 @@ cat >"$IOS_ONLY_CANDIDATE_EVIDENCE" <<IOS_ONLY_MD
 | Git commit | $CURRENT_COMMIT |
 IOS_ONLY_MD
 
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "iPhone" \
@@ -344,7 +344,7 @@ IOS_ONLY_MD
 
 grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | iPhone smoke can use the iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
 
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
   --area "Local-only fallback" \
   --platform "macOS/iOS" \
@@ -357,7 +357,7 @@ grep -qF '| Translation loop | iPhone | iPhone 17 Pro Max / iOS 26.0 | 1 | PASS 
 grep -qF '| Local-only fallback | macOS/iOS | Unsigned Mac Release + iPhone 17 Pro Max / iOS 26.0 | 1 | PASS | Local-only fallback uses the readiness-covered unsigned Mac build and the signed iOS candidate. |' "$IOS_ONLY_CANDIDATE_EVIDENCE"
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$IOS_ONLY_CANDIDATE_EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \
@@ -377,7 +377,7 @@ if grep -qF '| Translation loop | macOS |' "$IOS_ONLY_CANDIDATE_EVIDENCE"; then
 fi
 
 set +e
-"$ROOT/scripts/record_release_smoke_result.sh" \
+"$ROOT/scripts/internal/record_release_smoke_result.sh" \
   --evidence "$EVIDENCE" \
   --area "Translation loop" \
   --platform "macOS" \

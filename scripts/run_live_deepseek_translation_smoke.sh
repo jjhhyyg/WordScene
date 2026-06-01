@@ -132,11 +132,12 @@ cat >"$CURL_CONFIG" <<EOF
 silent
 show-error
 fail-with-body
+max-time = 10
 request = "POST"
 url = "$BASE_URL/chat/completions"
 header = "Authorization: Bearer $TOKEN"
 header = "Content-Type: application/json"
-header = "Accept: application/json"
+header = "Accept: text/event-stream"
 EOF
 
 /usr/bin/python3 - "$REQUEST_BODY" "$MODEL" "$SOURCE_LANGUAGE" "$TARGET_LANGUAGE" "$TEXT" <<'PY'
@@ -170,7 +171,7 @@ body = {
     "response_format": {"type": "json_object"},
     "max_tokens": 1200,
     "temperature": 0.2,
-    "stream": False,
+    "stream": True,
 }
 with open(request_path, "w", encoding="utf-8") as handle:
     json.dump(body, handle, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
@@ -183,28 +184,41 @@ import json
 import sys
 
 response_path, source_language, target_language, translated_text_path = sys.argv[1:]
+content = ""
 with open(response_path, "r", encoding="utf-8") as handle:
-    response = json.load(handle)
+    for line in handle:
+        line = line.strip()
+        if not line.startswith("data:"):
+            continue
+        payload = line[len("data:"):].strip()
+        if payload == "[DONE]":
+            continue
+        try:
+            chunk = json.loads(payload)
+        except json.JSONDecodeError as error:
+            raise SystemExit(f"DeepSeek stream chunk was not JSON: {error}") from error
 
-choices = response.get("choices") or []
-if not choices:
-    raise SystemExit("DeepSeek response did not include choices.")
+        choices = chunk.get("choices") or []
+        if not choices:
+            raise SystemExit("DeepSeek stream chunk did not include choices.")
 
-choice = choices[0]
-finish_reason = choice.get("finish_reason")
-if finish_reason == "length":
-    raise SystemExit("DeepSeek output was truncated.")
-if finish_reason == "content_filter":
-    raise SystemExit("DeepSeek filtered the content.")
-if finish_reason == "insufficient_system_resource":
-    raise SystemExit("DeepSeek reported insufficient system resources.")
-if finish_reason not in (None, "stop"):
-    raise SystemExit(f"Unexpected DeepSeek finish_reason: {finish_reason}")
+        choice = choices[0]
+        finish_reason = choice.get("finish_reason")
+        if finish_reason == "length":
+            raise SystemExit("DeepSeek output was truncated.")
+        if finish_reason == "content_filter":
+            raise SystemExit("DeepSeek filtered the content.")
+        if finish_reason == "insufficient_system_resource":
+            raise SystemExit("DeepSeek reported insufficient system resources.")
+        if finish_reason not in (None, "stop"):
+            raise SystemExit(f"Unexpected DeepSeek finish_reason: {finish_reason}")
 
-message = choice.get("message") or {}
-content = (message.get("content") or "").strip()
+        delta = choice.get("delta") or {}
+        content += delta.get("content") or ""
+
+content = content.strip()
 if not content:
-    raise SystemExit("DeepSeek returned empty assistant content.")
+    raise SystemExit("DeepSeek returned empty assistant stream content.")
 
 try:
     parsed_content = json.loads(content)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -13,7 +13,7 @@ cat >"$LOG" <<'LOG_TEXT'
 ** BUILD FAILED **
 LOG_TEXT
 
-OUTPUT="$("$ROOT/scripts/diagnose_release_signing.sh" --platform macos --log "$LOG")"
+OUTPUT="$("$ROOT/scripts/internal/diagnose_release_signing.sh" --platform macos --log "$LOG")"
 
 grep -qF 'Signing diagnosis | macOS | BLOCKED |' <<<"$OUTPUT"
 grep -qF 'Xcode has no active Apple Developer account session' <<<"$OUTPUT"
@@ -24,7 +24,7 @@ DEFAULT_BASE="$TMPDIR/default-candidates"
 mkdir -p "$DEFAULT_BASE/logs"
 cp "$LOG" "$DEFAULT_BASE/logs/macos-release-candidate.log"
 
-DEFAULT_OUTPUT="$(DERIVED_DATA_BASE="$DEFAULT_BASE" "$ROOT/scripts/diagnose_release_signing.sh" --platform macos)"
+DEFAULT_OUTPUT="$(DERIVED_DATA_BASE="$DEFAULT_BASE" "$ROOT/scripts/internal/diagnose_release_signing.sh" --platform macos)"
 
 grep -qF 'Signing diagnosis | macOS | BLOCKED |' <<<"$DEFAULT_OUTPUT"
 grep -qF 'Xcode has no active Apple Developer account session' <<<"$DEFAULT_OUTPUT"

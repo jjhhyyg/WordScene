@@ -91,6 +91,12 @@ set -euo pipefail
 printf 'test_privacy_surface\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_PRIVACY_SURFACE_TEST
 
+cat >"$BIN/scripts-test-check-localization-resources" <<'FAKE_LOCALIZATION_RESOURCES_TEST'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'test_check_localization_resources\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
+FAKE_LOCALIZATION_RESOURCES_TEST
+
 cat >"$BIN/scripts-test-cloudkit-background-mode" <<'FAKE_CLOUDKIT_BACKGROUND_MODE_TEST'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -103,7 +109,7 @@ set -euo pipefail
 printf 'test_required_reason_api_scan\n' >>"$WORDSCENE_FAKE_COMMAND_LOG"
 FAKE_REQUIRED_REASON_API_SCAN
 
-chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion" "$BIN/scripts-test-manual-smoke-readiness" "$BIN/scripts-test-release-next-actions" "$BIN/scripts-test-privacy-manifest" "$BIN/scripts-test-privacy-surface" "$BIN/scripts-test-cloudkit-background-mode" "$BIN/scripts-test-required-reason-api-scan"
+chmod +x "$BIN/git" "$BIN/rg" "$BIN/xcodebuild" "$BIN/scripts-test-run-release-candidate-gate" "$BIN/scripts-test-run-live-deepseek-translation-smoke" "$BIN/scripts-test-check-release-completion" "$BIN/scripts-test-manual-smoke-readiness" "$BIN/scripts-test-release-next-actions" "$BIN/scripts-test-privacy-manifest" "$BIN/scripts-test-privacy-surface" "$BIN/scripts-test-check-localization-resources" "$BIN/scripts-test-cloudkit-background-mode" "$BIN/scripts-test-required-reason-api-scan"
 
 PATH="$BIN:$PATH" \
   WORDSCENE_FAKE_COMMAND_LOG="$LOG" \
@@ -115,9 +121,10 @@ PATH="$BIN:$PATH" \
   WORDSCENE_TEST_RELEASE_NEXT_ACTIONS_SCRIPT="$BIN/scripts-test-release-next-actions" \
   WORDSCENE_TEST_PRIVACY_MANIFEST_SCRIPT="$BIN/scripts-test-privacy-manifest" \
   WORDSCENE_TEST_PRIVACY_SURFACE_SCRIPT="$BIN/scripts-test-privacy-surface" \
+  WORDSCENE_TEST_LOCALIZATION_RESOURCES_SCRIPT="$BIN/scripts-test-check-localization-resources" \
   WORDSCENE_TEST_CLOUDKIT_BACKGROUND_MODE_SCRIPT="$BIN/scripts-test-cloudkit-background-mode" \
   WORDSCENE_TEST_REQUIRED_REASON_API_SCAN_SCRIPT="$BIN/scripts-test-required-reason-api-scan" \
-  "$ROOT/scripts/verify_release_readiness.sh"
+  "$ROOT/scripts/internal/verify_release_readiness.sh"
 
 grep -qF 'git diff --check' "$LOG"
 grep -qF 'test_run_release_candidate_gate' "$LOG"
@@ -127,6 +134,7 @@ grep -qF 'test_manual_smoke_readiness' "$LOG"
 grep -qF 'test_release_next_actions' "$LOG"
 grep -qF 'test_privacy_manifest' "$LOG"
 grep -qF 'test_privacy_surface' "$LOG"
+grep -qF 'test_check_localization_resources' "$LOG"
 grep -qF 'test_cloudkit_background_mode' "$LOG"
 grep -qF 'test_required_reason_api_scan' "$LOG"
 token_pattern='sk-[A-Za-z0-9]|e2a'

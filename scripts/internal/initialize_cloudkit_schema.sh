@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLATFORM="macos"
 DESTINATION="platform=macOS"
 DRY_RUN=0
@@ -9,7 +9,7 @@ PRINT_SCHEMA=0
 
 usage() {
   cat >&2 <<'USAGE'
-Usage: scripts/initialize_cloudkit_schema.sh [--platform macos|ios] [--device <identifier>] [--dry-run] [--print-schema]
+Usage: scripts/internal/initialize_cloudkit_schema.sh [--platform macos|ios] [--device <identifier>] [--dry-run] [--print-schema]
 
 Initializes the CloudKit development schema through a signed test host.
 Use this only for development schema setup, not as an App Store production step.
@@ -55,14 +55,14 @@ done
 
 case "$PLATFORM" in
   macos)
-    SCHEME="WordSceneMac"
-    TEST_TARGET="WordSceneMacTests"
-    TEST_IDENTIFIER="WordSceneMacTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
+    SCHEME="WordSceneMacCloudKitSchema"
+    TEST_TARGET="WordSceneMacCloudKitSchemaTests"
+    TEST_IDENTIFIER="WordSceneMacCloudKitSchemaTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
     ;;
   ios)
-    SCHEME="WordScene"
-    TEST_TARGET="WordSceneTests"
-    TEST_IDENTIFIER="WordSceneTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
+    SCHEME="WordSceneCloudKitSchema"
+    TEST_TARGET="WordSceneCloudKitSchemaTests"
+    TEST_IDENTIFIER="WordSceneCloudKitSchemaTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema"
     if [[ "$DESTINATION" == "platform=macOS" ]]; then
       echo "iOS schema initialization requires --device <identifier> for a signed physical device." >&2
       exit 64

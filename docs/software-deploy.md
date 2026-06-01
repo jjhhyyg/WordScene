@@ -43,6 +43,37 @@ flowchart LR
 
 ## 3. 本地编译和测试
 
+### XcodeGen 工程生成
+
+WordScene 的 Xcode 工程由 `project.yml` 通过 XcodeGen 生成。`project.yml` 是工程蓝图，负责定义项目名、全局构建设置、iOS/macOS app target、测试 target、scheme、Bundle ID、Info.plist 生成项、entitlements、资源目录、App Icon 生成脚本等。
+
+当前工程的关键配置包括：
+
+- iOS app target：`WordScene`
+- macOS app target：`WordSceneMac`
+- 共享源码目录：`WordScene/Sources/Shared`
+- 共享资源目录：`WordScene/Resources`
+- Bundle ID：`com.erikssonhou.leximemory`
+- iCloud container：`iCloud.com.erikssonhou.leximemory`
+- 显示名称：`译笺`
+- 主要测试 scheme：`WordScene`、`WordSceneMac`、`WordSceneCloudKitSchema`、`WordSceneMacCloudKitSchema`
+
+修改 target、scheme、签名、entitlements、资源、测试目标、Build Settings 等工程结构时，优先修改 `project.yml`，然后在项目根目录重新生成 Xcode project：
+
+```bash
+cd /Users/erikssonhou/Documents/WordScene
+xcodegen generate
+```
+
+生成结果会更新 `WordScene.xcodeproj`。如果只在 Xcode 里手工修改 `.xcodeproj`，但没有同步回 `project.yml`，下一次执行 `xcodegen generate` 时这些手工改动可能被覆盖。
+
+发布前尤其注意：
+
+- `CURRENT_PROJECT_VERSION` 必须随每次 TestFlight 上传递增，不能低于 App Store Connect 已存在的同版本 build。
+- Bundle ID 和 iCloud container 已绑定 App Store Connect、签名与 CloudKit，除非明确迁移计划，不要随意更名。
+- `project.yml` 和 `WordScene.xcodeproj` 不应长期分叉；修改工程配置后要确认生成后的 `.xcodeproj` 与预期一致。
+- `WordScene/Resources`、Info.plist 自动生成项、App Icon post-build script 等配置变更后，需要至少跑一次本地构建确认资源和签名产物没有偏差。
+
 发布前至少跑一轮本地验证：
 
 ```bash

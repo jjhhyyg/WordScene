@@ -86,7 +86,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
     postBuildScripts:
       - name: Generate complete macOS AppIcon.icns
-        script: scripts/generate_macos_app_icon.sh
+        script: scripts/internal/generate_macos_app_icon.sh
         inputFiles:
           - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac.png
           - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac@2x.png

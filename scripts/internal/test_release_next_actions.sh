@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -46,7 +46,7 @@ Name             Hostname                         Identifier                    
 Lab iPhone       Lab-iPhone.coredevice.local      00000000-0000-0000-0000-000000000001   unavailable   iPhone 17 Pro Max
 DEVICES
 
-"$ROOT/scripts/release_next_actions.sh" \
+"$ROOT/scripts/internal/release_next_actions.sh" \
   --evidence "$EVIDENCE" \
   --candidate-root "$CANDIDATE_ROOT" \
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
@@ -67,7 +67,7 @@ grep -qF -- '- Local-only fallback smoke: WAIT - requires an available physical 
 grep -qF '4. Environment actions before smoke:' "$TMPDIR/actions.out"
 grep -qF 'A physical iPhone/iPad is visible but unavailable; unlock it, trust this Mac, confirm Developer Mode, and reconnect or re-pair it before smoke.' "$TMPDIR/actions.out"
 grep -qF 'Signed macOS candidate app is missing; restore the Xcode account/profile for team JU68L3U235 before macOS and iCloud smoke.' "$TMPDIR/actions.out"
-grep -qF '5. Before recording PASS, confirm executable devices with scripts/manual_smoke_environment_preflight.sh.' "$TMPDIR/actions.out"
-grep -qF '6. When a physical iPhone or iPad is available, install the iOS candidate with scripts/install_ios_release_candidate.sh before running device smoke.' "$TMPDIR/actions.out"
+grep -qF '5. Before recording PASS, confirm executable devices with scripts/internal/manual_smoke_environment_preflight.sh.' "$TMPDIR/actions.out"
+grep -qF '6. When a physical iPhone or iPad is available, install the iOS candidate with scripts/internal/install_ios_release_candidate.sh before running device smoke.' "$TMPDIR/actions.out"
 grep -qF '7. Use scripts/manual_smoke_session_guide.sh to print the preflight, install command, checklist pointer, and environment-scoped record-command templates in one place.' "$TMPDIR/actions.out"
 grep -qF '8. Do not call the release complete until scripts/check_release_completion.sh passes.' "$TMPDIR/actions.out"

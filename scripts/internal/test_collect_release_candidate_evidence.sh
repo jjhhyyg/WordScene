@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -46,7 +46,7 @@ PRIVACY_MANIFEST
 /usr/libexec/PlistBuddy -c 'Add :com.apple.developer.icloud-services:0 string CloudKit' "$ENTITLEMENTS"
 /usr/libexec/PlistBuddy -c 'Add :aps-environment string development' "$ENTITLEMENTS"
 
-OUTPUT="$("$ROOT/scripts/collect_release_candidate_evidence.sh" --platform ios --app "$APP" --entitlements "$ENTITLEMENTS")"
+OUTPUT="$("$ROOT/scripts/internal/collect_release_candidate_evidence.sh" --platform ios --app "$APP" --entitlements "$ENTITLEMENTS")"
 CURRENT_COMMIT="$(git -C "$ROOT" rev-parse --short=12 HEAD)"
 
 grep -qF '| Candidate build | iOS |' <<<"$OUTPUT"

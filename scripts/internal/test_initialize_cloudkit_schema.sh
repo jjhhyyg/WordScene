@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -33,7 +33,12 @@ if [[ "$*" == *"build-for-testing"* ]]; then
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>WordSceneTests</key>
+  <key>WordSceneCloudKitSchemaTests</key>
+  <dict>
+    <key>TestingEnvironmentVariables</key>
+    <dict/>
+  </dict>
+  <key>WordSceneMacCloudKitSchemaTests</key>
   <dict>
     <key>TestingEnvironmentVariables</key>
     <dict/>
@@ -46,16 +51,23 @@ FAKE_XCODEBUILD
 chmod +x "$BIN/xcodebuild"
 
 PATH="$BIN:$PATH" WORDSCENE_SCHEMA_TEST_LOG="$LOG" \
-  "$ROOT/scripts/initialize_cloudkit_schema.sh" --platform ios --device 00008150-000A42D90A3B401C --dry-run --print-schema
+  "$ROOT/scripts/internal/initialize_cloudkit_schema.sh" --platform ios --device 00008150-000A42D90A3B401C --dry-run --print-schema
 
 grep -qF 'xcodebuild build-for-testing -project' "$LOG"
-grep -qF -- '-scheme WordScene' "$LOG"
+grep -qF -- '-scheme WordSceneCloudKitSchema' "$LOG"
 grep -qF -- '-destination id=00008150-000A42D90A3B401C' "$LOG"
-grep -qF -- '-only-testing:WordSceneTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema' "$LOG"
+grep -qF -- '-only-testing:WordSceneCloudKitSchemaTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema' "$LOG"
 grep -qF 'xcodebuild test-without-building -xctestrun' "$LOG"
 
+PATH="$BIN:$PATH" WORDSCENE_SCHEMA_TEST_LOG="$LOG" \
+  "$ROOT/scripts/internal/initialize_cloudkit_schema.sh" --platform macos --dry-run --print-schema
+
+grep -qF -- '-scheme WordSceneMacCloudKitSchema' "$LOG"
+grep -qF -- '-destination platform=macOS' "$LOG"
+grep -qF -- '-only-testing:WordSceneMacCloudKitSchemaTests/CloudKitSchemaInitializationTests/testInitializeCloudKitDevelopmentSchema' "$LOG"
+
 if PATH="$BIN:$PATH" WORDSCENE_SCHEMA_TEST_LOG="$LOG" \
-  "$ROOT/scripts/initialize_cloudkit_schema.sh" --platform ios >/tmp/wordscene-schema-ios-without-device.out 2>/tmp/wordscene-schema-ios-without-device.err; then
+  "$ROOT/scripts/internal/initialize_cloudkit_schema.sh" --platform ios >/tmp/wordscene-schema-ios-without-device.out 2>/tmp/wordscene-schema-ios-without-device.err; then
   echo "Expected iOS schema initialization without --device to fail." >&2
   exit 1
 fi

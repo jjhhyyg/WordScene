@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 CANDIDATE_ROOT="/tmp/WordSceneReleaseCandidates"
 UNSIGNED_MACOS_RELEASE_APP="/tmp/WordSceneVerifyReleaseMac/Build/Products/Release/Word Scene.app"
@@ -120,7 +120,7 @@ print_device_guidance() {
   fi
 }
 
-readiness="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
+readiness="$("$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 ready_count="$(printf '%s\n' "$readiness" | sed -n 's/^Ready rows: //p' | tail -n 1)"
 waiting_count="$(printf '%s\n' "$readiness" | sed -n 's/^Waiting rows: //p' | tail -n 1)"
 

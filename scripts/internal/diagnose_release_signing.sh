@@ -72,7 +72,7 @@ if grep -q "No profiles for 'com.erikssonhou.leximemory' were found" "$LOG_FILE"
   else
     notes+=("iOS provisioning profile is missing for com.erikssonhou.leximemory")
   fi
-  next_actions+=("After account authentication, rerun scripts/build_release_candidates.sh --allow-provisioning-updates --platform $PLATFORM")
+  next_actions+=("After account authentication, rerun scripts/internal/build_release_candidates.sh --allow-provisioning-updates --platform $PLATFORM")
 fi
 
 if grep -qi 'cloudkit\|icloud' "$LOG_FILE" && grep -qi 'entitlement\|container' "$LOG_FILE"; then

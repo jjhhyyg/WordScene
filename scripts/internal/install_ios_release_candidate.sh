@@ -121,7 +121,7 @@ fi
 
 if [[ -z "$DEVICE" ]]; then
   echo "No available physical iPhone or iPad was reported by devicectl." >&2
-  echo "Connect and unlock a target device, then rerun scripts/manual_smoke_environment_preflight.sh." >&2
+  echo "Connect and unlock a target device, then rerun scripts/internal/manual_smoke_environment_preflight.sh." >&2
   exit 1
 fi
 

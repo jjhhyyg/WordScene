@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVIDENCE_FILE="$ROOT/docs/release-smoke-evidence.md"
 SHOW_COMMANDS=0
 SHOW_SUMMARY=0
@@ -367,7 +367,7 @@ print_record_command() {
 
   device="$(suggested_device_for "$area" "$platform")"
   cat <<COMMAND
-scripts/record_release_smoke_result.sh \\
+scripts/internal/record_release_smoke_result.sh \\
   --evidence docs/release-smoke-evidence.md \\
   --area "$area" \\
   --platform "$platform" \\

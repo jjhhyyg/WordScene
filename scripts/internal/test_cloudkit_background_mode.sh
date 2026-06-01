@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 if ! /usr/libexec/PlistBuddy -c 'Print :UIBackgroundModes:0' "$ROOT/WordScene/Generated/WordSceneInfo.plist" 2>/dev/null | rg -n '^remote-notification$' >/tmp/wordscene-cloudkit-background-project.out; then
   echo "iOS target uses CloudKit but the generated Info.plist does not declare remote-notification background mode." >&2

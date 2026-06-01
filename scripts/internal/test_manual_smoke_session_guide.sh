@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -55,8 +55,8 @@ DEVICES
 
 grep -qF 'Manual Smoke Session Guide' "$TMPDIR/guide.out"
 grep -qF 'Manual Smoke Environment Preflight' "$TMPDIR/guide.out"
-grep -qF 'scripts/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/guide.out"
-grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/guide.out"
+grep -qF 'scripts/internal/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/guide.out"
+grep -qF 'scripts/internal/record_release_smoke_result.sh \' "$TMPDIR/guide.out"
 grep -qF 'iOS/iPadOS device rows:' "$TMPDIR/guide.out"
 grep -qF -- '--area "Translation loop"' "$TMPDIR/guide.out"
 grep -qF -- '--platform "iPhone"' "$TMPDIR/guide.out"
@@ -90,7 +90,7 @@ DEVICES
   --unsigned-macos-app "$UNSIGNED_MAC_APP" \
   --device-list "$DEVICE_LIST" >"$TMPDIR/connected-guide.out"
 
-grep -qF 'scripts/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/connected-guide.out"
+grep -qF 'scripts/internal/install_ios_release_candidate.sh --device 00000000-0000-0000-0000-000000000001' "$TMPDIR/connected-guide.out"
 grep -qF 'iOS/iPadOS device rows:' "$TMPDIR/connected-guide.out"
 
 rm -rf "$CANDIDATE_ROOT/iOS"
@@ -108,7 +108,7 @@ DEVICES
 
 grep -qF 'WAIT: An available physical iPhone/iPad and iOS candidate app are required before install.' "$TMPDIR/waiting-guide.out"
 grep -qF 'PASS record commands are hidden until an executable candidate environment is available.' "$TMPDIR/waiting-guide.out"
-if grep -qF 'scripts/record_release_smoke_result.sh \' "$TMPDIR/waiting-guide.out"; then
+if grep -qF 'scripts/internal/record_release_smoke_result.sh \' "$TMPDIR/waiting-guide.out"; then
   echo "Waiting guide must not print PASS record commands." >&2
   exit 1
 fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SETTINGS_VIEW="$ROOT/WordScene/Sources/Shared/Features/Settings/SettingsView.swift"
 DOCS=(
   "$ROOT/docs/project-config.md"
