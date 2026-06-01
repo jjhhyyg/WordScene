@@ -37,20 +37,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "stop",
-                  "message": {
-                    "role": "assistant",
-                    "content": "{\\"translated_text\\":\\"你好\\"}"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
             return (response, data)
         }
         defer {
@@ -80,7 +67,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         let body = try XCTUnwrap(Self.bodyData(for: capturedRequest))
         let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
         XCTAssertEqual(payload["model"] as? String, "adapter-model")
-        XCTAssertEqual(payload["stream"] as? Bool, false)
+        XCTAssertEqual(payload["stream"] as? Bool, true)
         XCTAssertEqual((payload["thinking"] as? [String: Any])?["type"] as? String, "disabled")
         XCTAssertEqual((payload["response_format"] as? [String: Any])?["type"] as? String, "json_object")
         XCTAssertEqual(payload["max_tokens"] as? Int, 1_200)
@@ -94,7 +81,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertTrue(userPrompt.contains("translated_text"))
         XCTAssertTrue(userPrompt.contains("Translate only the text field"))
         XCTAssertTrue(userPrompt.contains(#""source_language":"English""#))
-        XCTAssertTrue(userPrompt.contains(#""target_language":"Chinese""#))
+        XCTAssertTrue(userPrompt.contains(#""target_language":"Simplified Chinese""#))
         XCTAssertTrue(userPrompt.contains(#""text":"He said \"hello\"""#))
         XCTAssertFalse(userPrompt.contains("Text:\nHe said"))
     }
@@ -110,20 +97,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "stop",
-                  "message": {
-                    "role": "assistant",
-                    "content": "{\\"translated_text\\":\\"你好，世界。\\"}"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let data = Self.streamData(content: #"{"translated_text":"你好，世界。"}"#)
             return (response, data)
         }
         defer {
@@ -145,6 +119,46 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertEqual(result.translatedText, "你好，世界。")
     }
 
+    func testProviderStreamsPartialTranslatedTextFromJSONAssistantContent() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = Self.streamData(chunks: [
+                #"{"translated_text":"你"#,
+                #"好，世"#,
+                #"界。"}"#
+            ])
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt"
+        )
+
+        var partials: [String] = []
+        for try await partial in provider.streamTranslation(
+            TranslationProviderRequest(text: "Hello, world.", source: .en, target: .zh),
+            credential: TranslationProviderCredential(apiToken: "test-token")
+        ) {
+            partials.append(partial)
+        }
+
+        XCTAssertEqual(partials, ["你", "你好，世", "你好，世界。"])
+    }
+
     func testProviderRejectsLengthFinishReason() async throws {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [CapturingURLProtocol.self]
@@ -156,20 +170,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "length",
-                  "message": {
-                    "role": "assistant",
-                    "content": "{\\"translated_text\\":\\"截断"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let data = Self.streamData(content: #"{"translated_text":"截断"#, finishReason: "length")
             return (response, data)
         }
         defer {
@@ -207,21 +208,8 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let content = attempt == 1 ? "" : "{\\\"translated_text\\\":\\\"你好\\\"}"
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "stop",
-                  "message": {
-                    "role": "assistant",
-                    "content": "\(content)"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let content = attempt == 1 ? "" : #"{"translated_text":"你好"}"#
+            let data = Self.streamData(content: content)
             return (response, data)
         }
         defer {
@@ -257,20 +245,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "stop",
-                  "message": {
-                    "role": "assistant",
-                    "content": "{\\"translated_text\\":\\"你好\\"}"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
             return (response, data)
         }
         defer {
@@ -318,20 +293,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = """
-            {
-              "choices": [
-                {
-                  "index": 0,
-                  "finish_reason": "stop",
-                  "message": {
-                    "role": "assistant",
-                    "content": "{\\"translated_text\\":\\"你好\\"}"
-                  }
-                }
-              ]
-            }
-            """.data(using: .utf8)!
+            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
             return (response, data)
         }
         defer {
@@ -447,6 +409,33 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         }
 
         return data
+    }
+
+    private static func streamData(content: String, finishReason: String? = "stop") -> Data {
+        streamData(chunks: [content], finishReason: finishReason)
+    }
+
+    private static func streamData(chunks: [String], finishReason: String? = "stop") -> Data {
+        let lines = chunks.enumerated().map { index, content in
+            let reason = index == chunks.count - 1 ? finishReason : nil
+            return streamLine(content: content, finishReason: reason)
+        }.joined(separator: "\n")
+        return "\(lines)\ndata: [DONE]\n\n".data(using: .utf8)!
+    }
+
+    private static func streamLine(content: String, finishReason: String?) -> String {
+        let chunk: [String: Any] = [
+            "choices": [
+                [
+                    "index": 0,
+                    "delta": ["content": content],
+                    "finish_reason": finishReason.map { $0 as Any } ?? NSNull()
+                ]
+            ]
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: chunk)
+        let json = String(data: data, encoding: .utf8)!
+        return "data: \(json)\n"
     }
 
 }

@@ -45,7 +45,7 @@ identifier and team.
 10. Build the macOS Release candidate from Terminal:
 
 ```bash
-scripts/build_release_candidates.sh --allow-provisioning-updates --platform macos
+scripts/internal/build_release_candidates.sh --allow-provisioning-updates --platform macos
 ```
 
 If that command still fails, do not edit source code first. Read the last
@@ -58,7 +58,7 @@ build. By default the script reads
 `--log` only when diagnosing a different log file:
 
 ```bash
-scripts/diagnose_release_signing.sh \
+scripts/internal/diagnose_release_signing.sh \
   --platform macos
 ```
 
@@ -71,7 +71,7 @@ After macOS signing succeeds, run the full non-manual gate:
 
 ```bash
 scripts/run_release_candidate_gate.sh --allow-provisioning-updates --platform all
-scripts/verify_release_readiness.sh
+scripts/test_verify_release_readiness.sh
 ```
 
 Expected result:
@@ -80,7 +80,7 @@ Expected result:
 - iOS Release candidate build: `PASS`
 - `docs/release-smoke-evidence.md` contains current candidate evidence for both
   platforms and no stale signing blocker for the same build.
-- `scripts/verify_release_readiness.sh` passes script checks, token leak scan,
+- `scripts/test_verify_release_readiness.sh` passes script checks, token leak scan,
   macOS tests, and iOS generic build.
 
 ## Then Run Manual Smoke

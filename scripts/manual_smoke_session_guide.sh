@@ -82,7 +82,7 @@ first_available_mobile_device() {
     '
 }
 
-readiness_summary="$("$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
+readiness_summary="$("$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --summary)"
 ios_candidate_app="$CANDIDATE_ROOT/iOS/Build/Products/Release-iphoneos/Word Scene.app"
 macos_candidate_app="$CANDIDATE_ROOT/macOS/Build/Products/Release/Word Scene.app"
 device="$(first_available_mobile_device)"
@@ -102,13 +102,13 @@ fi
 echo "Manual Smoke Session Guide"
 echo
 echo "1. Environment preflight:"
-"$ROOT/scripts/manual_smoke_environment_preflight.sh" "${preflight_args[@]}"
+"$ROOT/scripts/internal/manual_smoke_environment_preflight.sh" "${preflight_args[@]}"
 
 echo
 echo "2. Install current iOS candidate:"
 if [[ -d "$ios_candidate_app" && -n "$device" ]]; then
   can_install_ios=1
-  printf 'scripts/install_ios_release_candidate.sh --device %q --app %q\n' "$device" "$ios_candidate_app"
+  printf 'scripts/internal/install_ios_release_candidate.sh --device %q --app %q\n' "$device" "$ios_candidate_app"
 else
   echo "WAIT: An available physical iPhone/iPad and iOS candidate app are required before install."
 fi
@@ -130,25 +130,25 @@ if [[ "$can_install_ios" -eq 1 || "$can_run_macos" -eq 1 || "$can_run_local_only
   if [[ "$can_install_ios" -eq 1 ]]; then
     echo
     echo "iOS/iPadOS device rows:"
-    "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope ios-device
+    "$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope ios-device
   fi
 
   if [[ "$can_run_macos" -eq 1 ]]; then
     echo
     echo "macOS signed-candidate rows:"
-    "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope macos
+    "$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope macos
   fi
 
   if [[ "$can_install_ios" -eq 1 && "$can_run_macos" -eq 1 ]]; then
     echo
     echo "Cross-platform signed-candidate rows:"
-    "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope cross-platform
+    "$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope cross-platform
   fi
 
   if [[ "$can_run_local_only" -eq 1 ]]; then
     echo
     echo "Local-only fallback row:"
-    "$ROOT/scripts/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope local-only
+    "$ROOT/scripts/internal/manual_smoke_readiness.sh" --evidence "$EVIDENCE_FILE" --commands --summary --scope local-only
   elif [[ "$can_install_ios" -eq 1 ]]; then
     echo
     printf 'Local-only fallback command is hidden until the unsigned macOS Release app is available: %s\n' "$UNSIGNED_MACOS_RELEASE_APP"

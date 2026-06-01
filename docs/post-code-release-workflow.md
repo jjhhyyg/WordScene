@@ -191,7 +191,7 @@ local-only fallback 用到的 unsigned macOS Release app 默认在：
 先看当前可记录行：
 
 ```bash
-scripts/manual_smoke_readiness.sh \
+scripts/internal/manual_smoke_readiness.sh \
   --evidence docs/release-smoke-evidence.md \
   --commands \
   --summary \
@@ -207,7 +207,7 @@ scripts/manual_smoke_readiness.sh \
 记录通过示例：
 
 ```bash
-scripts/record_release_smoke_result.sh \
+scripts/internal/record_release_smoke_result.sh \
   --evidence docs/release-smoke-evidence.md \
   --area "Translation loop" \
   --platform "macOS" \
@@ -234,7 +234,7 @@ scripts/record_release_smoke_result.sh \
 运行：
 
 ```bash
-scripts/manual_smoke_environment_preflight.sh
+scripts/internal/manual_smoke_environment_preflight.sh
 ```
 
 重点看：
@@ -250,7 +250,7 @@ scripts/manual_smoke_environment_preflight.sh
 如果有真机：
 
 ```bash
-scripts/install_ios_release_candidate.sh \
+scripts/internal/install_ios_release_candidate.sh \
   --device <device-identifier>
 ```
 
@@ -271,7 +271,7 @@ candidate 默认路径：
 查看可记录行：
 
 ```bash
-scripts/manual_smoke_readiness.sh \
+scripts/internal/manual_smoke_readiness.sh \
   --evidence docs/release-smoke-evidence.md \
   --commands \
   --summary \
@@ -288,7 +288,7 @@ scripts/manual_smoke_readiness.sh \
 记录通过示例：
 
 ```bash
-scripts/record_release_smoke_result.sh \
+scripts/internal/record_release_smoke_result.sh \
   --evidence docs/release-smoke-evidence.md \
   --area "Translation loop" \
   --platform "iPhone" \
@@ -316,7 +316,7 @@ iCloud smoke 需要至少两个 signed candidate 环境，推荐 iPhone + macOS�
 先确认可记录行：
 
 ```bash
-scripts/manual_smoke_readiness.sh \
+scripts/internal/manual_smoke_readiness.sh \
   --evidence docs/release-smoke-evidence.md \
   --commands \
   --summary \
@@ -333,7 +333,7 @@ scripts/manual_smoke_readiness.sh \
 记录示例：
 
 ```bash
-scripts/record_release_smoke_result.sh \
+scripts/internal/record_release_smoke_result.sh \
   --evidence docs/release-smoke-evidence.md \
   --area "iCloud create sync" \
   --platform "iPhone + macOS" \
@@ -361,7 +361,7 @@ local-only fallback 需要 signed iOS candidate 和 unsigned macOS Release app�
 查看可记录行：
 
 ```bash
-scripts/manual_smoke_readiness.sh \
+scripts/internal/manual_smoke_readiness.sh \
   --evidence docs/release-smoke-evidence.md \
   --commands \
   --summary \
@@ -371,7 +371,7 @@ scripts/manual_smoke_readiness.sh \
 记录示例：
 
 ```bash
-scripts/record_release_smoke_result.sh \
+scripts/internal/record_release_smoke_result.sh \
   --evidence docs/release-smoke-evidence.md \
   --area "Local-only fallback" \
   --platform "macOS/iOS" \
@@ -455,9 +455,7 @@ scripts/run_live_deepseek_translation_smoke.sh --evidence docs/release-smoke-evi
 git add docs/release-smoke-evidence.md
 git commit -m "Refresh live smoke evidence after <change>"
 
-scripts/manual_smoke_environment_preflight.sh
 scripts/manual_smoke_session_guide.sh
-scripts/install_ios_release_candidate.sh --device <device-identifier>
 
 # 手工执行 docs/release-smoke-test.md 中对应场景后，再记录 PASS/FAIL/BLOCKED。
 scripts/check_release_completion.sh

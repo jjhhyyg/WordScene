@@ -2,8 +2,45 @@ import XCTest
 @testable import WordScene
 
 final class AppLocalizationTests: XCTestCase {
-    private let supportedLocalizationCodes = ["zh-Hans", "en", "es"]
-    private let translatedLocalizationCodes = ["en", "es"]
+    private let supportedLocalizationCodes = [
+        "zh-Hans",
+        "zh-Hant",
+        "en",
+        "es",
+        "fr",
+        "de",
+        "pt",
+        "it",
+        "ru",
+        "ja",
+        "ko",
+        "nl",
+        "pl",
+        "ar",
+        "tr",
+        "vi",
+        "id",
+        "hi"
+    ]
+    private let translatedLocalizationCodes = [
+        "zh-Hant",
+        "en",
+        "es",
+        "fr",
+        "de",
+        "pt",
+        "it",
+        "ru",
+        "ja",
+        "ko",
+        "nl",
+        "pl",
+        "ar",
+        "tr",
+        "vi",
+        "id",
+        "hi"
+    ]
 
     func testStringCatalogIsPrimaryLocalizationSource() throws {
         let resourcesDirectory = try sourceResourcesDirectory()
@@ -14,8 +51,9 @@ final class AppLocalizationTests: XCTestCase {
             return
         }
         XCTAssertFalse(FileManager.default.fileExists(atPath: resourcesDirectory.appendingPathComponent("zh-Hans.lproj/Localizable.strings").path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: resourcesDirectory.appendingPathComponent("en.lproj/Localizable.strings").path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: resourcesDirectory.appendingPathComponent("es.lproj/Localizable.strings").path))
+        for languageCode in translatedLocalizationCodes {
+            XCTAssertFalse(FileManager.default.fileExists(atPath: resourcesDirectory.appendingPathComponent("\(languageCode).lproj/Localizable.strings").path))
+        }
 
         let data = try Data(contentsOf: catalogURL)
         let catalog = try JSONDecoder().decode(StringCatalogFixture.self, from: data)
@@ -25,6 +63,7 @@ final class AppLocalizationTests: XCTestCase {
         XCTAssertEqual(Set(translationLocalizations.keys), Set(supportedLocalizationCodes))
         XCTAssertEqual(translationLocalizations["en"]?.stringUnit?.value, "Translate")
         XCTAssertEqual(translationLocalizations["es"]?.stringUnit?.value, "Traducir")
+        XCTAssertEqual(translationLocalizations["zh-Hant"]?.stringUnit?.value, "翻譯")
     }
 
     func testAppBundleAdvertisesSystemSelectableLanguages() throws {
@@ -40,6 +79,7 @@ final class AppLocalizationTests: XCTestCase {
 
         XCTAssertEqual(localizedDisplayName(languageCode: "en", bundle: bundle), "Word Scene")
         XCTAssertEqual(localizedDisplayName(languageCode: "es", bundle: bundle), "Escena de Palabras")
+        XCTAssertEqual(localizedDisplayName(languageCode: "zh-Hant", bundle: bundle), "譯箋")
     }
 
     func testBuiltBundleResolvesLocalizedRuntimeStrings() throws {
@@ -48,6 +88,7 @@ final class AppLocalizationTests: XCTestCase {
         XCTAssertEqual(localizedString("翻译", languageCode: "zh-Hans", bundle: bundle), "翻译")
         XCTAssertEqual(localizedString("翻译", languageCode: "en", bundle: bundle), "Translate")
         XCTAssertEqual(localizedString("翻译", languageCode: "es", bundle: bundle), "Traducir")
+        XCTAssertEqual(localizedString("翻译", languageCode: "zh-Hant", bundle: bundle), "翻譯")
         XCTAssertEqual(localizedString("开始翻译", languageCode: "en", bundle: bundle), "Start Translation")
         XCTAssertEqual(localizedString("开始翻译", languageCode: "es", bundle: bundle), "Iniciar traducción")
         XCTAssertEqual(localizedString("设置", languageCode: "en", bundle: bundle), "Settings")
@@ -109,6 +150,7 @@ final class AppLocalizationTests: XCTestCase {
             "DeepSeek 返回无效响应。",
             "DeepSeek Token 无效或已过期。",
             "DeepSeek 请求失败：HTTP %lld。",
+            "DeepSeek 响应超时，请稍后重试或缩短文本。",
             "读取系统凭据失败：%lld。",
             "系统凭据存储失败：%lld。",
             "翻译请求失败，请检查网络后重试。",

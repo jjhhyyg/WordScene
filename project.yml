@@ -9,7 +9,7 @@ options:
 settings:
   base:
     DEVELOPMENT_TEAM: JU68L3U235
-    MARKETING_VERSION: 1.0.0
+    MARKETING_VERSION: 1.0.2
     CURRENT_PROJECT_VERSION: 1
     SWIFT_VERSION: 6.0
     DEVELOPMENT_LANGUAGE: zh-Hans
@@ -33,6 +33,7 @@ targets:
     info:
       path: WordScene/Generated/WordSceneInfo.plist
       properties:
+        ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
           - remote-notification
     entitlements:
@@ -82,11 +83,12 @@ targets:
         PRODUCT_NAME: Word Scene
         PRODUCT_MODULE_NAME: WordScene
         INFOPLIST_KEY_CFBundleDisplayName: 译笺
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         GENERATE_INFOPLIST_FILE: YES
     postBuildScripts:
       - name: Generate complete macOS AppIcon.icns
-        script: scripts/generate_macos_app_icon.sh
+        script: scripts/internal/generate_macos_app_icon.sh
         inputFiles:
           - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac.png
           - $(SRCROOT)/WordScene/Resources/Assets.xcassets/AppIcon.appiconset/Icon-16-mac@2x.png
@@ -106,12 +108,30 @@ targets:
     deploymentTarget: "18.0"
     sources:
       - path: WordScene/Tests
+        excludes:
+          - CloudKitSchemaInitializationTests.swift
     dependencies:
       - target: WordScene
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.tests
         PRODUCT_MODULE_NAME: WordSceneTests
+        SUPPORTED_PLATFORMS: iphoneos iphonesimulator
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Word Scene"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: YES
+  WordSceneCloudKitSchemaTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: WordScene/Tests/CloudKitSchemaInitializationTests.swift
+    dependencies:
+      - target: WordScene
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.cloudkitschematests
+        PRODUCT_MODULE_NAME: WordSceneCloudKitSchemaTests
         SUPPORTED_PLATFORMS: iphoneos iphonesimulator
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Word Scene"
         BUNDLE_LOADER: "$(TEST_HOST)"
@@ -131,18 +151,49 @@ targets:
         SUPPORTED_PLATFORMS: iphoneos iphonesimulator
         TEST_TARGET_NAME: WordScene
         GENERATE_INFOPLIST_FILE: YES
+  WordSceneMacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: WordScene/UITests
+    dependencies:
+      - target: WordSceneMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.macuitests
+        PRODUCT_MODULE_NAME: WordSceneMacUITests
+        TEST_TARGET_NAME: WordSceneMac
+        GENERATE_INFOPLIST_FILE: YES
   WordSceneMacTests:
     type: bundle.unit-test
     platform: macOS
     deploymentTarget: "15.0"
     sources:
       - path: WordScene/Tests
+        excludes:
+          - CloudKitSchemaInitializationTests.swift
     dependencies:
       - target: WordSceneMac
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.mactests
         PRODUCT_MODULE_NAME: WordSceneMacTests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Contents/MacOS/Word Scene"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: YES
+  WordSceneMacCloudKitSchemaTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: WordScene/Tests/CloudKitSchemaInitializationTests.swift
+    dependencies:
+      - target: WordSceneMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.maccloudkitschematests
+        PRODUCT_MODULE_NAME: WordSceneMacCloudKitSchemaTests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Word Scene.app/Contents/MacOS/Word Scene"
         BUNDLE_LOADER: "$(TEST_HOST)"
         GENERATE_INFOPLIST_FILE: YES
@@ -162,3 +213,18 @@ schemes:
     test:
       targets:
         - WordSceneMacTests
+        - WordSceneMacUITests
+  WordSceneCloudKitSchema:
+    build:
+      targets:
+        WordScene: all
+    test:
+      targets:
+        - WordSceneCloudKitSchemaTests
+  WordSceneMacCloudKitSchema:
+    build:
+      targets:
+        WordSceneMac: all
+    test:
+      targets:
+        - WordSceneMacCloudKitSchemaTests

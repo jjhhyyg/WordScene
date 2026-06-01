@@ -737,6 +737,161 @@ private struct MemoryItemEditorSheet: View {
     }
 
     var body: some View {
+        #if os(macOS)
+        macEditor
+        #else
+        mobileEditor
+        #endif
+    }
+
+    #if os(macOS)
+    private var macEditor: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(title)
+                    .font(.title3.weight(.semibold))
+                    .accessibilityIdentifier("library.editor.title")
+
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 22)
+            .padding(.bottom, 14)
+
+            Divider()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    macSection(String(localized: "语言", comment: "Section title for language pickers in the saved memory editor.")) {
+                        Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 12) {
+                            GridRow {
+                                Text(String(localized: "源语言", comment: "Picker label for source language."))
+                                    .foregroundStyle(.secondary)
+                                Picker(String(localized: "源语言", comment: "Picker label for source language."), selection: $draft.sourceLanguage) {
+                                    ForEach(sourceLanguageOptions) { language in
+                                        Text(language.title).tag(language)
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityIdentifier("library.editor.sourceLanguage")
+                            }
+
+                            GridRow {
+                                Text(String(localized: "目标语言", comment: "Picker label for target language."))
+                                    .foregroundStyle(.secondary)
+                                Picker(String(localized: "目标语言", comment: "Picker label for target language."), selection: $draft.targetLanguage) {
+                                    ForEach(LanguageSelection.targetOptions(excluding: draft.sourceLanguage)) { language in
+                                        Text(language.title).tag(language)
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityIdentifier("library.editor.targetLanguage")
+                            }
+                        }
+                    }
+
+                    macSection(String(localized: "内容", comment: "Section title for memory item editor content fields.")) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            macTextEditor(
+                                title: String(localized: "原文", comment: "Section title for the source text field."),
+                                text: $draft.sourceText,
+                                identifier: "library.editor.sourceText"
+                            )
+
+                            macTextEditor(
+                                title: String(localized: "译文", comment: "Section title for the translated text field."),
+                                text: $draft.translatedText,
+                                identifier: "library.editor.translatedText"
+                            )
+                        }
+                    }
+
+                    macSection(String(localized: "备注", comment: "Section title for the optional note field.")) {
+                        TextField(String(localized: "可选", comment: "Placeholder for an optional note field."), text: $draft.note)
+                            .textFieldStyle(.roundedBorder)
+                            .accessibilityIdentifier("library.editor.note")
+                    }
+                }
+                .padding(24)
+            }
+            .background(macEditorBackground)
+
+            Divider()
+
+            HStack(spacing: 10) {
+                Spacer()
+                Button(String(localized: "取消", comment: "Cancel button title.")) {
+                    dismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+                .accessibilityIdentifier("library.editor.cancel")
+
+                Button(String(localized: "保存", comment: "Save button title.")) {
+                    if onSave(draft) {
+                        dismiss()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction)
+                .disabled(!draft.canSave)
+                .accessibilityIdentifier("library.editor.save")
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+            .background(Color(nsColor: .windowBackgroundColor))
+        }
+        .frame(width: 540, height: 640)
+        .background(Color(nsColor: .windowBackgroundColor))
+        .onChange(of: draft.sourceLanguage) { _, newSource in
+            normalizeTargetLanguage(for: newSource)
+        }
+    }
+
+    private func macSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+
+            content()
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color(nsColor: .separatorColor).opacity(0.7), lineWidth: 1)
+        }
+    }
+
+    private func macTextEditor(title: String, text: Binding<String>, identifier: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            TextEditor(text: text)
+                .font(.body)
+                .frame(minHeight: 104)
+                .scrollContentBackground(.hidden)
+                .padding(6)
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .strokeBorder(Color(nsColor: .separatorColor).opacity(0.72), lineWidth: 1)
+                }
+                .accessibilityLabel(title)
+                .accessibilityIdentifier(identifier)
+        }
+    }
+
+    private var macEditorBackground: Color {
+        Color(nsColor: .windowBackgroundColor)
+    }
+    #endif
+
+    private var mobileEditor: some View {
         NavigationStack {
             Form {
                 Section(String(localized: "语言", comment: "Section title for language pickers in the saved memory editor.")) {
@@ -745,28 +900,33 @@ private struct MemoryItemEditorSheet: View {
                             Text(language.title).tag(language)
                         }
                     }
+                    .accessibilityIdentifier("library.editor.sourceLanguage")
 
                     Picker(String(localized: "目标语言", comment: "Picker label for target language."), selection: $draft.targetLanguage) {
                         ForEach(LanguageSelection.targetOptions(excluding: draft.sourceLanguage)) { language in
                             Text(language.title).tag(language)
                         }
                     }
+                    .accessibilityIdentifier("library.editor.targetLanguage")
                 }
 
                 Section(String(localized: "原文", comment: "Section title for the source text field.")) {
                     TextEditor(text: $draft.sourceText)
                         .frame(minHeight: 96)
                         .accessibilityLabel(String(localized: "原文", comment: "Accessibility label for the source text field."))
+                        .accessibilityIdentifier("library.editor.sourceText")
                 }
 
                 Section(String(localized: "译文", comment: "Section title for the translated text field.")) {
                     TextEditor(text: $draft.translatedText)
                         .frame(minHeight: 96)
                         .accessibilityLabel(String(localized: "译文", comment: "Accessibility label for the translated text field."))
+                        .accessibilityIdentifier("library.editor.translatedText")
                 }
 
                 Section(String(localized: "备注", comment: "Section title for the optional note field.")) {
                     TextField(String(localized: "可选", comment: "Placeholder for an optional note field."), text: $draft.note)
+                        .accessibilityIdentifier("library.editor.note")
                 }
             }
             .scrollDismissesKeyboard(.interactively)
@@ -779,6 +939,7 @@ private struct MemoryItemEditorSheet: View {
                     Button(String(localized: "取消", comment: "Cancel button title.")) {
                         dismiss()
                     }
+                    .accessibilityIdentifier("library.editor.cancel")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -788,14 +949,19 @@ private struct MemoryItemEditorSheet: View {
                         }
                     }
                     .disabled(!draft.canSave)
+                    .accessibilityIdentifier("library.editor.save")
                 }
             }
             .onChange(of: draft.sourceLanguage) { _, newSource in
-                let targetOptions = LanguageSelection.targetOptions(excluding: newSource)
-                if !targetOptions.contains(draft.targetLanguage) {
-                    draft.targetLanguage = targetOptions.first ?? .zh
-                }
+                normalizeTargetLanguage(for: newSource)
             }
+        }
+    }
+
+    private func normalizeTargetLanguage(for newSource: LanguageSelection) {
+        let targetOptions = LanguageSelection.targetOptions(excluding: newSource)
+        if !targetOptions.contains(draft.targetLanguage) {
+            draft.targetLanguage = targetOptions.first ?? .zh
         }
     }
 
@@ -826,15 +992,6 @@ private struct MemoryItemRow: View {
         #if os(iOS)
         rowContent
             .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label(String(localized: "删除", comment: "Swipe action title for deleting an item."), systemImage: "trash")
-                }
-                .tint(.red)
-                .accessibilityIdentifier("library.swipe.delete")
-            }
-            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                 Button {
                     onToggleStar()
                 } label: {
@@ -845,6 +1002,15 @@ private struct MemoryItemRow: View {
                 }
                 .tint(.yellow)
                 .accessibilityIdentifier("library.swipe.star")
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(String(localized: "删除", comment: "Swipe action title for deleting an item."), systemImage: "trash")
+                }
+                .tint(.red)
+                .accessibilityIdentifier("library.swipe.delete")
             }
         #else
         rowContent
@@ -884,6 +1050,7 @@ private struct MemoryItemRow: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .accessibilityLabel(item.isStarred ? String(localized: "取消星标", comment: "Accessibility label for removing a star from a saved memory item.") : String(localized: "星标", comment: "Accessibility label for starring a saved memory item."))
+                .accessibilityIdentifier("library.item.star")
                 #endif
 
                 Button {
@@ -905,6 +1072,7 @@ private struct MemoryItemRow: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .accessibilityLabel(String(localized: "删除收藏", comment: "Accessibility label for deleting a saved memory item."))
+                .accessibilityIdentifier("library.item.delete")
                 #endif
             }
 

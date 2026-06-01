@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-protocol CredentialStoring {
+protocol CredentialStoring: Sendable {
     func save(_ value: String, account: String) throws
     func read(account: String) throws -> String?
     func delete(account: String) throws

@@ -24,7 +24,7 @@ struct DeepSeekBalanceResponse: Decodable, Equatable {
     }
 }
 
-struct DeepSeekBalanceClient {
+struct DeepSeekBalanceClient: DeepSeekBalanceFetching {
     private let session: URLSession
     private let baseURL: URL
 

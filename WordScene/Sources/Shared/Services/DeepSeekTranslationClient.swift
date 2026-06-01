@@ -19,6 +19,11 @@ protocol TranslationProvider: Sendable {
         _ request: TranslationProviderRequest,
         credential: TranslationProviderCredential
     ) async throws -> TranslationLLMResult
+
+    func streamTranslation(
+        _ request: TranslationProviderRequest,
+        credential: TranslationProviderCredential
+    ) -> AsyncThrowingStream<String, Error>
 }
 
 protocol TranslationClienting: Sendable {
@@ -28,6 +33,53 @@ protocol TranslationClienting: Sendable {
         target: LanguageSelection,
         apiToken: String
     ) async throws -> String
+
+    func streamTranslation(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection,
+        apiToken: String
+    ) -> AsyncThrowingStream<String, Error>
+}
+
+extension TranslationProvider {
+    func streamTranslation(
+        _ request: TranslationProviderRequest,
+        credential: TranslationProviderCredential
+    ) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    let result = try await translate(request, credential: credential)
+                    continuation.yield(result.translatedText)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+}
+
+extension TranslationClienting {
+    func streamTranslation(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection,
+        apiToken: String
+    ) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    let result = try await translate(text: text, source: source, target: target, apiToken: apiToken)
+                    continuation.yield(result)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
 }
 
 struct DeepSeekTranslationClient: Sendable {
@@ -55,6 +107,18 @@ struct DeepSeekTranslationClient: Sendable {
             TranslationProviderRequest(text: text, source: source, target: target),
             credential: TranslationProviderCredential(apiToken: apiToken)
         ).translatedText
+    }
+
+    func streamTranslation(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection,
+        apiToken: String
+    ) -> AsyncThrowingStream<String, Error> {
+        provider.streamTranslation(
+            TranslationProviderRequest(text: text, source: source, target: target),
+            credential: TranslationProviderCredential(apiToken: apiToken)
+        )
     }
 }
 
@@ -95,6 +159,13 @@ struct DeepSeekProvider: TranslationProvider {
         credential: TranslationProviderCredential
     ) async throws -> TranslationLLMResult {
         try await chatProvider.translate(request, credential: credential)
+    }
+
+    func streamTranslation(
+        _ request: TranslationProviderRequest,
+        credential: TranslationProviderCredential
+    ) -> AsyncThrowingStream<String, Error> {
+        chatProvider.streamTranslation(request, credential: credential)
     }
 }
 
@@ -148,29 +219,45 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         }
         let token = credential.apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let endpoint = baseURL.appending(path: "chat/completions")
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = try JSONEncoder().encode(
-            chatCompletionRequest(
-                text: trimmedText,
-                source: providerRequest.source,
-                target: providerRequest.target
-            )
-        )
-
         for attempt in 0..<2 {
             do {
-                return try await perform(request)
+                let translatedText = try await withTranslationTimeout(seconds: 10) {
+                    try await streamTranslationResult(providerRequest, credential: TranslationProviderCredential(apiToken: token)) { _ in }
+                }
+                return TranslationLLMResult(translatedText: translatedText)
             } catch DeepSeekTranslationError.emptyOutput where attempt == 0 {
                 continue
             }
         }
 
         throw DeepSeekTranslationError.emptyOutput
+    }
+
+    func streamTranslation(
+        _ providerRequest: TranslationProviderRequest,
+        credential: TranslationProviderCredential
+    ) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let result = try await withTranslationTimeout(seconds: 10) {
+                        try await streamTranslationResult(providerRequest, credential: credential) { partial in
+                            continuation.yield(partial)
+                        }
+                    }
+                    if result.isEmpty {
+                        throw DeepSeekTranslationError.emptyOutput
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: normalizedTimeoutError(error))
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
 
     private func chatCompletionRequest(
@@ -191,40 +278,131 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
             responseFormat: .init(type: "json_object"),
             maxTokens: 1_200,
             temperature: 0.2,
-            stream: false
+            stream: true
         )
     }
 
-    private func perform(_ request: URLRequest) async throws -> TranslationLLMResult {
-        let (data, response) = try await session.data(for: request)
+    private func streamTranslationResult(
+        _ providerRequest: TranslationProviderRequest,
+        credential: TranslationProviderCredential,
+        onPartialText: @escaping @Sendable (String) -> Void
+    ) async throws -> String {
+        let trimmedText = providerRequest.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            throw DeepSeekTranslationError.emptyInput
+        }
+
+        let token = credential.apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        let endpoint = baseURL.appending(path: "chat/completions")
+        var request = URLRequest(url: endpoint, timeoutInterval: 10)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        request.httpBody = try JSONEncoder().encode(
+            chatCompletionRequest(
+                text: trimmedText,
+                source: providerRequest.source,
+                target: providerRequest.target
+            )
+        )
+
+        var accumulatedContent = ""
+        var dataBuffer = Data()
+        #if DEBUG
+        var rawResponseData = Data()
+        #endif
+        let (bytes, response) = try await session.bytes(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw DeepSeekTranslationError.invalidResponse
         }
+        guard httpResponse.statusCode == 200 else {
+            if httpResponse.statusCode == 401 {
+                throw DeepSeekTranslationError.unauthorized
+            }
+            throw DeepSeekTranslationError.httpStatus(httpResponse.statusCode)
+        }
+
+        do {
+            for try await byte in bytes {
+                dataBuffer.append(byte)
+                #if DEBUG
+                rawResponseData.append(byte)
+                #endif
+                if byte == 10 {
+                    let lineData = dataBuffer
+                    dataBuffer.removeAll(keepingCapacity: true)
+                    guard let line = String(data: lineData, encoding: .utf8) else {
+                        throw DeepSeekTranslationError.invalidResponse
+                    }
+                    try consumeStreamLine(line, accumulatedContent: &accumulatedContent, onPartialText: onPartialText)
+                }
+            }
+        } catch {
+            throw normalizedTimeoutError(error)
+        }
+
+        if !dataBuffer.isEmpty {
+            guard let line = String(data: dataBuffer, encoding: .utf8) else {
+                throw DeepSeekTranslationError.invalidResponse
+            }
+            try consumeStreamLine(line, accumulatedContent: &accumulatedContent, onPartialText: onPartialText)
+        }
+
         #if DEBUG
         await rawResponseRecorder?.record(
             provider: model,
             endpoint: request.url ?? baseURL,
             statusCode: httpResponse.statusCode,
-            bodyData: data
+            bodyData: rawResponseData
         )
         #endif
 
-        switch httpResponse.statusCode {
-        case 200:
-            let decoded = try decodeResponse(from: data)
-            let choice = try decoded.firstChoice()
-            try validateFinishReason(choice.finishReason)
-            return TranslationLLMResult(translatedText: try translatedText(from: choice.message.content))
-        case 401:
-            throw DeepSeekTranslationError.unauthorized
-        default:
-            throw DeepSeekTranslationError.httpStatus(httpResponse.statusCode)
+        return try translatedText(from: accumulatedContent)
+    }
+
+    private func consumeStreamLine(
+        _ line: String,
+        accumulatedContent: inout String,
+        onPartialText: @escaping @Sendable (String) -> Void
+    ) throws {
+        let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedLine.hasPrefix("data:") else {
+            return
+        }
+
+        let payload = trimmedLine.dropFirst("data:".count).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard payload != "[DONE]" else {
+            return
+        }
+
+        guard let data = payload.data(using: .utf8) else {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+        let chunk = try decodeStreamChunk(from: data)
+        let choice = try chunk.firstChoice()
+        try validateFinishReason(choice.finishReason)
+        if let content = choice.delta.content {
+            accumulatedContent += content
+            if let partial = try? translatedText(from: accumulatedContent) {
+                onPartialText(partial)
+            } else if let partial = partialTranslatedText(from: accumulatedContent), !partial.isEmpty {
+                onPartialText(partial)
+            }
         }
     }
 
     private func decodeResponse(from data: Data) throws -> OpenAIChatCompletionResponse {
         do {
             return try JSONDecoder().decode(OpenAIChatCompletionResponse.self, from: data)
+        } catch {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+    }
+
+    private func decodeStreamChunk(from data: Data) throws -> OpenAIChatCompletionStreamChunk {
+        do {
+            return try JSONDecoder().decode(OpenAIChatCompletionStreamChunk.self, from: data)
         } catch {
             throw DeepSeekTranslationError.invalidResponse
         }
@@ -296,6 +474,73 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
             throw DeepSeekTranslationError.invalidResponse
         }
     }
+
+    private func partialTranslatedText(from content: String) -> String? {
+        let key = #""translated_text""#
+        guard let keyRange = content.range(of: key),
+              let colonRange = content.range(of: ":", range: keyRange.upperBound..<content.endIndex),
+              let openingQuote = content[colonRange.upperBound...].firstIndex(of: "\"") else {
+            return nil
+        }
+
+        var index = content.index(after: openingQuote)
+        var result = ""
+        var isEscaping = false
+        while index < content.endIndex {
+            let character = content[index]
+            if isEscaping {
+                switch character {
+                case "\"", "\\", "/":
+                    result.append(character)
+                case "n":
+                    result.append("\n")
+                case "r":
+                    result.append("\r")
+                case "t":
+                    result.append("\t")
+                default:
+                    break
+                }
+                isEscaping = false
+            } else if character == "\\" {
+                isEscaping = true
+            } else if character == "\"" {
+                return result
+            } else {
+                result.append(character)
+            }
+            index = content.index(after: index)
+        }
+        return result
+    }
+}
+
+private func withTranslationTimeout<T: Sendable>(
+    seconds: UInt64,
+    operation: @escaping @Sendable () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            try await operation()
+        }
+        group.addTask {
+            try await Task.sleep(nanoseconds: seconds * 1_000_000_000)
+            throw DeepSeekTranslationError.timedOut
+        }
+
+        guard let result = try await group.next() else {
+            throw DeepSeekTranslationError.timedOut
+        }
+        group.cancelAll()
+        return result
+    }
+}
+
+private func normalizedTimeoutError(_ error: Error) -> Error {
+    if let urlError = error as? URLError, urlError.code == .timedOut {
+        return DeepSeekTranslationError.timedOut
+    }
+    return error
 }
 
 private struct OpenAIChatCompletionRequest: Encodable {
@@ -361,6 +606,33 @@ struct OpenAIChatCompletionResponse: Decodable, Equatable {
 
 typealias DeepSeekChatCompletionResponse = OpenAIChatCompletionResponse
 
+private struct OpenAIChatCompletionStreamChunk: Decodable, Equatable {
+    struct Choice: Decodable, Equatable {
+        struct Delta: Decodable, Equatable {
+            let content: String?
+        }
+
+        let index: Int
+        let delta: Delta
+        let finishReason: String?
+
+        enum CodingKeys: String, CodingKey {
+            case index
+            case delta
+            case finishReason = "finish_reason"
+        }
+    }
+
+    let choices: [Choice]
+
+    func firstChoice() throws -> Choice {
+        guard let choice = choices.first else {
+            throw DeepSeekTranslationError.invalidResponse
+        }
+        return choice
+    }
+}
+
 private struct TranslationJSONOutput: Decodable {
     let translatedText: String
 
@@ -390,4 +662,5 @@ enum DeepSeekTranslationError: Error, Equatable {
     case invalidResponse
     case unauthorized
     case httpStatus(Int)
+    case timedOut
 }

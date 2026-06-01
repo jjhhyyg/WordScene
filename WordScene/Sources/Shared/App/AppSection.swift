@@ -29,4 +29,15 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .settings: "gearshape"
         }
     }
+
+    #if os(macOS)
+    var keyboardShortcut: KeyEquivalent {
+        switch self {
+        case .translate: "1"
+        case .library: "2"
+        case .history: "3"
+        case .settings: "4"
+        }
+    }
+    #endif
 }
