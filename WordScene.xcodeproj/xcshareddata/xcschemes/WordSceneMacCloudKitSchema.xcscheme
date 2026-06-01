@@ -42,19 +42,9 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9440FE1B7D3D80400DD69B76"
-               BuildableName = "WordSceneMacTests.xctest"
-               BlueprintName = "WordSceneMacTests"
-               ReferencedContainer = "container:WordScene.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C4E455467243A4143DDF1C50"
-               BuildableName = "WordSceneMacUITests.xctest"
-               BlueprintName = "WordSceneMacUITests"
+               BlueprintIdentifier = "CEDA5163E4D4A09FF3F28141"
+               BuildableName = "WordSceneMacCloudKitSchemaTests.xctest"
+               BlueprintName = "WordSceneMacCloudKitSchemaTests"
                ReferencedContainer = "container:WordScene.xcodeproj">
             </BuildableReference>
          </TestableReference>

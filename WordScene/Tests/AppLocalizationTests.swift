@@ -109,6 +109,7 @@ final class AppLocalizationTests: XCTestCase {
             "DeepSeek 返回无效响应。",
             "DeepSeek Token 无效或已过期。",
             "DeepSeek 请求失败：HTTP %lld。",
+            "DeepSeek 响应超时，请稍后重试或缩短文本。",
             "读取系统凭据失败：%lld。",
             "系统凭据存储失败：%lld。",
             "翻译请求失败，请检查网络后重试。",

@@ -47,6 +47,9 @@ struct RootView: View {
                     .listRowBackground(selectedSection == section ? Color.accentColor.opacity(0.14) : Color.clear)
                     .accessibilityLabel(section.title)
                     .accessibilityIdentifier("navigation.\(section.rawValue)")
+                    #if os(macOS)
+                    .keyboardShortcut(section.keyboardShortcut, modifiers: .command)
+                    #endif
                 }
             }
             .navigationTitle(String(localized: "译笺", comment: "Root sidebar navigation title."))

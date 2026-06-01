@@ -411,6 +411,29 @@
         }
       }
     },
+    "DeepSeek 响应超时，请稍后重试或缩短文本。" : {
+      "comment" : "Error shown when the translation provider does not respond before the timeout.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek timed out. Try again later or shorten the text."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek agotó el tiempo de espera. Inténtalo más tarde o acorta el texto."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek 响应超时，请稍后重试或缩短文本。"
+          }
+        }
+      }
+    },
     "DeepSeek 输出被截断，请缩短文本后重试。" : {
       "comment" : "Error shown when the translation provider truncates the output.",
       "localizations" : {
@@ -1774,6 +1797,29 @@
         }
       }
     },
+    "内容" : {
+      "comment" : "Section title for memory item editor content fields.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contenido"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内容"
+          }
+        }
+      }
+    },
     "失败原因" : {
       "comment" : "Diagnostic label for an error failure reason.",
       "localizations" : {
@@ -2326,6 +2372,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已复制"
+          }
+        }
+      }
+    },
+    "点击复制" : {
+      "comment" : "Accessibility hint for copying translated text.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to copy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para copiar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击复制"
           }
         }
       }
@@ -3835,6 +3904,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在测试 DeepSeek 连接..."
+          }
+        }
+      }
+    },
+    "正在生成译文" : {
+      "comment" : "Accessibility label for streaming translated text.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generating translation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generando traducción"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在生成译文"
           }
         }
       }

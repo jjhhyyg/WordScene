@@ -12,6 +12,11 @@ struct TranslationWorkflowResult: Equatable {
     let persistenceWarningMessage: String?
 }
 
+enum TranslationWorkflowStreamEvent: Equatable {
+    case partial(String)
+    case completed(TranslationWorkflowResult)
+}
+
 struct TranslationWorkflow {
     let credentialStore: any CredentialStoring
     let translationClient: any TranslationClienting
@@ -76,6 +81,86 @@ struct TranslationWorkflow {
             target: target,
             currentHistory: currentHistory
         )
+    }
+
+    @MainActor
+    func streamTranslation(
+        text: String,
+        source: LanguageSelection,
+        target: LanguageSelection,
+        currentHistory: [TranslationRecord]
+    ) -> AsyncThrowingStream<TranslationWorkflowStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let credentialStore = credentialStore
+            let translationClient = translationClient
+
+            let task = Task { @MainActor in
+                do {
+                    let trimmedInput = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !trimmedInput.isEmpty else {
+                        throw DeepSeekTranslationError.emptyInput
+                    }
+
+                    if source == .auto,
+                       let detectedSource = TranslationLanguageDetector.detect(trimmedInput),
+                       detectedSource == target {
+                        let result = persistResult(
+                            translatedText: trimmedInput,
+                            sourceText: trimmedInput,
+                            resolvedSource: detectedSource,
+                            target: target,
+                            currentHistory: currentHistory
+                        )
+                        continuation.yield(.partial(trimmedInput))
+                        continuation.yield(.completed(result))
+                        continuation.finish()
+                        return
+                    }
+
+                    guard let rawToken = try credentialStore.read(account: DeepSeekCredential.tokenAccount) else {
+                        throw TranslationWorkflowError.missingToken
+                    }
+                    let token = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !token.isEmpty else {
+                        throw TranslationWorkflowError.missingToken
+                    }
+
+                    var latestText = ""
+                    for try await partialText in translationClient.streamTranslation(
+                        text: trimmedInput,
+                        source: source,
+                        target: target,
+                        apiToken: token
+                    ) {
+                        latestText = partialText
+                        continuation.yield(.partial(partialText))
+                    }
+
+                    guard !latestText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                        throw DeepSeekTranslationError.emptyOutput
+                    }
+
+                    let resolvedSource = source == .auto
+                        ? TranslationLanguageDetector.detect(trimmedInput) ?? source
+                        : source
+                    let result = persistResult(
+                        translatedText: latestText,
+                        sourceText: trimmedInput,
+                        resolvedSource: resolvedSource,
+                        target: target,
+                        currentHistory: currentHistory
+                    )
+                    continuation.yield(.completed(result))
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
 
     private func persistResult(

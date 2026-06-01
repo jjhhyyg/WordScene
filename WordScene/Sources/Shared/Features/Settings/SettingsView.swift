@@ -28,9 +28,7 @@ struct SettingsView: View {
     @State private var isConfirmingDeepSeekTokenDeletion = false
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
-
-    private let credentialStore = KeychainCredentialStore()
-    private let balanceClient = DeepSeekBalanceClient()
+    @Environment(\.settingsRuntime) private var settingsRuntime
     private var importExportController: SettingsImportExportController {
         dataController.settingsImportExport
     }
@@ -81,9 +79,11 @@ struct SettingsView: View {
             isPresented: $isConfirmingDeepSeekTokenDeletion
         ) {
             Button(String(localized: "取消", comment: "Cancel button title."), role: .cancel) {}
+                .accessibilityIdentifier("settings.deepSeek.delete.cancel")
             Button(String(localized: "删除", comment: "Delete action title."), role: .destructive) {
                 confirmDeepSeekTokenDeletion()
             }
+            .accessibilityIdentifier("settings.deepSeek.delete.confirm")
         } message: {
             Text(String(localized: "删除后这台设备上的翻译 Token 会被移除，之后需要重新保存 Token 才能继续翻译。", comment: "Alert message before deleting the saved DeepSeek token."))
         }
@@ -248,10 +248,16 @@ struct SettingsView: View {
     }
 
     private var tokenStatusView: some View {
-        Label(tokenStatus.message, systemImage: tokenStatus.systemImage)
-            .font(.footnote)
-            .foregroundStyle(tokenStatus.tint)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(spacing: 6) {
+            Image(systemName: tokenStatus.systemImage)
+                .accessibilityHidden(true)
+
+            Text(tokenStatus.message)
+                .accessibilityIdentifier("settings.deepSeek.status")
+        }
+        .font(.footnote)
+        .foregroundStyle(tokenStatus.tint)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var importExportStatusView: some View {
@@ -678,6 +684,11 @@ struct SettingsView: View {
             exportFileName = export.fileName
             let format = String(localized: "已准备 %lld 条记忆，请在系统面板中选择保存位置。%@", comment: "Status shown after preparing a memory export. The first placeholder is the exported item count; the second is the privacy notice.")
             importExportStatus = .notice(String(format: format, Int64(export.itemCount), export.privacyNotice))
+            if let memoryExportURL = settingsRuntime.memoryExportURL {
+                try writeExportData(export.data, to: memoryExportURL)
+                handleExportCompletion(.success(memoryExportURL))
+                return
+            }
             #if os(iOS)
             documentExportRequest = try makeDocumentExportRequest(
                 kind: .memory,
@@ -756,6 +767,10 @@ struct SettingsView: View {
     @MainActor
     private func presentImport() {
         importExportStatus = .notice(String(localized: "请选择要导入的 JSON 文件。", comment: "Status shown before the user chooses a JSON import file."))
+        if let memoryImportURL = settingsRuntime.memoryImportURL {
+            importMemory(from: memoryImportURL)
+            return
+        }
         isImportingMemory = true
     }
 
@@ -818,6 +833,20 @@ struct SettingsView: View {
         }
 
         return String(localized: "操作失败，请稍后重试。", comment: "Generic settings operation failure.")
+    }
+
+    private func writeExportData(_ data: Data, to url: URL) throws {
+        let directory = url.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try data.write(to: url, options: .atomic)
+    }
+
+    private var credentialStore: any CredentialStoring {
+        settingsRuntime.credentialStore
+    }
+
+    private var balanceClient: any DeepSeekBalanceFetching {
+        settingsRuntime.balanceClient
     }
 
     private func importExportErrorMessage(for error: Error) -> String {

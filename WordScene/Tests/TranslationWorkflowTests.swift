@@ -28,11 +28,21 @@ final class TranslationWorkflowTests: XCTestCase {
     private final class StubTranslationClient: TranslationClienting, @unchecked Sendable {
         let expectedText: String
         let translatedText: String
+        let streamedTexts: [String]
+        let streamError: Error?
         private(set) var callCount = 0
+        private(set) var streamCallCount = 0
 
-        init(expectedText: String = "hello world", translatedText: String) {
+        init(
+            expectedText: String = "hello world",
+            translatedText: String,
+            streamedTexts: [String]? = nil,
+            streamError: Error? = nil
+        ) {
             self.expectedText = expectedText
             self.translatedText = translatedText
+            self.streamedTexts = streamedTexts ?? [translatedText]
+            self.streamError = streamError
         }
 
         func translate(
@@ -47,6 +57,33 @@ final class TranslationWorkflowTests: XCTestCase {
             XCTAssertEqual(target, .zh)
             XCTAssertEqual(apiToken, "test-token")
             return translatedText
+        }
+
+        func streamTranslation(
+            text: String,
+            source: LanguageSelection,
+            target: LanguageSelection,
+            apiToken: String
+        ) -> AsyncThrowingStream<String, Error> {
+            streamCallCount += 1
+            XCTAssertEqual(text, expectedText)
+            XCTAssertEqual(source, .auto)
+            XCTAssertEqual(target, .zh)
+            XCTAssertEqual(apiToken, "test-token")
+
+            let streamedTexts = streamedTexts
+            let streamError = streamError
+            return AsyncThrowingStream { continuation in
+                if let streamError {
+                    continuation.finish(throwing: streamError)
+                    return
+                }
+
+                for text in streamedTexts {
+                    continuation.yield(text)
+                }
+                continuation.finish()
+            }
         }
     }
 
@@ -223,5 +260,108 @@ final class TranslationWorkflowTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? TranslationWorkflowError, .missingToken)
         }
+    }
+
+    func testStreamTranslationYieldsPartialsThenCompletedResultAndPersistsHistory() async throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let translationClient = StubTranslationClient(
+            translatedText: "final unused",
+            streamedTexts: ["你", "你好，世界。"]
+        )
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: "test-token"),
+            translationClient: translationClient,
+            historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
+        )
+
+        let events = try await collectStreamEvents(
+            workflow.streamTranslation(
+                text: "  hello world  ",
+                source: .auto,
+                target: .zh,
+                currentHistory: []
+            )
+        )
+
+        XCTAssertEqual(events.map(\.partialText), ["你", "你好，世界。", nil])
+        guard case .completed(let result) = events.last else {
+            return XCTFail("Expected completed stream event.")
+        }
+        XCTAssertEqual(result.translatedText, "你好，世界。")
+        XCTAssertEqual(result.record.sourceText, "hello world")
+        XCTAssertEqual(result.record.sourceLanguage, .en)
+        XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [result.record])
+        XCTAssertEqual(translationClient.streamCallCount, 1)
+        XCTAssertEqual(translationClient.callCount, 0)
+    }
+
+    func testStreamTranslationEmptyProviderOutputFailsWithoutPersistingHistory() async throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: "test-token"),
+            translationClient: StubTranslationClient(translatedText: "", streamedTexts: ["  "]),
+            historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
+        )
+
+        do {
+            _ = try await collectStreamEvents(
+                workflow.streamTranslation(
+                    text: "hello world",
+                    source: .auto,
+                    target: .zh,
+                    currentHistory: []
+                )
+            )
+            XCTFail("Expected empty streamed output to fail.")
+        } catch {
+            XCTAssertEqual(error as? DeepSeekTranslationError, .emptyOutput)
+            XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [])
+        }
+    }
+
+    func testStreamTranslationPropagatesTimeoutWithoutPersistingHistory() async throws {
+        let coreDataStore = try CoreDataMemoryStore(inMemory: true)
+        let workflow = TranslationWorkflow(
+            credentialStore: StubCredentialStore(token: "test-token"),
+            translationClient: StubTranslationClient(
+                translatedText: "unused",
+                streamError: DeepSeekTranslationError.timedOut
+            ),
+            historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
+        )
+
+        do {
+            _ = try await collectStreamEvents(
+                workflow.streamTranslation(
+                    text: "hello world",
+                    source: .auto,
+                    target: .zh,
+                    currentHistory: []
+                )
+            )
+            XCTFail("Expected streamed timeout to fail.")
+        } catch {
+            XCTAssertEqual(error as? DeepSeekTranslationError, .timedOut)
+            XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [])
+        }
+    }
+
+    private func collectStreamEvents(
+        _ stream: AsyncThrowingStream<TranslationWorkflowStreamEvent, Error>
+    ) async throws -> [TranslationWorkflowStreamEvent] {
+        var events: [TranslationWorkflowStreamEvent] = []
+        for try await event in stream {
+            events.append(event)
+        }
+        return events
+    }
+}
+
+private extension TranslationWorkflowStreamEvent {
+    var partialText: String? {
+        guard case .partial(let text) = self else {
+            return nil
+        }
+        return text
     }
 }

@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5014EC536FD1F8A94C35187B"
+               BlueprintIdentifier = "402B83A2920371E562FD6730"
                BuildableName = "Word Scene.app"
-               BlueprintName = "WordSceneMac"
+               BlueprintName = "WordScene"
                ReferencedContainer = "container:WordScene.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -30,9 +30,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5014EC536FD1F8A94C35187B"
+            BlueprintIdentifier = "402B83A2920371E562FD6730"
             BuildableName = "Word Scene.app"
-            BlueprintName = "WordSceneMac"
+            BlueprintName = "WordScene"
             ReferencedContainer = "container:WordScene.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -42,19 +42,9 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9440FE1B7D3D80400DD69B76"
-               BuildableName = "WordSceneMacTests.xctest"
-               BlueprintName = "WordSceneMacTests"
-               ReferencedContainer = "container:WordScene.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C4E455467243A4143DDF1C50"
-               BuildableName = "WordSceneMacUITests.xctest"
-               BlueprintName = "WordSceneMacUITests"
+               BlueprintIdentifier = "6016376751C42B7CD0B75F06"
+               BuildableName = "WordSceneCloudKitSchemaTests.xctest"
+               BlueprintName = "WordSceneCloudKitSchemaTests"
                ReferencedContainer = "container:WordScene.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -74,9 +64,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5014EC536FD1F8A94C35187B"
+            BlueprintIdentifier = "402B83A2920371E562FD6730"
             BuildableName = "Word Scene.app"
-            BlueprintName = "WordSceneMac"
+            BlueprintName = "WordScene"
             ReferencedContainer = "container:WordScene.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -91,9 +81,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5014EC536FD1F8A94C35187B"
+            BlueprintIdentifier = "402B83A2920371E562FD6730"
             BuildableName = "Word Scene.app"
-            BlueprintName = "WordSceneMac"
+            BlueprintName = "WordScene"
             ReferencedContainer = "container:WordScene.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
