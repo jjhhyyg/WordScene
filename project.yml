@@ -33,6 +33,7 @@ targets:
     info:
       path: WordScene/Generated/WordSceneInfo.plist
       properties:
+        ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
           - remote-notification
     entitlements:
@@ -82,6 +83,7 @@ targets:
         PRODUCT_NAME: Word Scene
         PRODUCT_MODULE_NAME: WordScene
         INFOPLIST_KEY_CFBundleDisplayName: 译笺
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         GENERATE_INFOPLIST_FILE: YES
     postBuildScripts:
