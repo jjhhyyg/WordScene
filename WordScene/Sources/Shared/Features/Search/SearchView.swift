@@ -9,6 +9,7 @@ struct HistoryView: View {
     @State private var isConfirmingDeleteAll = false
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
+    @Environment(\.appThemePalette) private var themePalette
 
     private let searchIndex = MemorySearchIndex()
 
@@ -99,6 +100,10 @@ struct HistoryView: View {
     }
 
     private var pageBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.background
+        }
+
         #if os(macOS)
         return Color(nsColor: .windowBackgroundColor)
         #else
@@ -107,6 +112,10 @@ struct HistoryView: View {
     }
 
     private var searchFieldBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.surface
+        }
+
         #if os(macOS)
         return Color(nsColor: .textBackgroundColor)
         #else
@@ -115,6 +124,10 @@ struct HistoryView: View {
     }
 
     private var searchFieldBorder: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.primary.opacity(0.18)
+        }
+
         #if os(macOS)
         return Color(nsColor: .separatorColor).opacity(0.72)
         #else
@@ -219,6 +232,7 @@ struct HistoryView: View {
             #if os(iOS)
             Text(String(localized: "翻译历史", comment: "Large title for the translation history screen."))
                 .font(.largeTitle.bold())
+                .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary : Color.primary)
                 .accessibilityIdentifier("history.title")
             #endif
 
@@ -313,6 +327,7 @@ struct HistoryView: View {
             .accessibilityLabel(String(localized: "删除全部翻译历史", comment: "Accessibility label for the button that deletes all translation history."))
             .accessibilityIdentifier("history.deleteAll")
         }
+        .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary : Color.primary)
     }
 
     private func loadHistoryData() {

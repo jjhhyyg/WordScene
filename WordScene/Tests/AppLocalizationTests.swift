@@ -42,6 +42,58 @@ final class AppLocalizationTests: XCTestCase {
         "hi"
     ]
 
+    func testAppThemeOptionsIncludeIPhone17Finishes() {
+        XCTAssertEqual(
+            AppTheme.allCases.map(\.rawValue),
+            [
+                "auto",
+                "light",
+                "dark",
+                "black",
+                "mistBlue",
+                "sage",
+                "lavender",
+                "silver",
+                "cosmicOrange"
+            ]
+        )
+        XCTAssertEqual(
+            AppTheme.allCases.map(\.displayNameLocalizationKey),
+            [
+                "Auto",
+                "Light",
+                "Dark",
+                "Black",
+                "Mist Blue",
+                "Sage",
+                "Lavender",
+                "Silver",
+                "Cosmic Orange"
+            ]
+        )
+        XCTAssertEqual(AppTheme.fromStorageValue("blue"), .auto)
+        XCTAssertEqual(AppTheme.fromStorageValue("deepBlue"), .auto)
+        XCTAssertEqual(AppTheme.fromStorageValue("white"), .auto)
+        XCTAssertEqual(AppTheme.cosmicOrange.palette.primaryHex, "#D85E24")
+        XCTAssertTrue(AppTheme.lavender.palette.usesCustomPalette)
+    }
+
+    func testAppThemeOptionsAreLocalizedInStringCatalog() throws {
+        let catalog = try localizableStringCatalog()
+
+        for theme in AppTheme.allCases {
+            let localizations = catalog.strings[theme.displayNameLocalizationKey]?.localizations ?? [:]
+            XCTAssertEqual(
+                Set(localizations.keys),
+                Set(supportedLocalizationCodes),
+                "Missing localizations for theme option: \(theme.displayNameLocalizationKey)"
+            )
+        }
+
+        let themesLocalizations = catalog.strings["Themes"]?.localizations ?? [:]
+        XCTAssertEqual(Set(themesLocalizations.keys), Set(supportedLocalizationCodes))
+    }
+
     func testStringCatalogIsPrimaryLocalizationSource() throws {
         let resourcesDirectory = try sourceResourcesDirectory()
         let catalogURL = resourcesDirectory.appendingPathComponent("Localizable.xcstrings")
@@ -109,32 +161,44 @@ final class AppLocalizationTests: XCTestCase {
         }
     }
 
-    func testLiteralLocalizedStringKeysExistInCatalog() throws {
-        let projectRoot = try projectRootDirectory()
-        let catalogURL = projectRoot.appendingPathComponent("WordScene/Resources/Localizable.xcstrings")
-        let data = try Data(contentsOf: catalogURL)
-        let catalog = try JSONDecoder().decode(StringCatalogFixture.self, from: data)
-        let sourceRoot = projectRoot.appendingPathComponent("WordScene/Sources/Shared", isDirectory: true)
-        let swiftFiles = try FileManager.default.subpathsOfDirectory(atPath: sourceRoot.path)
-            .filter { $0.hasSuffix(".swift") }
-            .map { sourceRoot.appendingPathComponent($0) }
-        let pattern = #"String\s*\(\s*localized:\s*"((?:[^"\\]|\\.)*)""#
-        let regex = try NSRegularExpression(pattern: pattern)
+    func testSourceLocalizedStringKeysHaveCompleteCatalogCoverage() throws {
+        let catalog = try localizableStringCatalog()
+        let sourceKeys = try sourceLocalizedStringKeys()
+        XCTAssertGreaterThan(sourceKeys.count, 200)
 
-        for fileURL in swiftFiles {
-            let source = try String(contentsOf: fileURL, encoding: .utf8)
-            let nsRange = NSRange(source.startIndex..<source.endIndex, in: source)
-            for match in regex.matches(in: source, range: nsRange) {
-                guard let keyRange = Range(match.range(at: 1), in: source) else {
-                    continue
+        for key in sourceKeys.sorted() {
+            let localizations = try XCTUnwrap(catalog.strings[key]?.localizations, "Missing Localizable.xcstrings key for \(key)")
+            XCTAssertEqual(Set(localizations.keys), Set(supportedLocalizationCodes), "Incomplete localizations for \(key)")
+        }
+    }
+
+    func testSourceLocalizedStringsPreservePlaceholdersAndDoNotLeakChineseIntoNonCJKLanguages() throws {
+        let catalog = try localizableStringCatalog()
+        let sourceKeys = try sourceLocalizedStringKeys()
+        let nonCJKLocalizationCodes = Set(supportedLocalizationCodes).subtracting(["zh-Hans", "zh-Hant", "ja", "ko"])
+
+        for key in sourceKeys.sorted() {
+            let expectedPlaceholders = placeholderTokens(in: key)
+            let localizations = try XCTUnwrap(catalog.strings[key]?.localizations, "Missing Localizable.xcstrings key for \(key)")
+            for languageCode in supportedLocalizationCodes {
+                let localization = try XCTUnwrap(localizations[languageCode], "Missing \(languageCode) translation for \(key)")
+                for value in localization.translatedValues {
+                    XCTAssertEqual(
+                        placeholderTokens(in: value),
+                        expectedPlaceholders,
+                        "Placeholder mismatch for \(key) in \(languageCode): \(value)"
+                    )
+                    if nonCJKLocalizationCodes.contains(languageCode) {
+                        XCTAssertFalse(
+                            value.containsCJKIdeograph,
+                            "Likely untranslated Chinese fragment for \(key) in \(languageCode): \(value)"
+                        )
+                    }
                 }
-                let rawKey = String(source[keyRange])
-                let keyData = Data("\"\(rawKey)\"".utf8)
-                let key = try JSONDecoder().decode(String.self, from: keyData)
-                XCTAssertNotNil(catalog.strings[key], "Missing Localizable.xcstrings key for \(key) in \(fileURL.path)")
             }
         }
     }
+
 
     func testHighRiskDynamicStringsHaveEnglishAndSpanishTranslations() throws {
         let catalogURL = try sourceResourcesDirectory().appendingPathComponent("Localizable.xcstrings")
@@ -427,6 +491,65 @@ final class AppLocalizationTests: XCTestCase {
         return localizedBundle.localizedString(forKey: key, value: nil, table: nil)
     }
 
+    private func localizableStringCatalog() throws -> StringCatalogFixture {
+        let catalogURL = try sourceResourcesDirectory().appendingPathComponent("Localizable.xcstrings")
+        let data = try Data(contentsOf: catalogURL)
+        return try JSONDecoder().decode(StringCatalogFixture.self, from: data)
+    }
+
+    private func sourceLocalizedStringKeys() throws -> Set<String> {
+        let sourceRoot = try projectRootDirectory().appendingPathComponent("WordScene/Sources/Shared", isDirectory: true)
+        let swiftFiles = try FileManager.default.subpathsOfDirectory(atPath: sourceRoot.path)
+            .filter { $0.hasSuffix(".swift") }
+            .map { sourceRoot.appendingPathComponent($0) }
+        let patterns = [
+            #"String\s*\(\s*localized:\s*"((?:[^"\\]|\\.)*)""#,
+            #"\b(?:Text|Button|Label|Picker|Section|Toggle|TextField|SecureField|Menu|navigationTitle)\(\s*"((?:[^"\\]|\\.)*)""#,
+            #"\.accessibilityLabel\(\s*"((?:[^"\\]|\\.)*)""#
+        ]
+        let regexes = try patterns.map { try NSRegularExpression(pattern: $0) }
+        var keys = Set<String>()
+        let excludedVerbatimKeys = Set(["sk-..."])
+
+        for fileURL in swiftFiles {
+            let source = try String(contentsOf: fileURL, encoding: .utf8)
+            let nsRange = NSRange(source.startIndex..<source.endIndex, in: source)
+            for regex in regexes {
+                for match in regex.matches(in: source, range: nsRange) {
+                    guard let keyRange = Range(match.range(at: 1), in: source) else {
+                        continue
+                    }
+                    let rawKey = String(source[keyRange])
+                    guard !rawKey.contains(#"\("#) else {
+                        continue
+                    }
+                    let keyData = Data("\"\(rawKey)\"".utf8)
+                    let key = try JSONDecoder().decode(String.self, from: keyData)
+                    guard !excludedVerbatimKeys.contains(key) else {
+                        continue
+                    }
+                    keys.insert(key)
+                }
+            }
+        }
+
+        return keys
+    }
+
+    private func placeholderTokens(in string: String) -> [String] {
+        let pattern = #"%(?:\d+\$)?(?:@|lld|ld|d|f|s|u)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return []
+        }
+        let nsRange = NSRange(string.startIndex..<string.endIndex, in: string)
+        return regex.matches(in: string, range: nsRange).compactMap { match in
+            guard let range = Range(match.range, in: string) else {
+                return nil
+            }
+            return String(string[range])
+        }.sorted()
+    }
+
     private func sourceResourcesDirectory() throws -> URL {
         try projectRootDirectory().appendingPathComponent("WordScene/Resources", isDirectory: true)
     }
@@ -484,4 +607,12 @@ private struct StringCatalogVariationFixture: Decodable {
 
 private struct StringCatalogStringUnitFixture: Decodable {
     let value: String
+}
+
+private extension String {
+    var containsCJKIdeograph: Bool {
+        unicodeScalars.contains { scalar in
+            (0x4E00...0x9FFF).contains(Int(scalar.value))
+        }
+    }
 }

@@ -16,6 +16,7 @@
 		0671A7181E2798D1F30336E0 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */; };
 		079B623B7B372FF0D90B0607 /* LanguageDirectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9620FC5598FBD6CA7CB9106B /* LanguageDirectionTests.swift */; };
 		08E0FC5C646757C700EA296E /* MemoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685B7AD82D463A45F145A2B4 /* MemoryItem.swift */; };
+		0A7C7A763794FBB871F631B3 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755D873B173391E0404A123B /* AppTheme.swift */; };
 		0B302040AA11E344D195DAC1 /* DeepSeekTranslationResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D082A030BD30DDD1F94CED /* DeepSeekTranslationResponseTests.swift */; };
 		0E11FBE5FB9107A314FEEF91 /* TranslationHistoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4A7FB7FCC5F7BD59669735 /* TranslationHistoryRepository.swift */; };
 		0F01AF2937029ED82C6A143C /* CoreDataMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22148C574EC153CD30D8E876 /* CoreDataMemoryStore.swift */; };
@@ -64,6 +65,7 @@
 		601E8031A2DC6926A6F56777 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE67FC610560C08B600F953A /* InfoPlist.strings */; };
 		6240C1716D03756546DA1020 /* SettingsImportExportControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A326C54DE9B73BA7405FCB32 /* SettingsImportExportControllerTests.swift */; };
 		658402080E63EA0C380C2A7F /* MemoryLibraryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C040CEEF155F11CC214D80B6 /* MemoryLibraryRepositoryTests.swift */; };
+		6F9BD4BD294B7795DE0CDC8C /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755D873B173391E0404A123B /* AppTheme.swift */; };
 		6FD85F1B603FFBCABE71A6B9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4D4552B02C4C7DE95FE27546 /* Localizable.xcstrings */; };
 		78A03AF21F3FA00B9E737465 /* MemorySearchIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */; };
 		7923D8806E42E96FBC91A61F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE67FC610560C08B600F953A /* InfoPlist.strings */; };
@@ -218,6 +220,7 @@
 		71840717FD8FF143BAE51E49 /* MemoryImportExportServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImportExportServiceTests.swift; sourceTree = "<group>"; };
 		721B9483061EDEEB9D4C52BD /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		74C8385412454C45DC5ECE5B /* AppBuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBuildInfo.swift; sourceTree = "<group>"; };
+		755D873B173391E0404A123B /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		7E1C69A659E9CCA80A97DDED /* WordScene.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WordScene.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8100501C567D6C759CB8E82B /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		814B5E9442D220750AA59F13 /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -356,6 +359,7 @@
 				74C8385412454C45DC5ECE5B /* AppBuildInfo.swift */,
 				DC00EA37578F51C218C5DBC3 /* AppDataController.swift */,
 				C3B8777AC3DD498942C3FA17 /* AppSection.swift */,
+				755D873B173391E0404A123B /* AppTheme.swift */,
 				96BAF2CB4697677551219CBB /* RootView.swift */,
 				F292BDE0D2E1D12937D9B660 /* WordSceneApp.swift */,
 			);
@@ -857,6 +861,7 @@
 				F7673D2CAD402679A62E7E8E /* AppBuildInfo.swift in Sources */,
 				BDFAED11B6771D1197923B93 /* AppDataController.swift in Sources */,
 				5CDE955C2035798FB02E1F34 /* AppSection.swift in Sources */,
+				6F9BD4BD294B7795DE0CDC8C /* AppTheme.swift in Sources */,
 				135D99D273777D3420083E87 /* CoreDataMemoryStore.swift in Sources */,
 				4F9F3DF50F9EC0FAC283925F /* DebugRawAPIResponseRecorder.swift in Sources */,
 				A9460D82F6024D2375A935A2 /* DeepSeekBalanceClient.swift in Sources */,
@@ -897,6 +902,7 @@
 				47E69F27C72A015EC91AEAA1 /* AppBuildInfo.swift in Sources */,
 				E52F57F2A8F6D00761F689F6 /* AppDataController.swift in Sources */,
 				E09554AFBB7DD4768B82DC15 /* AppSection.swift in Sources */,
+				0A7C7A763794FBB871F631B3 /* AppTheme.swift in Sources */,
 				0F01AF2937029ED82C6A143C /* CoreDataMemoryStore.swift in Sources */,
 				1D272F40CF2071079A053F15 /* DebugRawAPIResponseRecorder.swift in Sources */,
 				B1617BC8C90214DE4CF412C6 /* DeepSeekBalanceClient.swift in Sources */,
@@ -1171,7 +1177,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1240,7 +1246,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

@@ -20,6 +20,7 @@ struct LibraryView: View {
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.appThemePalette) private var themePalette
 
     private var store: MemoryLibraryRepository {
         dataController.memoryLibrary
@@ -150,6 +151,10 @@ struct LibraryView: View {
     }
 
     private var pageBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.background
+        }
+
         #if os(macOS)
         return Color(nsColor: .windowBackgroundColor)
         #else
@@ -158,6 +163,10 @@ struct LibraryView: View {
     }
 
     private var searchFieldBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.surface
+        }
+
         #if os(macOS)
         return Color(nsColor: .textBackgroundColor)
         #else
@@ -166,6 +175,10 @@ struct LibraryView: View {
     }
 
     private var searchFieldBorder: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.primary.opacity(0.18)
+        }
+
         #if os(macOS)
         return Color(nsColor: .separatorColor).opacity(0.72)
         #else
@@ -298,6 +311,7 @@ struct LibraryView: View {
             HStack(alignment: .center, spacing: 12) {
                 Text(String(localized: "收藏", comment: "Large title for the saved memory library."))
                     .font(.largeTitle.bold())
+                    .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary : Color.primary)
                     .accessibilityIdentifier("library.title")
 
                 Spacer()
@@ -413,9 +427,10 @@ struct LibraryView: View {
 
                 Text(librarySyncBadgeText)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary.opacity(0.72) : Color.secondary)
                     .accessibilityIdentifier("library.sync.badge")
             }
+            .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary : Color.primary)
 
             Picker(String(localized: "收藏筛选", comment: "Picker label for filtering saved memory items."), selection: $filter) {
                 Text(String(localized: "全部", comment: "Filter option that shows all saved memory items.")).tag(LibraryFilter.all)

@@ -8,6 +8,7 @@ import UIKit
 #endif
 
 struct SettingsView: View {
+    @AppStorage(AppTheme.storageKey) private var selectedThemeRawValue = AppTheme.auto.rawValue
     @AppStorage(CloudKitSyncPreference.isEnabledKey) private var isCloudKitSyncRequested = false
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
@@ -29,6 +30,7 @@ struct SettingsView: View {
     @Environment(\.appDataController) private var dataController
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.settingsRuntime) private var settingsRuntime
+    @Environment(\.appThemePalette) private var themePalette
     private var importExportController: SettingsImportExportController {
         dataController.settingsImportExport
     }
@@ -110,12 +112,14 @@ struct SettingsView: View {
 
                 if usesTwoColumnSettings {
                     LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
+                        themesCard
                         deepSeekCard
                         persistenceStatusCard
                         importExportCard
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
+                        themesCard
                         deepSeekCard
                         persistenceStatusCard
                         importExportCard
@@ -142,74 +146,24 @@ struct SettingsView: View {
 
     #if os(macOS)
     private var macSettingsBody: some View {
-        Form {
-            Section(String(localized: "翻译服务", comment: "Settings section title for translation service setup.")) {
-                SecureField("sk-...", text: $apiToken)
-                    .textContentType(.password)
-                    .textFieldStyle(.roundedBorder)
-                    .accessibilityLabel("DeepSeek API Token")
-                    .accessibilityIdentifier("settings.deepSeek.token")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                settingsHeader
 
-                tokenStatusView
-                deepSeekTokenButtons
-            }
-
-            Section(String(localized: "同步", comment: "Settings section title for sync controls.")) {
-                iCloudSyncPreferenceToggle
-                userFacingSyncStatusView
-                if dataController.persistenceStatus.isDegraded {
-                    persistenceStatusView
-                }
-                if shouldShowNetworkStatus {
-                    NetworkStatusView(monitor: dataController.networkStatusMonitor)
-                }
-                if shouldShowSyncEventStatus {
-                    SyncEventStatusView(monitor: dataController.syncEventMonitor)
-                }
-                if showsLegacyRecoveryTools {
-                    recoveryStatusView
-
-                    HStack {
-                        Spacer()
-                        localRecoveryButtons
-                    }
+                LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
+                    themesCard
+                    deepSeekCard
+                    persistenceStatusCard
+                    importExportCard
                 }
             }
-
-            Section(String(localized: "导入导出", comment: "Settings section title for import and export.")) {
-                Picker(String(localized: "重复项", comment: "Picker label for duplicate import handling."), selection: $importConflictPolicy) {
-                    ForEach(SettingsMemoryImportConflictPolicy.allCases) { policy in
-                        Text(policy.title).tag(policy)
-                    }
-                }
-                .pickerStyle(.segmented)
-                importExportStatusView
-
-                HStack {
-                    Spacer()
-                    Button {
-                        presentImport()
-                    } label: {
-                        Label(String(localized: "导入", comment: "Button title for importing saved memory."), systemImage: "square.and.arrow.down")
-                    }
-                    .accessibilityIdentifier("settings.import.button")
-                    .disabled(importExportStatus.isWorking)
-
-                    Button {
-                        prepareExport()
-                    } label: {
-                        Label(String(localized: "导出", comment: "Button title for exporting saved memory."), systemImage: "square.and.arrow.up")
-                    }
-                    .accessibilityIdentifier("settings.export.button")
-                    .disabled(importExportStatus.isWorking)
-                }
-            }
+            .frame(maxWidth: settingsContentMaxWidth, alignment: .leading)
+            .padding(.horizontal, settingsHorizontalPadding)
+            .padding(.top, settingsTopPadding)
+            .padding(.bottom, settingsBottomPadding)
         }
-        .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
-        .padding(24)
         .frame(minWidth: 620, minHeight: 500)
-        .background(settingsBackground)
+        .background(settingsBackground.ignoresSafeArea())
         .navigationTitle(String(localized: "设置", comment: "Navigation title for settings."))
         .onAppear {
             loadSavedToken()
@@ -220,10 +174,44 @@ struct SettingsView: View {
     private var settingsHeader: some View {
         Text(String(localized: "设置", comment: "Large title for settings."))
             .font(.largeTitle.bold())
+            .foregroundStyle(settingsTitleColor)
             .accessibilityIdentifier("settings.title")
         #if os(macOS)
         .padding(.top, 4)
         #endif
+    }
+
+    private var themesCard: some View {
+        SettingsCard(title: String(localized: "Themes", comment: "Settings card title for theme selection."), systemImage: "paintpalette") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "Themes", comment: "Picker label for app theme selection."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                themePicker
+            }
+        }
+    }
+
+    private var themePicker: some View {
+        Picker(String(localized: "Themes", comment: "Picker label for app theme selection."), selection: selectedThemeBinding) {
+            ForEach(AppTheme.allCases) { theme in
+                Text(theme.displayName).tag(theme.rawValue)
+            }
+        }
+        .pickerStyle(.menu)
+        .accessibilityIdentifier("settings.themes.picker")
+    }
+
+    private var selectedThemeBinding: Binding<String> {
+        Binding(
+            get: {
+                AppTheme.fromStorageValue(selectedThemeRawValue).rawValue
+            },
+            set: { newValue in
+                selectedThemeRawValue = newValue
+            }
+        )
     }
 
     private var deepSeekCard: some View {
@@ -594,11 +582,19 @@ struct SettingsView: View {
     }
 
     private var settingsBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.background
+        }
+
         #if os(macOS)
         return Color(nsColor: .windowBackgroundColor)
         #else
         return Color(.systemGroupedBackground)
         #endif
+    }
+
+    private var settingsTitleColor: Color {
+        themePalette.usesCustomPalette ? themePalette.primary : Color.primary
     }
 
     private var persistenceStatusTint: Color {
@@ -1195,24 +1191,54 @@ private struct SettingsCard<Content: View>: View {
     let title: String
     let systemImage: String
     @ViewBuilder var content: Content
+    @Environment(\.appThemePalette) private var themePalette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Label(title, systemImage: systemImage)
                 .font(.headline)
+                .foregroundStyle(cardTitleColor)
 
             content
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         #if os(macOS)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color(nsColor: .separatorColor).opacity(0.45), lineWidth: 0.7)
+                .strokeBorder(cardBorder, lineWidth: 0.7)
         }
         #else
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         #endif
+    }
+
+    private var cardBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.surface
+        }
+
+        #if os(macOS)
+        return Color(nsColor: .controlBackgroundColor)
+        #else
+        return Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    private var cardBorder: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.primary.opacity(0.18)
+        }
+
+        #if os(macOS)
+        return Color(nsColor: .separatorColor).opacity(0.45)
+        #else
+        return Color(.separator).opacity(0.3)
+        #endif
+    }
+
+    private var cardTitleColor: Color {
+        themePalette.usesCustomPalette ? themePalette.primary : Color.primary
     }
 }

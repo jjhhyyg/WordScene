@@ -22,6 +22,7 @@ struct TranslationView: View {
     @Environment(\.translationRuntime) private var translationRuntime
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.appThemePalette) private var themePalette
 
     private var historyStore: TranslationHistoryRepository {
         dataController.translationHistory
@@ -134,6 +135,7 @@ struct TranslationView: View {
         HStack(alignment: .center, spacing: 12) {
             Text(String(localized: "翻译", comment: "Main translation tab title and primary translate action."))
                 .font(.largeTitle.bold())
+                .foregroundStyle(themePalette.usesCustomPalette ? themePalette.primary : Color.primary)
                 .accessibilityIdentifier("translation.title")
 
             Spacer()
@@ -283,6 +285,10 @@ struct TranslationView: View {
     }
 
     private var pageBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.background
+        }
+
         #if os(macOS)
         return Color(nsColor: .windowBackgroundColor)
         #else
@@ -1014,20 +1020,46 @@ private enum TranslationState: Equatable {
 }
 
 private struct PanelStyle: ViewModifier {
+    @Environment(\.appThemePalette) private var themePalette
+
     func body(content: Content) -> some View {
         #if os(macOS)
         content
             .padding(16)
-            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(panelBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Color(nsColor: .separatorColor).opacity(0.72), lineWidth: 1)
+                    .strokeBorder(panelBorder, lineWidth: 1)
             }
             .shadow(color: Color.black.opacity(0.035), radius: 10, x: 0, y: 3)
         #else
         content
             .padding(18)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(panelBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        #endif
+    }
+
+    private var panelBackground: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.surface
+        }
+
+        #if os(macOS)
+        return Color(nsColor: .controlBackgroundColor)
+        #else
+        return Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    private var panelBorder: Color {
+        if themePalette.usesCustomPalette {
+            return themePalette.primary.opacity(0.18)
+        }
+
+        #if os(macOS)
+        return Color(nsColor: .separatorColor).opacity(0.72)
+        #else
+        return Color(.separator).opacity(0.3)
         #endif
     }
 }

@@ -6,6 +6,7 @@ import UIKit
 
 struct RootView: View {
     @State private var selectedSection: AppSection = .translate
+    @Environment(\.appThemePalette) private var themePalette
 
     var body: some View {
         #if os(macOS)
@@ -44,7 +45,7 @@ struct RootView: View {
                     .buttonStyle(.plain)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
-                    .listRowBackground(selectedSection == section ? Color.accentColor.opacity(0.14) : Color.clear)
+                    .listRowBackground(selectedSection == section ? themePalette.primary.opacity(0.14) : Color.clear)
                     .accessibilityLabel(section.title)
                     .accessibilityIdentifier("navigation.\(section.rawValue)")
                     #if os(macOS)
@@ -53,6 +54,10 @@ struct RootView: View {
                 }
             }
             .navigationTitle(String(localized: "译笺", comment: "Root sidebar navigation title."))
+            #if os(macOS)
+            .scrollContentBackground(.hidden)
+            .background(sidebarBackground)
+            #endif
             #if os(macOS)
             .frame(minWidth: 176)
             #else
@@ -68,6 +73,15 @@ struct RootView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+        .background(rootBackground.ignoresSafeArea())
+    }
+
+    private var rootBackground: Color {
+        themePalette.usesCustomPalette ? themePalette.background : Color.clear
+    }
+
+    private var sidebarBackground: Color {
+        themePalette.usesCustomPalette ? themePalette.sidebar : Color.clear
     }
 
     #if os(iOS)
