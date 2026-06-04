@@ -10,6 +10,10 @@ import UIKit
 struct SettingsView: View {
     @AppStorage(AppTheme.storageKey) private var selectedThemeRawValue = AppTheme.auto.rawValue
     @AppStorage(CloudKitSyncPreference.isEnabledKey) private var isCloudKitSyncRequested = false
+    @AppStorage(
+        TranslationPreferencesStore.defaultTargetLanguageKey,
+        store: .wordSceneShared
+    ) private var defaultTargetLanguageRawValue = LanguageSelection.zh.rawValue
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
     @State private var importExportStatus: SettingsImportExportStatus = .idle
@@ -113,6 +117,7 @@ struct SettingsView: View {
                 if usesTwoColumnSettings {
                     LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
                         themesCard
+                        translationDefaultsCard
                         deepSeekCard
                         persistenceStatusCard
                         importExportCard
@@ -120,6 +125,7 @@ struct SettingsView: View {
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
                         themesCard
+                        translationDefaultsCard
                         deepSeekCard
                         persistenceStatusCard
                         importExportCard
@@ -152,6 +158,7 @@ struct SettingsView: View {
 
                 LazyVGrid(columns: settingsColumns, alignment: .leading, spacing: 18) {
                     themesCard
+                    translationDefaultsCard
                     deepSeekCard
                     persistenceStatusCard
                     importExportCard
@@ -203,6 +210,27 @@ struct SettingsView: View {
         .accessibilityIdentifier("settings.themes.picker")
     }
 
+    private var translationDefaultsCard: some View {
+        SettingsCard(title: String(localized: "翻译默认值", comment: "Settings card title for translation defaults."), systemImage: "translate") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "默认目标语言", comment: "Picker label for default target language."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Picker(
+                    String(localized: "默认目标语言", comment: "Picker label for default target language."),
+                    selection: defaultTargetLanguageBinding
+                ) {
+                    ForEach(LanguageSelection.translationTargets) { language in
+                        Text(language.title).tag(language.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("settings.translation.defaultTargetLanguage")
+            }
+        }
+    }
+
     private var selectedThemeBinding: Binding<String> {
         Binding(
             get: {
@@ -210,6 +238,28 @@ struct SettingsView: View {
             },
             set: { newValue in
                 selectedThemeRawValue = newValue
+            }
+        )
+    }
+
+    private var defaultTargetLanguageBinding: Binding<String> {
+        Binding(
+            get: {
+                guard let language = LanguageSelection(rawValue: defaultTargetLanguageRawValue),
+                      LanguageSelection.translationTargets.contains(language) else {
+                    return LanguageSelection.zh.rawValue
+                }
+
+                return language.rawValue
+            },
+            set: { newValue in
+                guard let language = LanguageSelection(rawValue: newValue),
+                      LanguageSelection.translationTargets.contains(language) else {
+                    defaultTargetLanguageRawValue = LanguageSelection.zh.rawValue
+                    return
+                }
+
+                defaultTargetLanguageRawValue = language.rawValue
             }
         )
     }

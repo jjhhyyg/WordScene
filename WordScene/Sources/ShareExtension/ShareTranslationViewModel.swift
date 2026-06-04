@@ -18,23 +18,27 @@ final class ShareTranslationViewModel: ObservableObject {
     @Published private(set) var didCopy = false
     @Published private(set) var didFavorite = false
     @Published private(set) var sourceLanguage: LanguageSelection = .auto
-    @Published var targetLanguage: LanguageSelection = .zh
+    @Published var targetLanguage: LanguageSelection
 
     private let extractor: SharedContentExtractor
     private let credentialStore: any CredentialStoring
     private let translationClient: any TranslationClienting
     private let handoffStore: ShareExtensionHandoffStore?
+    private let preferencesStore: TranslationPreferencesStore
 
     init(
         extractor: SharedContentExtractor = SharedContentExtractor(),
         credentialStore: any CredentialStoring = KeychainCredentialStore(),
         translationClient: any TranslationClienting = DeepSeekTranslationClient(),
-        handoffStore: ShareExtensionHandoffStore? = ShareExtensionHandoffStore()
+        handoffStore: ShareExtensionHandoffStore? = ShareExtensionHandoffStore(),
+        preferencesStore: TranslationPreferencesStore = TranslationPreferencesStore()
     ) {
         self.extractor = extractor
         self.credentialStore = credentialStore
         self.translationClient = translationClient
         self.handoffStore = handoffStore
+        self.preferencesStore = preferencesStore
+        self.targetLanguage = preferencesStore.defaultTargetLanguage
     }
 
     func load(providers: [NSItemProvider]) {
@@ -77,9 +81,9 @@ final class ShareTranslationViewModel: ObservableObject {
             return
         }
 
-        let detectedSource = TranslationLanguageDetector.detect(trimmed) ?? .auto
-        sourceLanguage = detectedSource
-        targetLanguage = normalizedTarget(for: detectedSource, currentTarget: targetLanguage)
+        let preferredTarget = preferencesStore.defaultTargetLanguage
+        sourceLanguage = .auto
+        targetLanguage = preferredTarget
         didCopy = false
         didFavorite = false
         state = .translating(trimmed)
@@ -93,15 +97,15 @@ final class ShareTranslationViewModel: ObservableObject {
             let token = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
             let translatedText = try await translationClient.translate(
                 text: trimmed,
-                source: detectedSource,
-                target: targetLanguage,
+                source: .auto,
+                target: preferredTarget,
                 apiToken: token
             )
             let record = ShareExtensionHandoffRecord(
                 sourceText: trimmed,
                 translatedText: translatedText,
-                sourceLanguage: detectedSource,
-                targetLanguage: targetLanguage,
+                sourceLanguage: .auto,
+                targetLanguage: preferredTarget,
                 isFavoritePending: false
             )
             try handoffStore?.save(record)
@@ -151,20 +155,5 @@ final class ShareTranslationViewModel: ObservableObject {
         return URL(
             string: "\(ShareExtensionConfiguration.urlScheme)://\(ShareExtensionConfiguration.handoffHost)?id=\(record.id.uuidString)"
         )
-    }
-
-    private func normalizedTarget(
-        for source: LanguageSelection,
-        currentTarget: LanguageSelection
-    ) -> LanguageSelection {
-        guard !LanguageSelection.targetOptions(excluding: source).contains(currentTarget) else {
-            return currentTarget
-        }
-
-        if source == .zh || source == .zhHant {
-            return .en
-        }
-
-        return .zh
     }
 }
