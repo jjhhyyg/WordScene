@@ -72,14 +72,21 @@ targets:
     deploymentTarget: "18.0"
     sources:
       - path: WordScene/Sources/ShareExtension
-      - path: WordScene/Sources/Shared
-      - path: WordScene/Resources
-    resources:
-      - path: WordScene/Resources
+      - path: WordScene/Sources/Shared/Models/LanguageSelection.swift
+      - path: WordScene/Sources/Shared/Models/TranslationRecord.swift
+      - path: WordScene/Sources/Shared/Services/DebugRawAPIResponseRecorder.swift
+      - path: WordScene/Sources/Shared/Services/DeepSeekCredential.swift
+      - path: WordScene/Sources/Shared/Services/DeepSeekTranslationClient.swift
+      - path: WordScene/Sources/Shared/Services/KeychainCredentialStore.swift
+      - path: WordScene/Sources/Shared/Services/ShareExtensionSupport.swift
+      - path: WordScene/Sources/Shared/Services/SharedContentExtractor.swift
+      - path: WordScene/Sources/Shared/Services/TranslationLanguageDetector.swift
     info:
       path: WordScene/ShareExtension/ShareExtensionInfo.plist
       properties:
         CFBundleDisplayName: 翻译到译笺
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
@@ -97,6 +104,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.share
         PRODUCT_NAME: Translate to WordScene
         PRODUCT_MODULE_NAME: WordSceneShareExtension
+        MARKETING_VERSION: 1.0.3
+        CURRENT_PROJECT_VERSION: 1
         APPLICATION_EXTENSION_API_ONLY: YES
         GENERATE_INFOPLIST_FILE: NO
   WordSceneMac:
