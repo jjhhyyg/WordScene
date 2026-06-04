@@ -21,8 +21,6 @@
 - 提供 `收藏` 按钮，写入收藏库。
 - 提供 `打开译笺` 按钮，进入主 App 翻译页，并带入原文和译文。
 - 翻译成功后写入翻译历史。
-- 翻译成功后可发送本地通知；用户点通知进入主 App 翻译页，并看到已有原文和译文。
-- 主 App 设置中提供本地通知开关；关闭后 Share Extension 不发送翻译完成通知。
 - 所有新增用户可见文案进入 `WordScene/Resources/Localizable.xcstrings`，不写死中文。
 - 本地化测试覆盖新增 key。
 
@@ -33,6 +31,7 @@
 - 不抓取网页全文。
 - 不做自动收藏；收藏必须由用户点击 `收藏`。
 - 不在 Share Extension 中提供完整收藏编辑页。
+- 不做系统本地通知。
 - 不做 Live Activity / Dynamic Island。
 - 不做 Dynamic Island 上的复制按钮。
 - 不自建服务端，不做远程推送。
@@ -50,7 +49,6 @@
 7. Extension 调用 DeepSeek 翻译。
 8. 翻译成功后，面板显示译文并启用 `复制译文`、`收藏`、`打开译笺`。
 9. Extension 写入翻译历史。
-10. 如果用户在 App 设置中开启本地通知，Extension 发送本地通知，通知展示译文摘要。
 
 ### 3.2 收藏
 
@@ -60,7 +58,7 @@
 
 ### 3.3 打开主 App
 
-用户点击 `打开译笺` 或点击本地通知后，主 App 打开翻译页。翻译页需要处于已有结果状态：
+用户点击 `打开译笺` 后，主 App 打开翻译页。翻译页需要处于已有结果状态：
 
 - 输入框包含原文。
 - 结果区包含译文。
@@ -124,7 +122,6 @@ group.com.erikssonhou.leximemory
 
 - 存放 Extension 写入的 pending translation record。
 - 支持 Extension 与主 App 交换一次性打开上下文。
-- 存放 Share Extension 需要读取的轻量偏好，例如翻译完成本地通知开关。
 - 为未来共享 Core Data store 或共享轻量队列预留空间。
 
 注意：App Group 是签名和 Developer Portal 层面的能力，工程配置后仍需要在 Apple Developer 账号中启用。
@@ -134,9 +131,8 @@ group.com.erikssonhou.leximemory
 Extension 不应直接依赖主 App UI runtime。需要抽出 extension-safe 服务：
 
 - `SharedContentExtractor`：从 `NSItemProvider` 提取文本、富文本纯文本和 URL。
-- `ShareTranslationWorkflow`：协调 Token 读取、翻译调用、历史写入、收藏写入和通知。
+- `ShareTranslationWorkflow`：协调 Token 读取、翻译调用、历史写入和收藏写入。
 - `SharedTranslationHandoffStore`：把原文、译文、语言方向、收藏状态写入 App Group，供主 App 打开时读取。
-- `ShareNotificationScheduler`：发送本地通知。
 
 已有 `DeepSeekTranslationClient` 可复用，但必须确认它没有使用 app-extension-unavailable API。
 
@@ -157,15 +153,9 @@ Extension 不应直接依赖主 App UI runtime。需要抽出 extension-safe 服
 Core Data + CloudKit store 当前是主数据真源。Extension 直接写 Core Data 需要处理 App Group store、CloudKit entitlement、并发写入和 migration 风险。第一版实现时可以选择两种路径之一：
 
 1. Extension 直接写共享 Core Data store：体验完整，但签名、App Group 和并发协调风险较高。
-2. Extension 写 App Group pending operation，主 App 下次启动或收到打开事件后落库：更稳，但通知后进入主 App 前收藏/历史可能只是 pending。
+2. Extension 写 App Group pending operation，主 App 下次启动或收到打开事件后落库：更稳，但打开主 App 前收藏/历史可能只是 pending。
 
 推荐第一版使用第 2 种路径，除非实现阶段验证 Extension 直接写 Core Data 的签名和并发风险可控。
-
-### 5.6 通知偏好
-
-主 App 设置页新增 `翻译完成通知` 开关。偏好值写入 App Group `UserDefaults(suiteName:)`，以便 Share Extension 在翻译完成时读取。
-
-默认值建议为开启，但首次发送仍必须服从系统通知授权。用户在 App 内关闭后，Extension 不发送本地通知，也不主动触发系统通知授权请求。
 
 ## 6. Deep Link / 打开主 App
 
@@ -182,27 +172,9 @@ wordscene://share-translation?id=<handoff-id>
 - 设置原文、译文、语言方向和翻译状态。
 - 如有 pending history 或 pending favorite，完成落库并清理 pending 状态。
 
-如果系统不允许 Share Extension 直接打开 containing app，则 `打开译笺` 需要采用可审核的系统路径，例如通过 `NSExtensionContext` 能力、通知点击或文档化允许的 URL 打开方式。实现阶段必须验证，不使用依赖私有 API 或明显规避审核的技巧。
+如果系统不允许 Share Extension 直接打开 containing app，则 `打开译笺` 需要采用可审核的系统路径，例如通过 `NSExtensionContext` 能力或文档化允许的 URL 打开方式。实现阶段必须验证，不使用依赖私有 API 或明显规避审核的技巧。
 
-## 7. 通知
-
-翻译成功后，Extension 可通过 `UNUserNotificationCenter` 安排本地通知。这个通知能力必须在主 App 设置中可关闭，关闭后 Extension 不请求发送翻译完成通知，用户仍可在 Share Extension 面板里查看译文、复制、收藏或打开主 App。
-
-通知文案：
-
-- 标题：`译文已生成`
-- 正文：译文摘要，长度受系统通知展示限制。
-- 辅助说明：`点按打开译笺查看完整翻译`
-
-通知点击后进入主 App 的翻译页，使用同一个 handoff id 恢复原文和译文。
-
-通知开关与系统授权分开处理：
-
-- App 内开关关闭：不发送通知，也不主动请求系统通知授权。
-- App 内开关开启但系统未授权：可以提示用户去系统设置授权，但不阻断翻译流程。
-- 系统通知授权被撤销：面板继续显示译文，复制、收藏和打开主 App 不受影响。
-
-## 8. Live Activity / Dynamic Island 后续阶段
+## 7. Live Activity / Dynamic Island 后续阶段
 
 Live Activity 和 Dynamic Island 不进入 V1。
 
@@ -219,7 +191,7 @@ Live Activity 和 Dynamic Island 不进入 V1。
 - 是否会要求启动主 App 或产生明显延迟。
 - 是否符合系统隐私和审核预期。
 
-## 9. 本地化
+## 8. 本地化
 
 新增 key 必须进入 `Localizable.xcstrings`，至少包括：
 
@@ -235,10 +207,6 @@ Live Activity 和 Dynamic Island 不进入 V1。
 - `打开译笺`
 - `无法读取分享内容`
 - `请先在设置中保存 DeepSeek API Token`
-- `译文已生成`
-- `点按打开译笺查看完整翻译`
-- `翻译完成通知`
-- `在分享翻译完成后发送本地通知`
 - `翻译失败`
 - `收藏失败`
 - `已保存到收藏`
@@ -247,27 +215,24 @@ Live Activity 和 Dynamic Island 不进入 V1。
 
 - `AppLocalizationTests` 覆盖新增 key。
 - Share Extension display name 覆盖至少 `zh-Hans`、`en`、`es` 的基础展示。
-- 不在 SwiftUI 视图、通知调度或错误提示里裸写仅中文文案。
+- 不在 SwiftUI 视图或错误提示里裸写仅中文文案。
 
-## 10. 错误处理
+## 9. 错误处理
 
 - 无文本：显示 `无法读取分享内容`。
 - Token 缺失：显示 `请先在设置中保存 DeepSeek API Token`，提供 `打开译笺`。
 - 网络失败：显示翻译失败原因摘要，保留原文。
 - DeepSeek 返回空结果：显示翻译失败，不写入历史或收藏。
 - 收藏写入失败：保留译文，允许复制和打开主 App。
-- App 内通知开关关闭：不发送通知，不阻断翻译、复制、收藏或打开主 App。
-- 通知未授权：不阻断翻译、复制、收藏或打开主 App。
 - App Group 不可用：Extension 显示无法打开主 App 的提示，但仍可展示译文。
 
-## 11. 测试计划
+## 10. 测试计划
 
 单元测试：
 
 - 文本提取：plain text、rich text、URL、空输入。
 - Share workflow：Token 缺失、翻译成功、翻译失败、收藏成功、收藏失败。
 - Handoff store：写入、读取、清理、缺失 id。
-- 通知偏好：开关关闭时不发送通知，开关开启但系统未授权时不阻断 workflow。
 - 本地化 key 覆盖。
 
 工程测试：
@@ -286,9 +251,7 @@ Live Activity 和 Dynamic Island 不进入 V1。
 - 翻译完成后可复制。
 - 翻译完成后可收藏。
 - 点 `打开译笺` 进入主 App，并显示已有原文和译文。
-- App 内关闭翻译完成通知后，Share Extension 翻译成功不发送本地通知。
-- 未授权通知时主流程不受影响。
 
-## 12. 审视性结论
+## 11. 审视性结论
 
 这个功能最重要的不是炫技，而是把外部阅读场景里的文本低摩擦送进 WordScene。第一版必须优先保证 Share Sheet 入口稳定、翻译面板可靠、收藏按钮明确、本地化完整。Live Activity 和 Dynamic Island 是体验增强，不应该成为 V1 的交付阻塞点。
