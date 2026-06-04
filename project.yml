@@ -44,6 +44,8 @@ targets:
       path: WordScene/WordSceneiOS.entitlements
       properties:
         aps-environment: $(APS_ENVIRONMENT)
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.erikssonhou.leximemory
         com.apple.security.application-groups:
           - group.com.erikssonhou.leximemory
         com.apple.developer.icloud-container-identifiers:
@@ -97,6 +99,8 @@ targets:
     entitlements:
       path: WordScene/WordSceneShareExtension.entitlements
       properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.erikssonhou.leximemory
         com.apple.security.application-groups:
           - group.com.erikssonhou.leximemory
     settings:

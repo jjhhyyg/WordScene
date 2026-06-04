@@ -10,6 +10,7 @@ enum SharedContentExtractorError: Error, Equatable {
     case noReadableContent
 }
 
+@MainActor
 struct SharedContentExtractor {
     func extractText(from providers: [NSItemProvider]) async throws -> SharedContentExtractionResult {
         for provider in providers {
@@ -71,7 +72,7 @@ struct SharedContentExtractor {
         }
     }
 
-    private func loadedItem(from item: NSSecureCoding?) -> LoadedItem? {
+    private nonisolated func loadedItem(from item: NSSecureCoding?) -> LoadedItem? {
         switch item {
         case let value as String:
             return .text(value)
@@ -90,7 +91,7 @@ struct SharedContentExtractor {
         }
     }
 
-    private func trimmedText(from item: LoadedItem?) -> String? {
+    private nonisolated func trimmedText(from item: LoadedItem?) -> String? {
         let text: String?
 
         switch item {
@@ -105,7 +106,7 @@ struct SharedContentExtractor {
         return text?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
     }
 
-    private func url(from item: LoadedItem?) -> URL? {
+    private nonisolated func url(from item: LoadedItem?) -> URL? {
         switch item {
         case let .url(value):
             return value
@@ -121,7 +122,7 @@ struct SharedContentExtractor {
         }
     }
 
-    private func trimmedURL(from string: String) -> URL? {
+    private nonisolated func trimmedURL(from string: String) -> URL? {
         let text = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
             return nil

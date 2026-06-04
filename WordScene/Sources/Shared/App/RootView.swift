@@ -6,28 +6,34 @@ import UIKit
 
 struct RootView: View {
     @State private var selectedSection: AppSection = .translate
+    @EnvironmentObject private var routeCoordinator: AppRouteCoordinator
     @Environment(\.appThemePalette) private var themePalette
 
     var body: some View {
+        Group {
         #if os(macOS)
-        splitRoot(layout: .expanded)
-            .environment(\.adaptiveLayout, .expanded)
-            .frame(minWidth: 920, minHeight: 620)
+            splitRoot(layout: .expanded)
+                .environment(\.adaptiveLayout, .expanded)
+                .frame(minWidth: 920, minHeight: 620)
         #else
-        GeometryReader { proxy in
-            let layout = AdaptiveLayout(availableWidth: proxy.size.width)
+            GeometryReader { proxy in
+                let layout = AdaptiveLayout(availableWidth: proxy.size.width)
 
-            Group {
-                if layout.usesTabNavigation {
-                    tabRoot
-                } else {
-                    splitRoot(layout: layout)
+                Group {
+                    if layout.usesTabNavigation {
+                        tabRoot
+                    } else {
+                        splitRoot(layout: layout)
+                    }
                 }
+                .environment(\.adaptiveLayout, layout)
+                .keyboardDismissControls()
             }
-            .environment(\.adaptiveLayout, layout)
-            .keyboardDismissControls()
-        }
         #endif
+        }
+        .onReceive(routeCoordinator.$pendingShareHandoffID.compactMap { $0 }) { _ in
+            selectedSection = .translate
+        }
     }
 
     private func splitRoot(layout: AdaptiveLayout) -> some View {

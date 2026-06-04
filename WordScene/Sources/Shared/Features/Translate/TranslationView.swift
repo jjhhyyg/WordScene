@@ -15,9 +15,11 @@ struct TranslationView: View {
     @State private var translationGeneration = 0
     @State private var didCopyTranslation = false
     @State private var didApplyUITestInput = false
+    @State private var consumedHandoffIDs: Set<UUID> = []
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
     @State private var persistenceWarningMessage: String?
+    @EnvironmentObject private var routeCoordinator: AppRouteCoordinator
     @Environment(\.appDataController) private var dataController
     @Environment(\.translationRuntime) private var translationRuntime
     @Environment(\.adaptiveLayout) private var adaptiveLayout
@@ -50,10 +52,16 @@ struct TranslationView: View {
             loadHistory()
             loadMemoryItems()
             applyUITestInputIfNeeded()
+            if let id = routeCoordinator.pendingShareHandoffID {
+                applyShareHandoff(id: id)
+            }
         }
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadHistory()
             loadMemoryItems()
+        }
+        .onReceive(routeCoordinator.$pendingShareHandoffID.compactMap { $0 }) { id in
+            applyShareHandoff(id: id)
         }
         .onChange(of: sourceLanguage) { _, _ in
             normalizeLanguageDirection()
@@ -821,6 +829,62 @@ struct TranslationView: View {
                 format: String(localized: "收藏保存失败：%@", comment: "Warning shown when saving a translation result to memory fails. The placeholder is the system error description."),
                 error.localizedDescription
             )
+        }
+    }
+
+    @MainActor
+    private func applyShareHandoff(id: UUID) {
+        guard !consumedHandoffIDs.contains(id),
+              let store = ShareExtensionHandoffStore(),
+              let handoff = try? store.load(id: id) else {
+            return
+        }
+
+        consumedHandoffIDs.insert(id)
+        translationGeneration += 1
+        sourceLanguage = handoff.sourceLanguage
+        targetLanguage = handoff.targetLanguage
+        inputText = handoff.sourceText
+        lastTranslatedRecord = handoff.translationRecord
+        translationState = .translated(handoff.translatedText)
+        didCopyTranslation = false
+        persistenceWarningMessage = nil
+        consumePendingShareOperations(using: store)
+        try? store.delete(id: id)
+        _ = routeCoordinator.consumePendingShareHandoffID()
+    }
+
+    @MainActor
+    private func consumePendingShareOperations(using store: ShareExtensionHandoffStore) {
+        guard let operations = try? store.consumePendingOperations() else {
+            return
+        }
+
+        for operation in operations {
+            switch operation {
+            case .history(let handoff):
+                let updatedHistory = historyStore.adding(handoff.translationRecord, to: history)
+                do {
+                    try historyStore.saveOrThrow(updatedHistory)
+                    history = updatedHistory
+                } catch {
+                    persistenceWarningMessage = String(
+                        format: String(localized: "翻译历史保存失败：%@", comment: "Warning shown when saving shared extension translation history fails. The placeholder is the system error description."),
+                        error.localizedDescription
+                    )
+                }
+            case .favorite(let handoff):
+                let updatedItems = memoryStore.adding(MemoryItem(record: handoff.translationRecord), to: memoryItems)
+                do {
+                    try memoryStore.saveOrThrow(updatedItems)
+                    memoryItems = updatedItems
+                } catch {
+                    persistenceWarningMessage = String(
+                        format: String(localized: "收藏保存失败：%@", comment: "Warning shown when saving shared extension favorite fails. The placeholder is the system error description."),
+                        error.localizedDescription
+                    )
+                }
+            }
         }
     }
 
