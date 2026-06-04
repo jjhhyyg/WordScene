@@ -141,39 +141,55 @@ struct ShareExtensionHandoffStore {
     }
 
     func appendPendingOperation(_ operation: ShareExtensionPendingOperation) throws {
-        var operations = try loadPendingOperations()
-        operations.append(operation)
-        try savePendingOperations(operations)
+        try ensureDirectoryExists()
+        let data = try encoder.encode(operation)
+        try data.write(to: pendingOperationURL(createdAt: Date(), id: UUID()), options: .atomic)
     }
 
     func consumePendingOperations() throws -> [ShareExtensionPendingOperation] {
-        let operations = try loadPendingOperations()
-        guard !operations.isEmpty else { return [] }
+        let fileURLs = try pendingOperationFileURLs()
+        guard !fileURLs.isEmpty else { return [] }
 
-        try fileManager.removeItem(at: pendingOperationsURL)
+        var operations: [ShareExtensionPendingOperation] = []
+        for fileURL in fileURLs {
+            defer {
+                try? fileManager.removeItem(at: fileURL)
+            }
+
+            do {
+                let data = try Data(contentsOf: fileURL)
+                operations.append(try decoder.decode(ShareExtensionPendingOperation.self, from: data))
+            } catch {
+                continue
+            }
+        }
         return operations
-    }
-
-    private var pendingOperationsURL: URL {
-        directoryURL.appendingPathComponent("share-pending-operations.json", isDirectory: false)
     }
 
     private func handoffURL(for id: UUID) -> URL {
         directoryURL.appendingPathComponent("share-handoff-\(id.uuidString).json", isDirectory: false)
     }
 
-    private func loadPendingOperations() throws -> [ShareExtensionPendingOperation] {
-        let url = pendingOperationsURL
-        guard fileManager.fileExists(atPath: url.path) else { return [] }
-
-        let data = try Data(contentsOf: url)
-        return try decoder.decode([ShareExtensionPendingOperation].self, from: data)
+    private func pendingOperationURL(createdAt: Date, id: UUID) -> URL {
+        let timestamp = UInt64(createdAt.timeIntervalSince1970 * 1_000_000_000)
+        return directoryURL.appendingPathComponent(
+            "share-pending-operation-\(String(format: "%020llu", timestamp))-\(id.uuidString).json",
+            isDirectory: false
+        )
     }
 
-    private func savePendingOperations(_ operations: [ShareExtensionPendingOperation]) throws {
-        try ensureDirectoryExists()
-        let data = try encoder.encode(operations)
-        try data.write(to: pendingOperationsURL, options: .atomic)
+    private func pendingOperationFileURLs() throws -> [URL] {
+        guard fileManager.fileExists(atPath: directoryURL.path) else { return [] }
+
+        return try fileManager.contentsOfDirectory(
+            at: directoryURL,
+            includingPropertiesForKeys: nil
+        )
+        .filter { url in
+            let fileName = url.lastPathComponent
+            return fileName.hasPrefix("share-pending-operation-") && fileName.hasSuffix(".json")
+        }
+        .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
     private func ensureDirectoryExists() throws {
