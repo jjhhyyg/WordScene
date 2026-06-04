@@ -34,16 +34,25 @@ targets:
       path: WordScene/Generated/WordSceneInfo.plist
       properties:
         ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.erikssonhou.leximemory.share
+            CFBundleURLSchemes:
+              - wordscene
         UIBackgroundModes:
           - remote-notification
     entitlements:
       path: WordScene/WordSceneiOS.entitlements
       properties:
         aps-environment: $(APS_ENVIRONMENT)
+        com.apple.security.application-groups:
+          - group.com.erikssonhou.leximemory
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.erikssonhou.leximemory
         com.apple.developer.icloud-services:
           - CloudKit
+    dependencies:
+      - target: WordSceneShareExtension
+        embed: true
     settings:
       base:
         ENABLE_DEBUG_DYLIB: NO
@@ -57,6 +66,39 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         GENERATE_INFOPLIST_FILE: YES
+  WordSceneShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: WordScene/Sources/ShareExtension
+      - path: WordScene/Sources/Shared
+      - path: WordScene/Resources
+    resources:
+      - path: WordScene/Resources
+    info:
+      path: WordScene/ShareExtension/ShareExtensionInfo.plist
+      properties:
+        CFBundleDisplayName: 翻译到译笺
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+    entitlements:
+      path: WordScene/WordSceneShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.erikssonhou.leximemory
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erikssonhou.leximemory.share
+        PRODUCT_NAME: Translate to WordScene
+        PRODUCT_MODULE_NAME: WordSceneShareExtension
+        APPLICATION_EXTENSION_API_ONLY: YES
+        GENERATE_INFOPLIST_FILE: NO
   WordSceneMac:
     type: application
     platform: macOS
