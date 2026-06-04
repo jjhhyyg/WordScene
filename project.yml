@@ -84,6 +84,7 @@ targets:
       - path: WordScene/Sources/Shared/Services/SharedContentExtractor.swift
       - path: WordScene/Sources/Shared/Services/TranslationLanguageDetector.swift
       - path: WordScene/Sources/Shared/Services/TranslationPreferencesStore.swift
+      - path: WordScene/Resources/Localizable.xcstrings
     info:
       path: WordScene/ShareExtension/ShareExtensionInfo.plist
       properties:

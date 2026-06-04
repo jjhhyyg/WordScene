@@ -80,6 +80,7 @@
 		658402080E63EA0C380C2A7F /* MemoryLibraryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C040CEEF155F11CC214D80B6 /* MemoryLibraryRepositoryTests.swift */; };
 		6F9BD4BD294B7795DE0CDC8C /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755D873B173391E0404A123B /* AppTheme.swift */; };
 		6FD85F1B603FFBCABE71A6B9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4D4552B02C4C7DE95FE27546 /* Localizable.xcstrings */; };
+		70FB7B44906D11D4FCBBE083 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4D4552B02C4C7DE95FE27546 /* Localizable.xcstrings */; };
 		78A03AF21F3FA00B9E737465 /* MemorySearchIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D5E2AC8B21A0D0EA3D57FE /* MemorySearchIndexTests.swift */; };
 		7923D8806E42E96FBC91A61F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE67FC610560C08B600F953A /* InfoPlist.strings */; };
 		7AB1A9BC5FAC51F0C6A22E06 /* MemoryLibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD8C4290705F81BA86674BC /* MemoryLibraryStoreTests.swift */; };
@@ -565,6 +566,7 @@
 			buildConfigurationList = 8A7977F1D9075463FA58154A /* Build configuration list for PBXNativeTarget "WordSceneShareExtension" */;
 			buildPhases = (
 				34CFD74CA3610D4A03576FFE /* Sources */,
+				7BA72BCC89757173AC2786FA /* Resources */,
 			);
 			buildRules = (
 			);
@@ -829,6 +831,14 @@
 				8278CBA84B1B4B24B0D6980D /* WordSceneAppIcon-previous-20260531.png in Resources */,
 				3816E6F7FCC71CC7F37D29ED /* WordSceneLogo-v2.png in Resources */,
 				9F26440D8AF5ACF3CDC08D1C /* WordSceneLogo.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7BA72BCC89757173AC2786FA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70FB7B44906D11D4FCBBE083 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
