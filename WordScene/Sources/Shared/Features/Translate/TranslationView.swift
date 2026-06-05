@@ -19,8 +19,8 @@ struct TranslationView: View {
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
     @State private var persistenceWarningMessage: String?
-    @State private var clipboardPrompt: TranslationClipboardPrompt?
-    @State private var dismissedClipboardText: String?
+    @State private var isClipboardPromptVisible = false
+    @State private var didDismissClipboardPromptCandidate = false
     @EnvironmentObject private var routeCoordinator: AppRouteCoordinator
     @Environment(\.appDataController) private var dataController
     @Environment(\.translationRuntime) private var translationRuntime
@@ -390,7 +390,7 @@ struct TranslationView: View {
     #if os(iOS)
     @ViewBuilder
     private var clipboardPromptBanner: some View {
-        if let clipboardPrompt {
+        if isClipboardPromptVisible {
             HStack(spacing: 12) {
                 Label(String(localized: "检测到剪贴板文本"), systemImage: "doc.on.clipboard")
                     .font(.subheadline.weight(.semibold))
@@ -399,16 +399,16 @@ struct TranslationView: View {
 
                 Spacer(minLength: 8)
 
-                Button(String(localized: "翻译剪贴板")) {
+                ClipboardTranslatePasteControl { clipboardText in
                     Task {
-                        await acceptClipboardPrompt(clipboardPrompt)
+                        await acceptClipboardText(clipboardText)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
+                .frame(width: 120, height: 34)
+                .accessibilityLabel(String(localized: "翻译剪贴板"))
 
                 Button {
-                    dismissClipboardPrompt(clipboardPrompt)
+                    dismissClipboardPrompt()
                 } label: {
                     Image(systemName: "xmark")
                 }
@@ -891,6 +891,7 @@ struct TranslationView: View {
         sourceLanguage = handoff.sourceLanguage
         targetLanguage = handoff.targetLanguage
         inputText = handoff.sourceText
+        isClipboardPromptVisible = false
         lastTranslatedRecord = handoff.translationRecord
         translationState = .translated(handoff.translatedText)
         didCopyTranslation = false
@@ -946,28 +947,36 @@ struct TranslationView: View {
     #if os(iOS)
     @MainActor
     private func refreshClipboardPrompt() {
-        clipboardPrompt = TranslationClipboardPrompt.make(
-            clipboardText: UIPasteboard.general.string,
-            currentInput: inputText,
-            dismissedText: dismissedClipboardText
-        )
+        let hasClipboardText = UIPasteboard.general.hasStrings
+        isClipboardPromptVisible = hasClipboardText
+            && !didDismissClipboardPromptCandidate
+            && inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     @MainActor
-    private func acceptClipboardPrompt(_ prompt: TranslationClipboardPrompt) async {
+    private func acceptClipboardText(_ clipboardText: String) async {
+        guard let prompt = TranslationClipboardPrompt.make(
+            clipboardText: clipboardText,
+            currentInput: inputText,
+            dismissedText: nil
+        ) else {
+            isClipboardPromptVisible = false
+            return
+        }
+
         let action = prompt.acceptance(defaultTargetLanguage: TranslationPreferencesStore().defaultTargetLanguage)
         translationGeneration += 1
         inputText = action.inputText
         sourceLanguage = action.sourceLanguage
         targetLanguage = action.targetLanguage
-        clipboardPrompt = nil
+        isClipboardPromptVisible = false
         await translateInput()
     }
 
     @MainActor
-    private func dismissClipboardPrompt(_ prompt: TranslationClipboardPrompt) {
-        dismissedClipboardText = prompt.text
-        clipboardPrompt = nil
+    private func dismissClipboardPrompt() {
+        didDismissClipboardPromptCandidate = true
+        isClipboardPromptVisible = false
     }
     #endif
 
@@ -1222,6 +1231,59 @@ private struct PromptedTextEditor: View {
         .frame(minHeight: minHeight)
     }
 }
+
+#if os(iOS)
+private struct ClipboardTranslatePasteControl: UIViewRepresentable {
+    let onPaste: (String) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPaste: onPaste)
+    }
+
+    func makeUIView(context: Context) -> UIPasteControl {
+        let configuration = UIPasteControl.Configuration()
+        configuration.displayMode = .iconAndLabel
+        configuration.cornerStyle = .capsule
+
+        let control = UIPasteControl(configuration: configuration)
+        control.target = context.coordinator
+        control.accessibilityIdentifier = "translation.clipboardPrompt.paste"
+        return control
+    }
+
+    func updateUIView(_ uiView: UIPasteControl, context: Context) {
+        context.coordinator.onPaste = onPaste
+    }
+
+    final class Coordinator: NSObject, UIPasteConfigurationSupporting {
+        var pasteConfiguration: UIPasteConfiguration?
+        var onPaste: (String) -> Void
+
+        init(onPaste: @escaping (String) -> Void) {
+            self.onPaste = onPaste
+            super.init()
+            pasteConfiguration = UIPasteConfiguration(forAccepting: NSString.self)
+        }
+
+        func paste(itemProviders: [NSItemProvider]) {
+            guard let provider = itemProviders.first(where: { $0.canLoadObject(ofClass: NSString.self) }) else {
+                return
+            }
+
+            provider.loadObject(ofClass: NSString.self) { [weak self] object, _ in
+                guard let text = object as? NSString else {
+                    return
+                }
+
+                let pastedText = String(text)
+                DispatchQueue.main.async {
+                    self?.onPaste(pastedText)
+                }
+            }
+        }
+    }
+}
+#endif
 
 private enum TextInputTextStyle {
     case body
