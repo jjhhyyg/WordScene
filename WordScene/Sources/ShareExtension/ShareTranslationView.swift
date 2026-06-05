@@ -6,111 +6,132 @@ struct ShareTranslationView: View {
     let onOpen: (URL) -> Void
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                content
-                Spacer(minLength: 0)
-                actionBar
-            }
-            .padding(18)
-            .navigationTitle(String(localized: "翻译到译笺"))
-            .navigationBarTitleDisplayMode(.inline)
+        VStack(spacing: 18) {
+            Capsule()
+                .fill(Color.secondary.opacity(0.35))
+                .frame(width: 42, height: 5)
+                .padding(.top, 8)
+
+            Text(String(localized: "翻译"))
+                .font(.headline.weight(.semibold))
+
+            content
+
+            actionGroups
+
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, 18)
+        .padding(.bottom, 18)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
         case .loading:
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            card {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 160)
+            }
         case .ready(let sourceText), .translating(let sourceText):
-            sourceSection(sourceText)
-            ProgressView(String(localized: "翻译中..."))
-                .frame(maxWidth: .infinity, alignment: .center)
+            card {
+                sourcePreview(sourceText)
+                Divider()
+                ProgressView(String(localized: "翻译中..."))
+                    .frame(maxWidth: .infinity, minHeight: 72)
+            }
         case .translated(let record):
-            languageSummary(record)
-            sourceSection(record.sourceText)
-            translationSection(record.translatedText)
+            card {
+                sourcePreview(record.sourceText, languageText: record.sourceLanguage.title)
+                Divider()
+                translationPreview(record.translatedText, languageText: record.targetLanguage.title)
+            }
         case .failed(let message, let sourceText):
-            if let sourceText {
-                sourceSection(sourceText)
+            card {
+                if let sourceText {
+                    sourcePreview(sourceText)
+                    Divider()
+                }
+                Label(message, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.orange)
+                    .font(.body.weight(.medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("shareTranslation.error")
             }
-            Label(message, systemImage: "exclamationmark.triangle")
-                .foregroundStyle(.orange)
         }
     }
 
-    private func languageSummary(_ record: ShareExtensionHandoffRecord) -> some View {
-        Text("\(record.sourceLanguage.title) -> \(record.targetLanguage.title)")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-    }
-
-    private func sourceSection(_ text: String) -> some View {
+    private func sourcePreview(_ text: String, languageText: String = String(localized: "原文")) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(String(localized: "原文"))
-                .font(.caption)
+            Text(languageText)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
             ScrollView {
                 Text(text)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
             }
-            .frame(minHeight: 86, maxHeight: 150)
+            .frame(minHeight: 60, maxHeight: 120)
         }
+        .accessibilityIdentifier("shareTranslation.source")
     }
 
-    private func translationSection(_ text: String) -> some View {
+    private func translationPreview(_ text: String, languageText: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(String(localized: "译文"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(languageText)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.blue)
             ScrollView {
                 Text(text)
-                    .font(.title3.weight(.semibold))
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.blue)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
             }
-            .frame(minHeight: 110, maxHeight: 220)
+            .frame(minHeight: 120, maxHeight: 260)
         }
+        .accessibilityIdentifier("shareTranslation.translation")
     }
 
-    private var actionBar: some View {
-        HStack(spacing: 10) {
-            Button {
-                if case .translated(let record) = viewModel.state {
-                    onCopy(record.translatedText)
+    private var actionGroups: some View {
+        VStack(spacing: 14) {
+            actionGroup {
+                ShareTranslationActionRow(
+                    title: viewModel.didCopy ? String(localized: "已复制") : String(localized: "复制译文"),
+                    systemImage: "doc.on.doc",
+                    isEnabled: isTranslated
+                ) {
+                    if case .translated(let record) = viewModel.state {
+                        onCopy(record.translatedText)
+                        viewModel.markCopied()
+                    }
                 }
-            } label: {
-                Label(
-                    viewModel.didCopy ? String(localized: "已复制") : String(localized: "复制译文"),
-                    systemImage: "doc.on.doc"
-                )
-            }
-            .disabled(!isTranslated)
 
-            Button {
-                viewModel.markFavorite()
-            } label: {
-                Label(
-                    viewModel.didFavorite ? String(localized: "已收藏") : String(localized: "收藏"),
-                    systemImage: viewModel.didFavorite ? "bookmark.fill" : "bookmark"
-                )
-            }
-            .disabled(!isTranslated || viewModel.didFavorite)
+                Divider().padding(.leading, 54)
 
-            Button {
-                if let url = viewModel.openURL() {
-                    onOpen(url)
+                ShareTranslationActionRow(
+                    title: viewModel.didFavorite ? String(localized: "已收藏") : String(localized: "收藏"),
+                    systemImage: viewModel.didFavorite ? "bookmark.fill" : "bookmark",
+                    isEnabled: isTranslated && !viewModel.didFavorite
+                ) {
+                    viewModel.markFavorite()
                 }
-            } label: {
-                Label(String(localized: "打开"), systemImage: "arrow.up.forward.app")
             }
-            .disabled(viewModel.openURL() == nil)
+
+            actionGroup {
+                ShareTranslationActionRow(
+                    title: String(localized: "打开"),
+                    systemImage: "arrow.up.forward.app",
+                    isEnabled: viewModel.openURL() != nil
+                ) {
+                    if let url = viewModel.openURL() {
+                        onOpen(url)
+                    }
+                }
+            }
         }
-        .buttonStyle(.bordered)
-        .controlSize(.regular)
     }
 
     private var isTranslated: Bool {
@@ -118,5 +139,53 @@ struct ShareTranslationView: View {
             return true
         }
         return false
+    }
+
+    private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            content()
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.background, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .accessibilityIdentifier("shareTranslation.card")
+    }
+
+    private func actionGroup<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(spacing: 0) {
+            content()
+        }
+        .background(.background, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private struct ShareTranslationActionRow: View {
+    let title: String
+    let systemImage: String
+    let isEnabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: systemImage)
+                    .font(.title3)
+                    .frame(width: 28)
+                    .foregroundStyle(.primary)
+                Text(title)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+                Spacer(minLength: 10)
+            }
+            .padding(.horizontal, 18)
+            .frame(minHeight: 58)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.42)
     }
 }
