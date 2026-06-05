@@ -27,7 +27,7 @@ struct TranslationClipboardPrompt: Equatable {
             return nil
         }
 
-        if normalizedClipboard == dismissedText {
+        if normalizedClipboard == dismissedText.map(normalized) {
             return nil
         }
 
