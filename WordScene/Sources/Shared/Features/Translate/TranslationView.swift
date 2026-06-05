@@ -19,6 +19,8 @@ struct TranslationView: View {
     @State private var history: [TranslationRecord] = []
     @State private var memoryItems: [MemoryItem] = []
     @State private var persistenceWarningMessage: String?
+    @State private var clipboardPrompt: TranslationClipboardPrompt?
+    @State private var dismissedClipboardText: String?
     @EnvironmentObject private var routeCoordinator: AppRouteCoordinator
     @Environment(\.appDataController) private var dataController
     @Environment(\.translationRuntime) private var translationRuntime
@@ -55,6 +57,9 @@ struct TranslationView: View {
             if let id = routeCoordinator.pendingShareHandoffID {
                 applyShareHandoff(id: id)
             }
+            #if os(iOS)
+            refreshClipboardPrompt()
+            #endif
         }
         .onReceive(dataController.dataChangeMonitor.$revision.dropFirst()) { _ in
             loadHistory()
@@ -108,6 +113,7 @@ struct TranslationView: View {
         if usesCompactPhoneLayout {
             VStack(alignment: .leading, spacing: 18) {
                 translationHeader
+                clipboardPromptBanner
                 mobileTranslationPanel
                 persistenceWarningBanner
             }
@@ -118,6 +124,7 @@ struct TranslationView: View {
                 translationHeader
                 commandBar
                 persistenceWarningBanner
+                clipboardPromptBanner
 
                 if usesTwoColumnLayout {
                     VStack(alignment: .leading, spacing: 14) {
@@ -379,6 +386,45 @@ struct TranslationView: View {
                 .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
     }
+
+    #if os(iOS)
+    @ViewBuilder
+    private var clipboardPromptBanner: some View {
+        if let clipboardPrompt {
+            HStack(spacing: 12) {
+                Label(String(localized: "检测到剪贴板文本"), systemImage: "doc.on.clipboard")
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+
+                Spacer(minLength: 8)
+
+                Button(String(localized: "翻译剪贴板")) {
+                    Task {
+                        await acceptClipboardPrompt(clipboardPrompt)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+
+                Button {
+                    dismissClipboardPrompt(clipboardPrompt)
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "忽略剪贴板文本"))
+            }
+            .padding(12)
+            .background(.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .accessibilityIdentifier("translation.clipboardPrompt")
+        }
+    }
+    #else
+    private var clipboardPromptBanner: some View {
+        EmptyView()
+    }
+    #endif
 
     private var mobileTranslationPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -896,6 +942,34 @@ struct TranslationView: View {
         lastTranslatedRecord = nil
         didCopyTranslation = false
     }
+
+    #if os(iOS)
+    @MainActor
+    private func refreshClipboardPrompt() {
+        clipboardPrompt = TranslationClipboardPrompt.make(
+            clipboardText: UIPasteboard.general.string,
+            currentInput: inputText,
+            dismissedText: dismissedClipboardText
+        )
+    }
+
+    @MainActor
+    private func acceptClipboardPrompt(_ prompt: TranslationClipboardPrompt) async {
+        let action = prompt.acceptance(defaultTargetLanguage: TranslationPreferencesStore().defaultTargetLanguage)
+        translationGeneration += 1
+        inputText = action.inputText
+        sourceLanguage = action.sourceLanguage
+        targetLanguage = action.targetLanguage
+        clipboardPrompt = nil
+        await translateInput()
+    }
+
+    @MainActor
+    private func dismissClipboardPrompt(_ prompt: TranslationClipboardPrompt) {
+        dismissedClipboardText = prompt.text
+        clipboardPrompt = nil
+    }
+    #endif
 
     @MainActor
     private func copyTranslation(_ text: String) {

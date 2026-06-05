@@ -270,7 +270,10 @@ final class AppLocalizationTests: XCTestCase {
             "翻译历史保存失败：%@",
             "收藏保存失败：%@",
             "翻译默认值",
-            "默认目标语言"
+            "默认目标语言",
+            "检测到剪贴板文本",
+            "翻译剪贴板",
+            "忽略剪贴板文本"
         ]
 
         try assertCatalog(catalog, containsCompleteLocalizationsFor: requiredKeys)
