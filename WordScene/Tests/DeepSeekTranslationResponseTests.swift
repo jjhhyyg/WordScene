@@ -80,6 +80,8 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         XCTAssertTrue(userPrompt.contains("json"))
         XCTAssertTrue(userPrompt.contains("translated_text"))
         XCTAssertTrue(userPrompt.contains("Translate only the text field"))
+        XCTAssertTrue(userPrompt.contains("When source_language is auto-detect"))
+        XCTAssertTrue(userPrompt.contains("Do not copy the input unchanged"))
         XCTAssertTrue(userPrompt.contains(#""source_language":"English""#))
         XCTAssertTrue(userPrompt.contains(#""target_language":"Simplified Chinese""#))
         XCTAssertTrue(userPrompt.contains(#""text":"He said \"hello\"""#))

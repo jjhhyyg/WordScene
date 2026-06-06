@@ -27,6 +27,8 @@ final class TranslationWorkflowTests: XCTestCase {
 
     private final class StubTranslationClient: TranslationClienting, @unchecked Sendable {
         let expectedText: String
+        let expectedSource: LanguageSelection
+        let expectedTarget: LanguageSelection
         let translatedText: String
         let streamedTexts: [String]
         let streamError: Error?
@@ -35,11 +37,15 @@ final class TranslationWorkflowTests: XCTestCase {
 
         init(
             expectedText: String = "hello world",
+            expectedSource: LanguageSelection = .auto,
+            expectedTarget: LanguageSelection = .zh,
             translatedText: String,
             streamedTexts: [String]? = nil,
             streamError: Error? = nil
         ) {
             self.expectedText = expectedText
+            self.expectedSource = expectedSource
+            self.expectedTarget = expectedTarget
             self.translatedText = translatedText
             self.streamedTexts = streamedTexts ?? [translatedText]
             self.streamError = streamError
@@ -53,8 +59,8 @@ final class TranslationWorkflowTests: XCTestCase {
         ) async throws -> String {
             callCount += 1
             XCTAssertEqual(text, expectedText)
-            XCTAssertEqual(source, .auto)
-            XCTAssertEqual(target, .zh)
+            XCTAssertEqual(source, expectedSource)
+            XCTAssertEqual(target, expectedTarget)
             XCTAssertEqual(apiToken, "test-token")
             return translatedText
         }
@@ -67,8 +73,8 @@ final class TranslationWorkflowTests: XCTestCase {
         ) -> AsyncThrowingStream<String, Error> {
             streamCallCount += 1
             XCTAssertEqual(text, expectedText)
-            XCTAssertEqual(source, .auto)
-            XCTAssertEqual(target, .zh)
+            XCTAssertEqual(source, expectedSource)
+            XCTAssertEqual(target, expectedTarget)
             XCTAssertEqual(apiToken, "test-token")
 
             let streamedTexts = streamedTexts
@@ -118,14 +124,14 @@ final class TranslationWorkflowTests: XCTestCase {
         XCTAssertNil(result.persistenceWarningMessage)
         XCTAssertEqual(result.record.sourceText, "hello world")
         XCTAssertEqual(result.record.translatedText, "你好，世界。")
-        XCTAssertEqual(result.record.sourceLanguage, .en)
+        XCTAssertEqual(result.record.sourceLanguage, .auto)
         XCTAssertEqual(result.record.targetLanguage, .zh)
         XCTAssertEqual(result.updatedHistory.map(\.sourceText), ["hello world"])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords().map(\.sourceText), ["hello world"])
         XCTAssertEqual(translationClient.callCount, 1)
     }
 
-    func testAutoDetectedSpanishTranslationWritesDetectedSourceLanguage() async throws {
+    func testAutoSourceTranslationKeepsAutoSourceLanguageInRecord() async throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
         let translationClient = StubTranslationClient(expectedText: "Hola", translatedText: "你好")
         let workflow = TranslationWorkflow(
@@ -141,9 +147,9 @@ final class TranslationWorkflowTests: XCTestCase {
             currentHistory: []
         )
 
-        XCTAssertEqual(result.record.sourceLanguage, .es)
+        XCTAssertEqual(result.record.sourceLanguage, .auto)
         XCTAssertEqual(result.record.targetLanguage, .zh)
-        XCTAssertEqual(MemoryItem(record: result.record).sourceLanguage, .es)
+        XCTAssertEqual(MemoryItem(record: result.record).sourceLanguage, .auto)
     }
 
     func testTranslationStillSucceedsWhenHistoryPersistenceFails() async throws {
@@ -188,58 +194,34 @@ final class TranslationWorkflowTests: XCTestCase {
         XCTAssertEqual(result.translatedText, "你好，世界。")
     }
 
-    func testAutoDetectedSameLanguageCopiesInputWithoutProviderOrToken() async throws {
-        try await assertAutoDetectedSameLanguageCopiesInput(
-            text: "  我喜欢你  ",
-            expectedText: "我喜欢你",
-            target: .zh
-        )
-    }
-
-    func testAutoDetectedEnglishTargetCopiesEnglishInputWithoutProviderOrToken() async throws {
-        try await assertAutoDetectedSameLanguageCopiesInput(
-            text: "  I like you  ",
-            expectedText: "I like you",
-            target: .en
-        )
-    }
-
-    func testAutoDetectedSpanishTargetCopiesSpanishInputWithoutProviderOrToken() async throws {
-        try await assertAutoDetectedSameLanguageCopiesInput(
-            text: "  Me gusta el café  ",
-            expectedText: "Me gusta el café",
-            target: .es
-        )
-    }
-
-    private func assertAutoDetectedSameLanguageCopiesInput(
-        text: String,
-        expectedText: String,
-        target: LanguageSelection
-    ) async throws {
+    func testAutoSourceMixedTextAlwaysCallsProviderEvenWhenTargetIsEnglish() async throws {
         let coreDataStore = try CoreDataMemoryStore(inMemory: true)
-        let translationClient = StubTranslationClient(translatedText: "不应调用")
+        let sourceText = "不过为啥你会预置一个 rebuild database 的指令"
+        let translationClient = StubTranslationClient(
+            expectedText: sourceText,
+            expectedTarget: .en,
+            translatedText: "But why would you preset a rebuild database command?"
+        )
         let workflow = TranslationWorkflow(
-            credentialStore: StubCredentialStore(token: nil),
+            credentialStore: StubCredentialStore(token: "test-token"),
             translationClient: translationClient,
             historyStore: TranslationHistoryRepository(coreDataStore: coreDataStore)
         )
 
         let result = try await workflow.translate(
-            text: text,
+            text: "  \(sourceText)  ",
             source: .auto,
-            target: target,
+            target: .en,
             currentHistory: []
         )
 
-        XCTAssertEqual(result.translatedText, expectedText)
-        XCTAssertEqual(result.record.sourceText, expectedText)
-        XCTAssertEqual(result.record.translatedText, expectedText)
-        XCTAssertEqual(result.record.sourceLanguage, target)
-        XCTAssertEqual(result.record.targetLanguage, target)
+        XCTAssertEqual(result.translatedText, "But why would you preset a rebuild database command?")
+        XCTAssertEqual(result.record.sourceText, sourceText)
+        XCTAssertEqual(result.record.sourceLanguage, .auto)
+        XCTAssertEqual(result.record.targetLanguage, .en)
         XCTAssertEqual(result.updatedHistory, [result.record])
         XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [result.record])
-        XCTAssertEqual(translationClient.callCount, 0)
+        XCTAssertEqual(translationClient.callCount, 1)
     }
 
     func testMissingTokenFailsBeforeCallingProvider() async {
@@ -289,7 +271,7 @@ final class TranslationWorkflowTests: XCTestCase {
         }
         XCTAssertEqual(result.translatedText, "你好，世界。")
         XCTAssertEqual(result.record.sourceText, "hello world")
-        XCTAssertEqual(result.record.sourceLanguage, .en)
+        XCTAssertEqual(result.record.sourceLanguage, .auto)
         XCTAssertEqual(try coreDataStore.loadHistoryRecords(), [result.record])
         XCTAssertEqual(translationClient.streamCallCount, 1)
         XCTAssertEqual(translationClient.callCount, 0)

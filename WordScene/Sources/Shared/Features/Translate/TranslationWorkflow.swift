@@ -43,18 +43,6 @@ struct TranslationWorkflow {
             throw DeepSeekTranslationError.emptyInput
         }
 
-        if source == .auto,
-           let detectedSource = TranslationLanguageDetector.detect(trimmedInput),
-           detectedSource == target {
-            return persistResult(
-                translatedText: trimmedInput,
-                sourceText: trimmedInput,
-                resolvedSource: detectedSource,
-                target: target,
-                currentHistory: currentHistory
-            )
-        }
-
         guard let rawToken = try credentialStore.read(account: DeepSeekCredential.tokenAccount) else {
             throw TranslationWorkflowError.missingToken
         }
@@ -69,14 +57,10 @@ struct TranslationWorkflow {
             target: target,
             apiToken: token
         )
-        let resolvedSource = source == .auto
-            ? TranslationLanguageDetector.detect(trimmedInput) ?? source
-            : source
-
         return persistResult(
             translatedText: translatedText,
             sourceText: trimmedInput,
-            resolvedSource: resolvedSource,
+            resolvedSource: source,
             target: target,
             currentHistory: currentHistory
         )
@@ -98,22 +82,6 @@ struct TranslationWorkflow {
                     let trimmedInput = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !trimmedInput.isEmpty else {
                         throw DeepSeekTranslationError.emptyInput
-                    }
-
-                    if source == .auto,
-                       let detectedSource = TranslationLanguageDetector.detect(trimmedInput),
-                       detectedSource == target {
-                        let result = persistResult(
-                            translatedText: trimmedInput,
-                            sourceText: trimmedInput,
-                            resolvedSource: detectedSource,
-                            target: target,
-                            currentHistory: currentHistory
-                        )
-                        continuation.yield(.partial(trimmedInput))
-                        continuation.yield(.completed(result))
-                        continuation.finish()
-                        return
                     }
 
                     guard let rawToken = try credentialStore.read(account: DeepSeekCredential.tokenAccount) else {
@@ -139,13 +107,10 @@ struct TranslationWorkflow {
                         throw DeepSeekTranslationError.emptyOutput
                     }
 
-                    let resolvedSource = source == .auto
-                        ? TranslationLanguageDetector.detect(trimmedInput) ?? source
-                        : source
                     let result = persistResult(
                         translatedText: latestText,
                         sourceText: trimmedInput,
-                        resolvedSource: resolvedSource,
+                        resolvedSource: source,
                         target: target,
                         currentHistory: currentHistory
                     )

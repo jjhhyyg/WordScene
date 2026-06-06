@@ -82,9 +82,6 @@ extension MemoryItem {
 
 extension TranslationRecord {
     var resolvedSourceLanguage: LanguageSelection {
-        guard sourceLanguage == .auto else {
-            return sourceLanguage
-        }
-        return TranslationLanguageDetector.detect(sourceText) ?? sourceLanguage
+        sourceLanguage
     }
 }

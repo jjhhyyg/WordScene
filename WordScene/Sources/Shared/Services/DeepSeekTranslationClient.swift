@@ -411,6 +411,9 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
     private func userPrompt(text: String, source: LanguageSelection, target: LanguageSelection) -> String {
         """
         Translate only the text field in the input json object below.
+        When source_language is auto-detect, infer the source language from the full text yourself.
+        Always produce text in target_language. Do not copy the input unchanged just because it contains words, product names, code terms, or technical terms already written in target_language.
+        For mixed-language input, translate the natural-language meaning into target_language while preserving technical identifiers, command names, API names, file names, and product names when they are normally left untranslated.
         Return json matching {"translated_text":"..."}.
         Input json:
         \(userPromptInputJSON(text: text, source: source, target: target))

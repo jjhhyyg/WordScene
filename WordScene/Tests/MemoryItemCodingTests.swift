@@ -24,7 +24,7 @@ final class MemoryItemCodingTests: XCTestCase {
         XCTAssertEqual(item.displaySourceLanguage, .es)
     }
 
-    func testMemoryItemFromAutoRecordStoresResolvedSpanishSourceLanguage() {
+    func testMemoryItemFromAutoRecordKeepsAutoSourceLanguage() {
         let record = TranslationRecord(
             sourceText: "Hola",
             translatedText: "你好",
@@ -34,7 +34,7 @@ final class MemoryItemCodingTests: XCTestCase {
 
         let item = MemoryItem(record: record)
 
-        XCTAssertEqual(item.sourceLanguage, .es)
+        XCTAssertEqual(item.sourceLanguage, .auto)
     }
 
     func testDecodingLegacyJSONWithoutStarredDefaultsToFalse() throws {
