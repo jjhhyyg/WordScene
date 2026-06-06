@@ -20,13 +20,14 @@ struct TranslationView: View {
     @State private var memoryItems: [MemoryItem] = []
     @State private var persistenceWarningMessage: String?
     @State private var isClipboardPromptVisible = false
-    @State private var didDismissClipboardPromptCandidate = false
+    @State private var dismissedClipboardChangeCount: Int?
     @EnvironmentObject private var routeCoordinator: AppRouteCoordinator
     @Environment(\.appDataController) private var dataController
     @Environment(\.translationRuntime) private var translationRuntime
     @Environment(\.adaptiveLayout) private var adaptiveLayout
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.appThemePalette) private var themePalette
+    @Environment(\.scenePhase) private var scenePhase
 
     private var historyStore: TranslationHistoryRepository {
         dataController.translationHistory
@@ -71,6 +72,13 @@ struct TranslationView: View {
         .onChange(of: sourceLanguage) { _, _ in
             normalizeLanguageDirection()
         }
+        #if os(iOS)
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                refreshClipboardPrompt()
+            }
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -948,9 +956,10 @@ struct TranslationView: View {
     #if os(iOS)
     @MainActor
     private func refreshClipboardPrompt() {
+        let currentChangeCount = UIPasteboard.general.changeCount
         let hasClipboardText = UIPasteboard.general.hasStrings
         isClipboardPromptVisible = hasClipboardText
-            && !didDismissClipboardPromptCandidate
+            && dismissedClipboardChangeCount != currentChangeCount
             && inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
@@ -986,7 +995,7 @@ struct TranslationView: View {
 
     @MainActor
     private func dismissClipboardPrompt() {
-        didDismissClipboardPromptCandidate = true
+        dismissedClipboardChangeCount = UIPasteboard.general.changeCount
         isClipboardPromptVisible = false
     }
     #endif
