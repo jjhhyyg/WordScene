@@ -984,7 +984,10 @@ struct TranslationView: View {
             return
         }
 
-        let action = prompt.acceptance(defaultTargetLanguage: TranslationPreferencesStore().defaultTargetLanguage)
+        let action = prompt.acceptance(
+            currentSourceLanguage: sourceLanguage,
+            currentTargetLanguage: targetLanguage
+        )
         translationGeneration += 1
         inputText = action.inputText
         sourceLanguage = action.sourceLanguage

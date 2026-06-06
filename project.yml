@@ -81,6 +81,7 @@ targets:
       - path: WordScene/Sources/Shared/Services/DeepSeekTranslationClient.swift
       - path: WordScene/Sources/Shared/Services/KeychainCredentialStore.swift
       - path: WordScene/Sources/Shared/Services/ShareExtensionSupport.swift
+      - path: WordScene/Sources/Shared/Services/ShareTranslationViewModel.swift
       - path: WordScene/Sources/Shared/Services/SharedContentExtractor.swift
       - path: WordScene/Sources/Shared/Services/TranslationLanguageDetector.swift
       - path: WordScene/Sources/Shared/Services/TranslationPreferencesStore.swift

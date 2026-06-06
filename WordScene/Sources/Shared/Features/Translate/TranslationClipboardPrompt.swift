@@ -34,11 +34,18 @@ struct TranslationClipboardPrompt: Equatable {
         return TranslationClipboardPrompt(text: normalizedClipboard)
     }
 
-    func acceptance(defaultTargetLanguage: LanguageSelection) -> Acceptance {
-        Acceptance(
+    func acceptance(
+        currentSourceLanguage: LanguageSelection,
+        currentTargetLanguage: LanguageSelection
+    ) -> Acceptance {
+        let direction = TranslationLanguageDirection(
+            source: currentSourceLanguage,
+            target: currentTargetLanguage
+        ).normalized()
+        return Acceptance(
             inputText: text,
-            sourceLanguage: .auto,
-            targetLanguage: LanguageSelection.translationTargets.contains(defaultTargetLanguage) ? defaultTargetLanguage : .zh
+            sourceLanguage: direction.source,
+            targetLanguage: direction.target
         )
     }
 

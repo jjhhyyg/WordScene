@@ -14,6 +14,10 @@ struct SettingsView: View {
         TranslationPreferencesStore.defaultTargetLanguageKey,
         store: .wordSceneShared
     ) private var defaultTargetLanguageRawValue = LanguageSelection.zh.rawValue
+    @AppStorage(
+        TranslationPreferencesStore.shareAutoTranslateEnabledKey,
+        store: .wordSceneShared
+    ) private var isShareAutoTranslateEnabled = false
     @State private var apiToken = ""
     @State private var tokenStatus: SettingsTokenStatus = .idle
     @State private var importExportStatus: SettingsImportExportStatus = .idle
@@ -227,6 +231,13 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.menu)
                 .accessibilityIdentifier("settings.translation.defaultTargetLanguage")
+
+                Toggle(
+                    String(localized: "分享时自动翻译", comment: "Settings toggle for automatic translation in the share extension."),
+                    isOn: $isShareAutoTranslateEnabled
+                )
+                .font(.body)
+                .accessibilityIdentifier("settings.translation.shareAutoTranslate")
             }
         }
     }

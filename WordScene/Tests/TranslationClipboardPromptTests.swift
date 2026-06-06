@@ -54,7 +54,7 @@ final class TranslationClipboardPromptTests: XCTestCase {
         )
     }
 
-    func testAcceptingClipboardTextUsesAutomaticSourceAndConfiguredTarget() throws {
+    func testAcceptingClipboardTextUsesCurrentTranslationPageDirection() throws {
         let prompt = try XCTUnwrap(
             TranslationClipboardPrompt.make(
                 clipboardText: "Hola mundo",
@@ -63,14 +63,14 @@ final class TranslationClipboardPromptTests: XCTestCase {
             )
         )
 
-        let action = prompt.acceptance(defaultTargetLanguage: .en)
+        let action = prompt.acceptance(currentSourceLanguage: .es, currentTargetLanguage: .en)
 
         XCTAssertEqual(action.inputText, "Hola mundo")
-        XCTAssertEqual(action.sourceLanguage, .auto)
+        XCTAssertEqual(action.sourceLanguage, .es)
         XCTAssertEqual(action.targetLanguage, .en)
     }
 
-    func testAcceptingClipboardTextRejectsAutoAsTargetLanguage() throws {
+    func testAcceptingClipboardTextNormalizesInvalidCurrentDirection() throws {
         let prompt = try XCTUnwrap(
             TranslationClipboardPrompt.make(
                 clipboardText: "Hola mundo",
@@ -79,10 +79,10 @@ final class TranslationClipboardPromptTests: XCTestCase {
             )
         )
 
-        let action = prompt.acceptance(defaultTargetLanguage: .auto)
+        let action = prompt.acceptance(currentSourceLanguage: .en, currentTargetLanguage: .en)
 
         XCTAssertEqual(action.inputText, "Hola mundo")
-        XCTAssertEqual(action.sourceLanguage, .auto)
+        XCTAssertEqual(action.sourceLanguage, .en)
         XCTAssertEqual(action.targetLanguage, .zh)
     }
 }

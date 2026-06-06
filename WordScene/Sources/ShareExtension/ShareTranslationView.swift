@@ -15,6 +15,8 @@ struct ShareTranslationView: View {
             Text(String(localized: "翻译"))
                 .font(.headline.weight(.semibold))
 
+            languageControls
+
             content
 
             actionGroups
@@ -35,7 +37,11 @@ struct ShareTranslationView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 160)
             }
-        case .ready(let sourceText), .translating(let sourceText):
+        case .ready(let sourceText):
+            card {
+                sourcePreview(sourceText)
+            }
+        case .translating(let sourceText):
             card {
                 sourcePreview(sourceText)
                 Divider()
@@ -61,6 +67,54 @@ struct ShareTranslationView: View {
                     .accessibilityIdentifier("shareTranslation.error")
             }
         }
+    }
+
+    private var languageControls: some View {
+        HStack(spacing: 10) {
+            Picker(
+                String(localized: "源语言", comment: "Picker label for source language."),
+                selection: sourceLanguageBinding
+            ) {
+                ForEach(LanguageSelection.sourceOptions) { language in
+                    Text(language.title).tag(language)
+                }
+            }
+            .pickerStyle(.menu)
+            .accessibilityIdentifier("shareTranslation.sourceLanguage")
+
+            Image(systemName: "arrow.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Picker(
+                String(localized: "目标语言", comment: "Picker label for target language."),
+                selection: targetLanguageBinding
+            ) {
+                ForEach(LanguageSelection.targetOptions(excluding: viewModel.sourceLanguage)) { language in
+                    Text(language.title).tag(language)
+                }
+            }
+            .pickerStyle(.menu)
+            .accessibilityIdentifier("shareTranslation.targetLanguage")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(.background, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private var sourceLanguageBinding: Binding<LanguageSelection> {
+        Binding(
+            get: { viewModel.sourceLanguage },
+            set: { viewModel.updateSourceLanguage($0) }
+        )
+    }
+
+    private var targetLanguageBinding: Binding<LanguageSelection> {
+        Binding(
+            get: { viewModel.targetLanguage },
+            set: { viewModel.updateTargetLanguage($0) }
+        )
     }
 
     private func sourcePreview(_ text: String, languageText: String = String(localized: "原文")) -> some View {
@@ -97,6 +151,20 @@ struct ShareTranslationView: View {
 
     private var actionGroups: some View {
         VStack(spacing: 14) {
+            if viewModel.shouldShowTranslateButton {
+                actionGroup {
+                    ShareTranslationActionRow(
+                        title: String(localized: "翻译", comment: "Manual translate action title in the share extension."),
+                        systemImage: "translate",
+                        isEnabled: viewModel.canTranslateCurrentText
+                    ) {
+                        Task {
+                            await viewModel.translateCurrentText()
+                        }
+                    }
+                }
+            }
+
             actionGroup {
                 ShareTranslationActionRow(
                     title: viewModel.didCopy ? String(localized: "已复制") : String(localized: "复制译文"),
