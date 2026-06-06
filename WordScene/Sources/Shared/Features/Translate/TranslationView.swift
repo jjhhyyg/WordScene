@@ -399,12 +399,13 @@ struct TranslationView: View {
 
                 Spacer(minLength: 8)
 
-                ClipboardTranslatePasteControl { clipboardText in
+                Button(String(localized: "翻译剪贴板")) {
                     Task {
-                        await acceptClipboardText(clipboardText)
+                        await acceptClipboardFromPasteboard()
                     }
                 }
-                .frame(width: 120, height: 34)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
                 .accessibilityLabel(String(localized: "翻译剪贴板"))
 
                 Button {
@@ -954,6 +955,16 @@ struct TranslationView: View {
     }
 
     @MainActor
+    private func acceptClipboardFromPasteboard() async {
+        guard let clipboardText = UIPasteboard.general.string else {
+            isClipboardPromptVisible = false
+            return
+        }
+
+        await acceptClipboardText(clipboardText)
+    }
+
+    @MainActor
     private func acceptClipboardText(_ clipboardText: String) async {
         guard let prompt = TranslationClipboardPrompt.make(
             clipboardText: clipboardText,
@@ -1231,59 +1242,6 @@ private struct PromptedTextEditor: View {
         .frame(minHeight: minHeight)
     }
 }
-
-#if os(iOS)
-private struct ClipboardTranslatePasteControl: UIViewRepresentable {
-    let onPaste: (String) -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onPaste: onPaste)
-    }
-
-    func makeUIView(context: Context) -> UIPasteControl {
-        let configuration = UIPasteControl.Configuration()
-        configuration.displayMode = .iconAndLabel
-        configuration.cornerStyle = .capsule
-
-        let control = UIPasteControl(configuration: configuration)
-        control.target = context.coordinator
-        control.accessibilityIdentifier = "translation.clipboardPrompt.paste"
-        return control
-    }
-
-    func updateUIView(_ uiView: UIPasteControl, context: Context) {
-        context.coordinator.onPaste = onPaste
-    }
-
-    final class Coordinator: NSObject, UIPasteConfigurationSupporting {
-        var pasteConfiguration: UIPasteConfiguration?
-        var onPaste: (String) -> Void
-
-        init(onPaste: @escaping (String) -> Void) {
-            self.onPaste = onPaste
-            super.init()
-            pasteConfiguration = UIPasteConfiguration(forAccepting: NSString.self)
-        }
-
-        func paste(itemProviders: [NSItemProvider]) {
-            guard let provider = itemProviders.first(where: { $0.canLoadObject(ofClass: NSString.self) }) else {
-                return
-            }
-
-            provider.loadObject(ofClass: NSString.self) { [weak self] object, _ in
-                guard let text = object as? NSString else {
-                    return
-                }
-
-                let pastedText = String(text)
-                DispatchQueue.main.async {
-                    self?.onPaste(pastedText)
-                }
-            }
-        }
-    }
-}
-#endif
 
 private enum TextInputTextStyle {
     case body
