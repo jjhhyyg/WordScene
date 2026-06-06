@@ -51,16 +51,16 @@ struct TranslationWorkflow {
             throw TranslationWorkflowError.missingToken
         }
 
-        let translatedText = try await translationClient.translate(
+        let translationResult = try await translationClient.translate(
             text: trimmedInput,
             source: source,
             target: target,
             apiToken: token
         )
         return persistResult(
-            translatedText: translatedText,
+            translatedText: translationResult.translatedText,
             sourceText: trimmedInput,
-            resolvedSource: source,
+            resolvedSource: translationResult.detectedSourceLanguage,
             target: target,
             currentHistory: currentHistory
         )
@@ -92,25 +92,30 @@ struct TranslationWorkflow {
                         throw TranslationWorkflowError.missingToken
                     }
 
-                    var latestText = ""
-                    for try await partialText in translationClient.streamTranslation(
+                    var latestResult: TranslationLLMResult?
+                    for try await event in translationClient.streamTranslation(
                         text: trimmedInput,
                         source: source,
                         target: target,
                         apiToken: token
                     ) {
-                        latestText = partialText
-                        continuation.yield(.partial(partialText))
+                        switch event {
+                        case .partial(let partialText):
+                            continuation.yield(.partial(partialText))
+                        case .completed(let result):
+                            latestResult = result
+                        }
                     }
 
-                    guard !latestText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    guard let latestResult,
+                          !latestResult.translatedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                         throw DeepSeekTranslationError.emptyOutput
                     }
 
                     let result = persistResult(
-                        translatedText: latestText,
+                        translatedText: latestResult.translatedText,
                         sourceText: trimmedInput,
-                        resolvedSource: source,
+                        resolvedSource: latestResult.detectedSourceLanguage,
                         target: target,
                         currentHistory: currentHistory
                     )

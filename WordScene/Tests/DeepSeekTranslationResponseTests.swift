@@ -37,7 +37,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
+            let data = Self.streamData(content: #"{"translated_text":"你好","detected_source_language":"en"}"#)
             return (response, data)
         }
         defer {
@@ -59,6 +59,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         let capturedRequestValue = requestCapture.recordedRequest()
         let capturedRequest = try XCTUnwrap(capturedRequestValue)
         XCTAssertEqual(result.translatedText, "你好")
+        XCTAssertEqual(result.detectedSourceLanguage, .en)
         XCTAssertEqual(capturedRequest.url?.absoluteString, "https://example.test/v1/chat/completions")
         XCTAssertEqual(capturedRequest.httpMethod, "POST")
         XCTAssertEqual(capturedRequest.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
@@ -79,9 +80,11 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         let userPrompt = try XCTUnwrap(messages.last?["content"])
         XCTAssertTrue(userPrompt.contains("json"))
         XCTAssertTrue(userPrompt.contains("translated_text"))
+        XCTAssertTrue(userPrompt.contains("detected_source_language"))
         XCTAssertTrue(userPrompt.contains("Translate only the text field"))
         XCTAssertTrue(userPrompt.contains("When source_language is auto-detect"))
         XCTAssertTrue(userPrompt.contains("Do not copy the input unchanged"))
+        XCTAssertTrue(userPrompt.contains("Allowed detected_source_language values"))
         XCTAssertTrue(userPrompt.contains(#""source_language":"English""#))
         XCTAssertTrue(userPrompt.contains(#""target_language":"Simplified Chinese""#))
         XCTAssertTrue(userPrompt.contains(#""text":"He said \"hello\"""#))
@@ -99,7 +102,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = Self.streamData(content: #"{"translated_text":"你好，世界。"}"#)
+            let data = Self.streamData(content: #"{"translated_text":"你好，世界。","detected_source_language":"en"}"#)
             return (response, data)
         }
         defer {
@@ -119,6 +122,43 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         )
 
         XCTAssertEqual(result.translatedText, "你好，世界。")
+        XCTAssertEqual(result.detectedSourceLanguage, .en)
+    }
+
+    func testProviderRejectsUnsupportedDetectedSourceLanguage() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [CapturingURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        CapturingURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            let data = Self.streamData(content: #"{"translated_text":"你好，世界。","detected_source_language":"klingon"}"#)
+            return (response, data)
+        }
+        defer {
+            CapturingURLProtocol.handler = nil
+        }
+
+        let provider = OpenAICompatibleChatProvider(
+            session: session,
+            baseURL: URL(string: "https://example.test/v1")!,
+            model: "adapter-model",
+            systemPrompt: "System prompt"
+        )
+
+        do {
+            _ = try await provider.translate(
+                TranslationProviderRequest(text: "Hello, world.", source: .auto, target: .zh),
+                credential: TranslationProviderCredential(apiToken: "test-token")
+            )
+            XCTFail("Expected unsupported detected source language to be rejected.")
+        } catch {
+            XCTAssertEqual(error as? DeepSeekTranslationError, .invalidResponse)
+        }
     }
 
     func testProviderStreamsPartialTranslatedTextFromJSONAssistantContent() async throws {
@@ -135,7 +175,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
             let data = Self.streamData(chunks: [
                 #"{"translated_text":"你"#,
                 #"好，世"#,
-                #"界。"}"#
+                #"界。","detected_source_language":"en"}"#
             ])
             return (response, data)
         }
@@ -150,15 +190,19 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
             systemPrompt: "System prompt"
         )
 
-        var partials: [String] = []
-        for try await partial in provider.streamTranslation(
+        var events: [TranslationLLMStreamEvent] = []
+        for try await event in provider.streamTranslation(
             TranslationProviderRequest(text: "Hello, world.", source: .en, target: .zh),
             credential: TranslationProviderCredential(apiToken: "test-token")
         ) {
-            partials.append(partial)
+            events.append(event)
         }
 
-        XCTAssertEqual(partials, ["你", "你好，世", "你好，世界。"])
+        XCTAssertEqual(events.map(\.partialText), ["你", "你好，世", "你好，世界。", nil])
+        XCTAssertEqual(events.last?.completedResult, TranslationLLMResult(
+            translatedText: "你好，世界。",
+            detectedSourceLanguage: .en
+        ))
     }
 
     func testProviderRejectsLengthFinishReason() async throws {
@@ -210,7 +254,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let content = attempt == 1 ? "" : #"{"translated_text":"你好"}"#
+            let content = attempt == 1 ? "" : #"{"translated_text":"你好","detected_source_language":"en"}"#
             let data = Self.streamData(content: content)
             return (response, data)
         }
@@ -231,6 +275,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
         )
 
         XCTAssertEqual(result.translatedText, "你好")
+        XCTAssertEqual(result.detectedSourceLanguage, .en)
         XCTAssertEqual(attemptCounter.value(), 2)
     }
 
@@ -247,7 +292,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
+            let data = Self.streamData(content: #"{"translated_text":"你好","detected_source_language":"en"}"#)
             return (response, data)
         }
         defer {
@@ -295,7 +340,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            let data = Self.streamData(content: #"{"translated_text":"你好"}"#)
+            let data = Self.streamData(content: #"{"translated_text":"你好","detected_source_language":"en"}"#)
             return (response, data)
         }
         defer {
@@ -368,7 +413,10 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
     #endif
 
     func testDeepSeekTranslationClientDelegatesToProvider() async throws {
-        let provider = CapturingTranslationProvider(result: TranslationLLMResult(translatedText: "你好"))
+        let provider = CapturingTranslationProvider(result: TranslationLLMResult(
+            translatedText: "你好",
+            detectedSourceLanguage: .en
+        ))
         let client = DeepSeekTranslationClient(provider: provider)
 
         let result = try await client.translate(
@@ -378,7 +426,7 @@ final class DeepSeekTranslationResponseTests: XCTestCase {
             apiToken: "test-token"
         )
 
-        XCTAssertEqual(result, "你好")
+        XCTAssertEqual(result, TranslationLLMResult(translatedText: "你好", detectedSourceLanguage: .en))
         let capturedRequest = await provider.recordedRequest()
         let capturedCredential = await provider.recordedCredential()
         XCTAssertEqual(capturedRequest, TranslationProviderRequest(text: "Hello", source: .en, target: .zh))
@@ -543,5 +591,21 @@ private actor CapturingTranslationProvider: TranslationProvider {
 
     func recordedCredential() -> TranslationProviderCredential? {
         capturedCredential
+    }
+}
+
+private extension TranslationLLMStreamEvent {
+    var partialText: String? {
+        guard case .partial(let text) = self else {
+            return nil
+        }
+        return text
+    }
+
+    var completedResult: TranslationLLMResult? {
+        guard case .completed(let result) = self else {
+            return nil
+        }
+        return result
     }
 }

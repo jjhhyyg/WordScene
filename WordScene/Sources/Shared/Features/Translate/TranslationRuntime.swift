@@ -54,15 +54,15 @@ private struct UITestTranslationClient: TranslationClienting {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) async throws -> String {
+    ) async throws -> TranslationLLMResult {
         switch mode {
         case "timeout":
             throw DeepSeekTranslationError.timedOut
         case "slow-success":
             try await Task.sleep(nanoseconds: 700_000_000)
-            return "流式完成译文"
+            return TranslationLLMResult(translatedText: "流式完成译文", detectedSourceLanguage: .en)
         default:
-            return "你好，世界。"
+            return TranslationLLMResult(translatedText: "你好，世界。", detectedSourceLanguage: .en)
         }
     }
 
@@ -71,7 +71,7 @@ private struct UITestTranslationClient: TranslationClienting {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             let mode = mode
             Task {
@@ -80,15 +80,23 @@ private struct UITestTranslationClient: TranslationClienting {
                     continuation.finish(throwing: DeepSeekTranslationError.timedOut)
 
                 case "slow-success":
-                    continuation.yield("流式中间译文")
+                    continuation.yield(.partial("流式中间译文"))
                     try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    continuation.yield("流式完成译文")
+                    continuation.yield(.partial("流式完成译文"))
+                    continuation.yield(.completed(TranslationLLMResult(
+                        translatedText: "流式完成译文",
+                        detectedSourceLanguage: .en
+                    )))
                     continuation.finish()
 
                 default:
-                    continuation.yield("你好")
+                    continuation.yield(.partial("你好"))
                     try? await Task.sleep(nanoseconds: 150_000_000)
-                    continuation.yield("你好，世界。")
+                    continuation.yield(.partial("你好，世界。"))
+                    continuation.yield(.completed(TranslationLLMResult(
+                        translatedText: "你好，世界。",
+                        detectedSourceLanguage: .en
+                    )))
                     continuation.finish()
                 }
             }

@@ -51,6 +51,31 @@ final class ShareTranslationViewModelTests: XCTestCase {
         XCTAssertEqual(preferencesStore.shareTargetLanguage, .en)
     }
 
+    func testManualTranslateRecordsProviderDetectedSourceLanguage() async throws {
+        let defaults = makeDefaults()
+        let preferencesStore = TranslationPreferencesStore(defaults: defaults)
+        preferencesStore.isShareAutoTranslateEnabled = false
+        preferencesStore.shareSourceLanguage = .auto
+        preferencesStore.shareTargetLanguage = .en
+        let translationClient = StubShareTranslationClient(translatedText: "But why?", detectedSourceLanguage: .zh)
+        let viewModel = makeViewModel(preferencesStore: preferencesStore, translationClient: translationClient)
+
+        viewModel.load(providers: [NSItemProvider(object: "不过为啥" as NSString)])
+        try await waitUntil {
+            if case .ready = viewModel.state {
+                return true
+            }
+            return false
+        }
+        await viewModel.translateCurrentText()
+
+        guard case .translated(let record) = viewModel.state else {
+            return XCTFail("Expected translated share state.")
+        }
+        XCTAssertEqual(record.sourceLanguage, .zh)
+        XCTAssertEqual(record.targetLanguage, .en)
+    }
+
     func testLoadAutoTranslatesWithShareLanguagePreference() async throws {
         let defaults = makeDefaults()
         let preferencesStore = TranslationPreferencesStore(defaults: defaults)
@@ -150,10 +175,12 @@ private struct StubShareCredentialStore: CredentialStoring {
 
 private final class StubShareTranslationClient: TranslationClienting, @unchecked Sendable {
     let translatedText: String
+    let detectedSourceLanguage: LanguageSelection
     private(set) var requests: [TranslationProviderRequest] = []
 
-    init(translatedText: String) {
+    init(translatedText: String, detectedSourceLanguage: LanguageSelection = .es) {
         self.translatedText = translatedText
+        self.detectedSourceLanguage = detectedSourceLanguage
     }
 
     func translate(
@@ -161,9 +188,12 @@ private final class StubShareTranslationClient: TranslationClienting, @unchecked
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) async throws -> String {
+    ) async throws -> TranslationLLMResult {
         XCTAssertEqual(apiToken, "test-token")
         requests.append(TranslationProviderRequest(text: text, source: source, target: target))
-        return translatedText
+        return TranslationLLMResult(
+            translatedText: translatedText,
+            detectedSourceLanguage: detectedSourceLanguage
+        )
     }
 }

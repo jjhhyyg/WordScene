@@ -12,6 +12,12 @@ struct TranslationProviderCredential: Equatable, Sendable {
 
 struct TranslationLLMResult: Equatable, Sendable {
     let translatedText: String
+    let detectedSourceLanguage: LanguageSelection
+}
+
+enum TranslationLLMStreamEvent: Equatable, Sendable {
+    case partial(String)
+    case completed(TranslationLLMResult)
 }
 
 protocol TranslationProvider: Sendable {
@@ -23,7 +29,7 @@ protocol TranslationProvider: Sendable {
     func streamTranslation(
         _ request: TranslationProviderRequest,
         credential: TranslationProviderCredential
-    ) -> AsyncThrowingStream<String, Error>
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error>
 }
 
 protocol TranslationClienting: Sendable {
@@ -32,26 +38,27 @@ protocol TranslationClienting: Sendable {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) async throws -> String
+    ) async throws -> TranslationLLMResult
 
     func streamTranslation(
         text: String,
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) -> AsyncThrowingStream<String, Error>
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error>
 }
 
 extension TranslationProvider {
     func streamTranslation(
         _ request: TranslationProviderRequest,
         credential: TranslationProviderCredential
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
                     let result = try await translate(request, credential: credential)
-                    continuation.yield(result.translatedText)
+                    continuation.yield(.partial(result.translatedText))
+                    continuation.yield(.completed(result))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -67,12 +74,13 @@ extension TranslationClienting {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
                     let result = try await translate(text: text, source: source, target: target, apiToken: apiToken)
-                    continuation.yield(result)
+                    continuation.yield(.partial(result.translatedText))
+                    continuation.yield(.completed(result))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -102,11 +110,11 @@ struct DeepSeekTranslationClient: Sendable {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) async throws -> String {
+    ) async throws -> TranslationLLMResult {
         try await provider.translate(
             TranslationProviderRequest(text: text, source: source, target: target),
             credential: TranslationProviderCredential(apiToken: apiToken)
-        ).translatedText
+        )
     }
 
     func streamTranslation(
@@ -114,7 +122,7 @@ struct DeepSeekTranslationClient: Sendable {
         source: LanguageSelection,
         target: LanguageSelection,
         apiToken: String
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         provider.streamTranslation(
             TranslationProviderRequest(text: text, source: source, target: target),
             credential: TranslationProviderCredential(apiToken: apiToken)
@@ -138,7 +146,7 @@ struct DeepSeekProvider: TranslationProvider {
             baseURL: baseURL,
             model: model,
             systemPrompt: """
-            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"..."}. Do not add explanations, alternatives, markdown, or notes.
+            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"...","detected_source_language":"..."}. detected_source_language must be one of the allowed language codes from the user prompt. Do not add explanations, alternatives, markdown, or notes.
             """,
             rawResponseRecorder: .userDefaultsBacked()
         )
@@ -148,7 +156,7 @@ struct DeepSeekProvider: TranslationProvider {
             baseURL: baseURL,
             model: model,
             systemPrompt: """
-            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"..."}. Do not add explanations, alternatives, markdown, or notes.
+            You are a precise translation engine for a language learning app. Return json only. Use exactly this schema: {"translated_text":"...","detected_source_language":"..."}. detected_source_language must be one of the allowed language codes from the user prompt. Do not add explanations, alternatives, markdown, or notes.
             """
         )
         #endif
@@ -164,7 +172,7 @@ struct DeepSeekProvider: TranslationProvider {
     func streamTranslation(
         _ request: TranslationProviderRequest,
         credential: TranslationProviderCredential
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         chatProvider.streamTranslation(request, credential: credential)
     }
 }
@@ -221,10 +229,10 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
 
         for attempt in 0..<2 {
             do {
-                let translatedText = try await withTranslationTimeout(seconds: 10) {
+                let result = try await withTranslationTimeout(seconds: 10) {
                     try await streamTranslationResult(providerRequest, credential: TranslationProviderCredential(apiToken: token)) { _ in }
                 }
-                return TranslationLLMResult(translatedText: translatedText)
+                return result
             } catch DeepSeekTranslationError.emptyOutput where attempt == 0 {
                 continue
             }
@@ -236,18 +244,19 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
     func streamTranslation(
         _ providerRequest: TranslationProviderRequest,
         credential: TranslationProviderCredential
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<TranslationLLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
                     let result = try await withTranslationTimeout(seconds: 10) {
                         try await streamTranslationResult(providerRequest, credential: credential) { partial in
-                            continuation.yield(partial)
+                            continuation.yield(.partial(partial))
                         }
                     }
-                    if result.isEmpty {
+                    if result.translatedText.isEmpty {
                         throw DeepSeekTranslationError.emptyOutput
                     }
+                    continuation.yield(.completed(result))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: normalizedTimeoutError(error))
@@ -286,7 +295,7 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         _ providerRequest: TranslationProviderRequest,
         credential: TranslationProviderCredential,
         onPartialText: @escaping @Sendable (String) -> Void
-    ) async throws -> String {
+    ) async throws -> TranslationLLMResult {
         let trimmedText = providerRequest.text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else {
             throw DeepSeekTranslationError.emptyInput
@@ -358,7 +367,7 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         )
         #endif
 
-        return try translatedText(from: accumulatedContent)
+        return try translationResult(from: accumulatedContent)
     }
 
     private func consumeStreamLine(
@@ -384,8 +393,8 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         try validateFinishReason(choice.finishReason)
         if let content = choice.delta.content {
             accumulatedContent += content
-            if let partial = try? translatedText(from: accumulatedContent) {
-                onPartialText(partial)
+            if let result = try? translationResult(from: accumulatedContent) {
+                onPartialText(result.translatedText)
             } else if let partial = partialTranslatedText(from: accumulatedContent), !partial.isEmpty {
                 onPartialText(partial)
             }
@@ -414,7 +423,9 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         When source_language is auto-detect, infer the source language from the full text yourself.
         Always produce text in target_language. Do not copy the input unchanged just because it contains words, product names, code terms, or technical terms already written in target_language.
         For mixed-language input, translate the natural-language meaning into target_language while preserving technical identifiers, command names, API names, file names, and product names when they are normally left untranslated.
-        Return json matching {"translated_text":"..."}.
+        Return json matching {"translated_text":"...","detected_source_language":"..."}.
+        Allowed detected_source_language values: \(Self.allowedDetectedSourceLanguageValues).
+        detected_source_language must be the best source language code for the input text. Never return auto.
         Input json:
         \(userPromptInputJSON(text: text, source: source, target: target))
         """
@@ -454,7 +465,7 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
         }
     }
 
-    private func translatedText(from content: String) throws -> String {
+    private func translationResult(from content: String) throws -> TranslationLLMResult {
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedContent.isEmpty else {
             throw DeepSeekTranslationError.emptyOutput
@@ -470,12 +481,22 @@ struct OpenAICompatibleChatProvider: TranslationProvider {
             guard !translatedText.isEmpty else {
                 throw DeepSeekTranslationError.emptyOutput
             }
-            return translatedText
+            guard let detectedSourceLanguage = output.validatedDetectedSourceLanguage else {
+                throw DeepSeekTranslationError.invalidResponse
+            }
+            return TranslationLLMResult(
+                translatedText: translatedText,
+                detectedSourceLanguage: detectedSourceLanguage
+            )
         } catch let error as DeepSeekTranslationError {
             throw error
         } catch {
             throw DeepSeekTranslationError.invalidResponse
         }
+    }
+
+    private static var allowedDetectedSourceLanguageValues: String {
+        LanguageSelection.translationTargets.map(\.rawValue).joined(separator: ", ")
     }
 
     private func partialTranslatedText(from content: String) -> String? {
@@ -638,9 +659,19 @@ private struct OpenAIChatCompletionStreamChunk: Decodable, Equatable {
 
 private struct TranslationJSONOutput: Decodable {
     let translatedText: String
+    let detectedSourceLanguage: String
 
     enum CodingKeys: String, CodingKey {
         case translatedText = "translated_text"
+        case detectedSourceLanguage = "detected_source_language"
+    }
+
+    var validatedDetectedSourceLanguage: LanguageSelection? {
+        guard let language = LanguageSelection(rawValue: detectedSourceLanguage),
+              LanguageSelection.translationTargets.contains(language) else {
+            return nil
+        }
+        return language
     }
 }
 

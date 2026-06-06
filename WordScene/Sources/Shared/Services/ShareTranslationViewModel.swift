@@ -143,7 +143,7 @@ final class ShareTranslationViewModel: ObservableObject {
             }
 
             let token = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
-            let translatedText = try await translationClient.translate(
+            let translationResult = try await translationClient.translate(
                 text: trimmed,
                 source: direction.source,
                 target: direction.target,
@@ -151,8 +151,8 @@ final class ShareTranslationViewModel: ObservableObject {
             )
             let record = ShareExtensionHandoffRecord(
                 sourceText: trimmed,
-                translatedText: translatedText,
-                sourceLanguage: direction.source,
+                translatedText: translationResult.translatedText,
+                sourceLanguage: translationResult.detectedSourceLanguage,
                 targetLanguage: direction.target,
                 isFavoritePending: false
             )
