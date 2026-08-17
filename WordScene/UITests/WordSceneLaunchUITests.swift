@@ -338,16 +338,38 @@ final class WordSceneLaunchUITests: XCTestCase {
         openTab("收藏")
         let firstLibraryRow = app.staticTexts["scroll library item 01"].firstMatch
         XCTAssertTrue(firstLibraryRow.waitForExistence(timeout: 8))
-        firstLibraryRow.swipeUp()
-        app.swipeUp()
-        XCTAssertTrue(app.staticTexts["scroll library item 12"].firstMatch.waitForExistence(timeout: 4))
+        let lastLibraryRow = app.staticTexts["scroll library item 12"].firstMatch
+        XCTAssertTrue(scrollUntilVisible(lastLibraryRow, startingAt: firstLibraryRow))
 
         openTab("翻译历史")
         let firstHistoryRow = app.staticTexts["scroll history item 01"].firstMatch
         XCTAssertTrue(firstHistoryRow.waitForExistence(timeout: 8))
-        firstHistoryRow.swipeUp()
-        app.swipeUp()
-        XCTAssertTrue(app.staticTexts["scroll history item 12"].firstMatch.waitForExistence(timeout: 4))
+        let lastHistoryRow = app.staticTexts["scroll history item 12"].firstMatch
+        XCTAssertTrue(scrollUntilVisible(lastHistoryRow, startingAt: firstHistoryRow))
+    }
+
+    private func scrollUntilVisible(
+        _ target: XCUIElement,
+        startingAt firstVisibleElement: XCUIElement,
+        maximumSwipes: Int = 6
+    ) -> Bool {
+        if target.exists {
+            return true
+        }
+
+        firstVisibleElement.swipeUp()
+        if target.waitForExistence(timeout: 1) {
+            return true
+        }
+
+        for _ in 1..<maximumSwipes {
+            app.swipeUp()
+            if target.waitForExistence(timeout: 1) {
+                return true
+            }
+        }
+
+        return false
     }
 
     func testTranslationBusinessFlowCreatesHistoryAndSavedItem() throws {
